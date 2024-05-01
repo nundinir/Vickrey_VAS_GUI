@@ -1,0 +1,17 @@
+/*#Author: Varun Satyadev Shetty*/
+syntax = "proto3";
+
+message Null {};
+
+/* This service is between
+Client: Sending a torque magnitude value selected by the User -- {Microsoft Surface tablet}
+Server: Sending back a response received "Null" -- {Raaspberry Pi, Dephy Exoboot Controller}
+*/
+service CommunicationService{
+  rpc Input (Request) returns (Null) {}
+
+}
+
+message Request {
+  repeated float torque_profile = 1;
+}
