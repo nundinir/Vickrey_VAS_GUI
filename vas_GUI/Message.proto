@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+message Null {};
+
+/*
+GUI: (Client running on the surface tablet) -- This will send the user selection (which is basically the torque values)
+Controller: (Server running on the assisitve devices attached to the RPI)
+*/
+service GUI{
+    rpc UserButton (Input) returns (Null) {}
+}
+
+message Input{
+    float torque = 1;
+}
