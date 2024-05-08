@@ -18,6 +18,11 @@ import numpy as np
 import time
 import csv
 
+import Message_pb2
+import Message_pb2_grpc
+import config
+import grpc
+
 # TODO: Fix the slider mapping to the correct button label (A<->E, E<->A, B<->D...)
 # TODO: Add confirm button
 # TODO: dynamic change order of button and slider after confirm button is pressed
@@ -37,7 +42,7 @@ class GuiVas(BoxLayout):
 
         # Ask user for name of csv file and start the logger
         print("Filename to save as (format:Subject_VAS_pres#_inclinelvl).csv => ") 
-        self.filename = input()
+        self.filename = '1'#input()
         self.headers = ['Time(s)', 'Current Torque Experienced', 'Torque Slider Adjusted', 'VAS Value of Torque Slider']
         self.logged_yet = False
         self.start_time = time.time()
@@ -90,6 +95,21 @@ class GuiVas(BoxLayout):
 
     def press(self, instance_btn: Button):
         """Button press response method"""
+        if(instance_btn.text == 'A'):
+            torque = 1
+        elif(instance_btn.text == 'B'):
+            torque = 2
+        elif(instance_btn.text == 'C'):
+            torque = 3
+        elif(instance_btn.text == 'D'):
+            torque = 4
+        elif(instance_btn.text == 'E'):
+            torque = 5
+    
+        with grpc.insecure_channel(config.server_ip) as channel:
+            stub = Message_pb2_grpc.GUIStub(channel)
+            response = stub.UserButton(Message_pb2.Input(torque=torque))
+
         print(f"You pressed the button: {instance_btn.text}")
         
         # Log the new torque option to a csv file

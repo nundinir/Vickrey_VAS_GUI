@@ -1042,3 +1042,13 @@ Time(s),Current Torque Experienced,Torque Slider Adjusted,VAS Value of Torque Sl
 4.429375648498535,,{'E'},-8.451492537313436
 4.453950643539429,,{'E'},-8.694029850746269
 4.466246128082275,,{'E'},-8.936567164179104
+Time(s),Current Torque Experienced,Torque Slider Adjusted,VAS Value of Torque Slider
+16.195955276489258,,,A
+19.934841871261597,,,B
+21.094480514526367,,,C
+21.942569971084595,,,D
+22.705317974090576,,,E
+Time(s),Current Torque Experienced,Torque Slider Adjusted,VAS Value of Torque Slider
+0.9302217960357666,,,A
+Time(s),Current Torque Experienced,Torque Slider Adjusted,VAS Value of Torque Slider
+3.6458144187927246,,,B
