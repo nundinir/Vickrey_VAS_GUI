@@ -1,0 +1,1 @@
+server_ip = f"{'0.0.0.0'}:" f"{'50051'}" #The IP address of the Controller (RPi)
