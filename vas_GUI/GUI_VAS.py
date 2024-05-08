@@ -24,6 +24,7 @@ import csv
 # TODO: Add column in log file for confirmation button press
 # TODO: GRPC server/client for real-time data transfer
 # TODO: Separate script of torque and button randomization mapping (use random.seed(0) for reproducibility)
+# TODO: Add trial # as user input [argparser: https://docs.python.org/3/library/argparse.html]
 
 # Define the GUI class
 class GuiVas(BoxLayout):
@@ -94,6 +95,8 @@ class GuiVas(BoxLayout):
         
         # Log the new torque option to a csv file
         self.csvlogger(instance_btn.text)
+
+        # TODO: insert the logic for the torque-button mapping here (also include trial #)
 
 
     def create_buttons(self):
