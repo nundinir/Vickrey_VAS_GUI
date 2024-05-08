@@ -1,0 +1,49 @@
+#this file is used to define the layout of the GUI
+#:import Factory kivy.factory.Factory
+#:import utils kivy.utils
+
+#This describes the layout and the orientation of the 10 buttons on the GUI
+<GuiVas>:
+    GridLayout:
+        rows: 2
+        size: root.width, root.height
+
+        BoxLayout:
+            id: top_layout
+            orientation = 'horizontal'
+            size_hint_y: 0.7
+            #size_hint_x: 1
+
+            Label:
+                id: left_label
+                orientation: 'vertical'
+                size_hint_x: 0.2
+                text:'Assistance\nNot Valued:\n$-15' 
+                halign: 'center'
+                valign: 'center'
+                text_size: self.size
+                font_name: 'Roboto'
+
+            FloatLayout:
+                id: slider_layout
+                #pos:self.x,self.y
+                size_hint_x: 0.6
+                size_hint_y: 0.4
+                on_kv_post: root.create_sliders()
+
+            Label:
+                id: right_label
+                orientation: 'vertical'
+                size_hint_x: 0.2
+                text: 'Assistance Valued:\n$50' 
+                halign: 'center'
+                valign: 'center'
+                text_size: self.size
+                font_name: 'Roboto'
+
+        BoxLayout:
+            id: button_layout
+            orientation: 'horizontal'
+            size_hint_y: 0.3
+            #size_hint_x: 1
+            on_kv_post: root.create_buttons()
