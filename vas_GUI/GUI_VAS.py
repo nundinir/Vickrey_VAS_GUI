@@ -23,13 +23,12 @@ import Message_pb2_grpc
 import config
 import grpc
 
-# TODO: Fix the slider mapping to the correct button label (A<->E, E<->A, B<->D...)
-# TODO: Add confirm button
-# TODO: dynamic change order of button and slider after confirm button is pressed
-# TODO: Add column in log file for confirmation button press
-# TODO: GRPC server/client for real-time data transfer
-# TODO: Separate script of torque and button randomization mapping (use random.seed(0) for reproducibility)
-# TODO: Add trial # as user input [argparser: https://docs.python.org/3/library/argparse.html]
+# TODO: Fix the slider mapping to the correct button label (A<->E, E<->A, B<->D...) (nundini)
+# TODO: Add confirm button (varun)
+# TODO: dynamic change order of button and slider after confirm button is pressed (varun)
+# TODO: Add column in log file for confirmation button press (varun)
+# TODO: Separate script of torque and button randomization mapping (use random.seed(0) for reproducibility) (nundini)
+# TODO: Add trial # as user input [argparser: https://docs.python.org/3/library/argparse.html] (nundini)
 
 # Define the GUI class
 class GuiVas(BoxLayout):
@@ -43,7 +42,7 @@ class GuiVas(BoxLayout):
 
         # Ask user for name of csv file and start the logger
         print("Filename to save as (format:Subject_VAS_pres#_inclinelvl).csv => ") 
-        self.filename = '1'#input()
+        self.filename = input()
         self.headers = ['Time(s)', 'Current Torque Experienced', 'Torque Slider Adjusted', 'VAS Value of Torque Slider']
         self.logged_yet = False
         self.start_time = time.time()
