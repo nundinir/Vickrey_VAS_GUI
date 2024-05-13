@@ -43,9 +43,12 @@ class GuiVas(BoxLayout):
         # Ask user for name of csv file and start the logger
         print("Filename to save as (format:Subject_VAS_pres#_inclinelvl).csv => ") 
         self.filename = input()
-        self.headers = ['Time(s)', 'Current Torque Experienced', 'Torque Slider Adjusted', 'VAS Value of Torque Slider']
+        self.headers = ['Time(s)', 'Current Torque Experienced', 'Torque Slider Adjusted', 'VAS Value of Torque Slider', 'Confirm Button Pressed']
         self.logged_yet = False
         self.start_time = time.time()
+        self.prev_btn_instance =  None
+        self.prev_slider_selected = None
+        self.prev_value_of_slider = None
 
     def csvlogger(self, value_of_slider=None, slider_index=None, btn_instance=None):
         """Log the data to a csv file"""
@@ -63,7 +66,17 @@ class GuiVas(BoxLayout):
                     slider_selected = None
                 
                 elapsed_time = time.time() - self.start_time
-                csvwriter.writerow([elapsed_time, btn_instance, slider_selected, value_of_slider])   
+                if(config.bool_confirm_button_pressed == True):
+                    array_row = [elapsed_time, self.prev_btn_instance, self.prev_slider_selected, self.prev_value_of_slider, config.bool_confirm_button_pressed]
+                else:
+                    array_row = [elapsed_time, btn_instance, slider_selected, value_of_slider , config.bool_confirm_button_pressed]
+                    self.prev_btn_instance = btn_instance 
+                    self.prev_slider_selected = slider_selected
+                    self.prev_value_of_slider = value_of_slider
+
+                config.bool_confirm_button_pressed = False
+
+                csvwriter.writerow(array_row)   
 
         except IOError:
             print("An error occurred while trying to write to the file.")
@@ -106,17 +119,24 @@ class GuiVas(BoxLayout):
         elif(instance_btn.text == 'E'):
             torque = 5
     
-        with grpc.insecure_channel(config.server_ip) as channel:
+        """with grpc.insecure_channel(config.server_ip) as channel:
             stub = Message_pb2_grpc.GUIStub(channel)
             response = stub.UserButton(Message_pb2.Input(torque=torque))
 
-        print(f"You pressed the button: {instance_btn.text}")
+        print(f"You pressed the button: {instance_btn.text}")"""
         
         # Log the new torque option to a csv file
         self.csvlogger(instance_btn.text)
 
         # TODO: insert the logic for the torque-button mapping here (also include trial #)
 
+    def confirm_button_pressed(self, instance_btn: Button):
+        """Confirm button press response method"""
+        print("Value of the Torque Confirmed")
+        print(f"{'CONFIRM'}")
+        button = Button(text=f"{'CONFIRM'}")
+        config.bool_confirm_button_pressed = True
+        self.csvlogger(instance_btn.text)
 
     def create_buttons(self):
         """Create variable number of buttons"""

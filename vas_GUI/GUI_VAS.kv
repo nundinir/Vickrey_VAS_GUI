@@ -48,3 +48,18 @@
             size_hint_y: 0.8
             size_hint_x: 0.3
             on_kv_post: root.create_buttons()
+
+        BoxLayout:
+            id: new_button_layout
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Button:
+                text: 'Confirm'
+                font_name: 'Roboto'
+                font_size: 40
+                size_hint_x: 0.3
+                pos_hint: {'center_x': 0.25}
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#0000FF')
+                on_press: root.confirm_button_pressed(self)
+
