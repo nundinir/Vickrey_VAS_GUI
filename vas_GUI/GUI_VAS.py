@@ -23,7 +23,6 @@ import Message_pb2_grpc
 import config
 import grpc
 
-# TODO: Fix the slider mapping to the correct button label (A<->E, E<->A, B<->D...) (nundini)
 # TODO: Add confirm button (varun)
 # TODO: dynamic change order of button and slider after confirm button is pressed (varun)
 # TODO: Add column in log file for confirmation button press (varun)
@@ -34,7 +33,7 @@ import grpc
 class GuiVas(BoxLayout):
     """Actual Class for the GUI"""
     # set the number of torque options (create equal # of buttons and sliders)
-    num_torque_options = NumericProperty(5)  # Defined as Kivy property 
+    num_torque_options = NumericProperty(config.num_torques)  # Defined as Kivy property 
 
     def __init__(self, **kwargs):
         """Initialize the GUI"""
@@ -77,7 +76,7 @@ class GuiVas(BoxLayout):
         print("VAS value:", self.vas_value)
 
         # Find the index of the slider that triggered the event
-        index = self.ids.slider_layout.children.index(instance_slider.parent)
+        index = self.num_torque_options - self.ids.slider_layout.children.index(instance_slider.parent) - 1
 
         # Print the VAS value and the index of the slider
         print(f"VAS value: {self.vas_value}, Slider: {chr(65+index)}")
@@ -106,9 +105,10 @@ class GuiVas(BoxLayout):
         elif(instance_btn.text == 'E'):
             torque = 5
     
-        with grpc.insecure_channel(config.server_ip) as channel:
-            stub = Message_pb2_grpc.GUIStub(channel)
-            response = stub.UserButton(Message_pb2.Input(torque=torque))
+        if config.grpc_needed:
+            with grpc.insecure_channel(config.server_ip) as channel:
+                stub = Message_pb2_grpc.GUIStub(channel)
+                response = stub.UserButton(Message_pb2.Input(torque=torque))
 
         print(f"You pressed the button: {instance_btn.text}")
         
@@ -145,7 +145,7 @@ class GuiVas(BoxLayout):
             box_layout = BoxLayout(orientation='horizontal')
 
             # Create the slider
-            slider = Slider(min=-15, max=50, value=0, cursor_size=(25, 25), cursor_image="pin_1.png")
+            slider = Slider(min=config.NPO_MV, max=config.EPO_MV, value=config.starting_val, cursor_size=(25, 25), cursor_image="pin_1.png")
             slider.bind(value=self.on_slider_value)
 
             # Create the cursor label and initially set the opacity to 0
