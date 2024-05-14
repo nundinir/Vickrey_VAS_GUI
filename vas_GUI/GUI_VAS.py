@@ -23,17 +23,11 @@ import Message_pb2_grpc
 import config
 import grpc
 
-# TODO: Add confirm button (varun)
-# TODO: dynamic change order of button and slider after confirm button is pressed (varun)
-# TODO: Add column in log file for confirmation button press (varun)
-# TODO: Separate script of torque and button randomization mapping (use random.seed(0) for reproducibility) (nundini)
-# TODO: Add trial # as user input [argparser: https://docs.python.org/3/library/argparse.html] (nundini)
-
 # Define the GUI class
 class GuiVas(BoxLayout):
     """Actual Class for the GUI"""
     # set the number of torque options (create equal # of buttons and sliders)
-    num_torque_options = NumericProperty(config.num_torques)  # Defined as Kivy property 
+    num_torque_options = NumericProperty(config.torques_per_presentation)  # Defined as Kivy property 
 
     def __init__(self, **kwargs):
         """Initialize the GUI"""
@@ -42,7 +36,7 @@ class GuiVas(BoxLayout):
         # Ask user for name of csv file and start the logger
         print("Filename to save as (format:Subject_VAS_pres#_inclinelvl).csv => ") 
         self.filename = input()
-        self.headers = ['Time(s)', 'Current Torque Experienced', 'Torque Slider Adjusted', 'VAS Value of Torque Slider']
+        self.headers = ['Time(s)','Trial Num','Presentation Num','Current Torque Experienced','Torque Slider Adjusted','VAS Value of Torque Slider']
         self.logged_yet = False
         self.start_time = time.time()
 
@@ -62,7 +56,7 @@ class GuiVas(BoxLayout):
                     slider_selected = None
                 
                 elapsed_time = time.time() - self.start_time
-                csvwriter.writerow([elapsed_time, btn_instance, slider_selected, value_of_slider])   
+                csvwriter.writerow([elapsed_time,config.curr_trial_num,config.current_presentation_num,btn_instance,slider_selected,value_of_slider])   
 
         except IOError:
             print("An error occurred while trying to write to the file.")
@@ -94,28 +88,38 @@ class GuiVas(BoxLayout):
 
     def press(self, instance_btn: Button):
         """Button press response method"""
+        print(f"You pressed the button: {instance_btn.text}")
+
+        # randomized button-torque mapping for each trial (wtihout replacement)
+        np.random.seed(config.curr_trial_num)
+        pseudo_random_presentation_torques = np.random.choice(config.torque_settings, size = config.num_of_tot_torque_settings, replace=False)
+        
+        # select a subset of the pseudo-randomized torques based on current presentation number
+        if config.current_presentation_num == 1:
+            pseudo_random_presentation_torques = pseudo_random_presentation_torques[:config.torques_per_presentation]
+        elif config.current_presentation_num == 2:
+            pseudo_random_presentation_torques = pseudo_random_presentation_torques[config.torques_per_presentation:]
+            
+        # Set the torque value based on the button pressed
         if(instance_btn.text == 'A'):
-            torque = 1
+            torque = pseudo_random_presentation_torques[0]
         elif(instance_btn.text == 'B'):
-            torque = 2
+            torque = pseudo_random_presentation_torques[1]
         elif(instance_btn.text == 'C'):
-            torque = 3
+            torque = pseudo_random_presentation_torques[2]
         elif(instance_btn.text == 'D'):
-            torque = 4
+            torque = pseudo_random_presentation_torques[3]
         elif(instance_btn.text == 'E'):
-            torque = 5
+            torque = pseudo_random_presentation_torques[4]
+
+        # Log the new torque option to a csv file
+        self.csvlogger(instance_btn.text)
     
+        # Send the torque value to the server via gRPC
         if config.grpc_needed:
             with grpc.insecure_channel(config.server_ip) as channel:
                 stub = Message_pb2_grpc.GUIStub(channel)
                 response = stub.UserButton(Message_pb2.Input(torque=torque))
-
-        print(f"You pressed the button: {instance_btn.text}")
-        
-        # Log the new torque option to a csv file
-        self.csvlogger(instance_btn.text)
-
-        # TODO: insert the logic for the torque-button mapping here (also include trial #)
 
 
     def create_buttons(self):
