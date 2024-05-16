@@ -151,7 +151,6 @@ class GuiVas(BoxLayout):
 
     def confirm_button_pressed(self, instance_btn: Button):
         """Confirm button press response method"""
-        print("Value of the Torque Confirmed")
         button = Button(text=f"{'CONFIRM'}")
         config.bool_confirm_button_pressed = True
         self.csvlogger(instance_btn.text)
@@ -173,7 +172,7 @@ class GuiVas(BoxLayout):
             button = Button(text=f"{i}") # unicode point for 'A' is 65
             self.last_pressed_button= i
             button.bind(on_press=self.press)
-            button.background_color = button_colors[count]
+            button.background_color = button_colors[count-1]
             button.font_size = 64
             button.background_normal = ''
             self.ids.button_layout.add_widget(button)
@@ -181,7 +180,7 @@ class GuiVas(BoxLayout):
 
     def create_sliders(self):
         """Create variable number of sliders (called only once at the beginning)"""
-        print("Create sliders is called")
+        
         slider_colors = ['#0d9c35','#00954b','#92dc7e','#64c987','#39b48e','#089f8f','#00898a','#08737f','#215d6e','#2a4858']
         slider_colors = slider_colors[:self.num_torque_options]  # limit the number of buttons to the number of torque options
         self.ids.slider_layout.rows = self.num_torque_options
@@ -200,7 +199,7 @@ class GuiVas(BoxLayout):
             slider.bind(value=partial(self.on_slider_value, additional_variable))
 
             # Create the cursor label and initially set the opacity to 0
-            cursor_label = Label(text=f"${round(slider.value, 2)}", size_hint=(None, None), color=slider_colors[count],opacity=1)
+            cursor_label = Label(text=f"${round(slider.value, 2)}", size_hint=(None, None), color=slider_colors[count-1],opacity=1)
             self.labels.append(cursor_label)
 
             # Add the labels and the slider to the BoxLayout
