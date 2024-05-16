@@ -24,18 +24,11 @@ import Message_pb2_grpc
 import config
 import grpc
 
-# TODO: Fix the slider mapping to the correct button label (A<->E, E<->A, B<->D...) (nundini)
-# TODO: Add confirm button (varun)
-# TODO: dynamic change order of button and slider after confirm button is pressed (varun)
-# TODO: Add column in log file for confirmation button press (varun)
-# TODO: Separate script of torque and button randomization mapping (use random.seed(0) for reproducibility) (nundini)
-# TODO: Add trial # as user input [argparser: https://docs.python.org/3/library/argparse.html] (nundini)
-
 # Define the GUI class
 class GuiVas(BoxLayout):
     """Actual Class for the GUI"""
     # set the number of torque options (create equal # of buttons and sliders)
-    num_torque_options = NumericProperty(5)  # Defined as Kivy property 
+    num_torque_options = NumericProperty(config.torques_per_presentation)  # Defined as Kivy property 
 
     def __init__(self, **kwargs):
         """Initialize the GUI"""
@@ -43,8 +36,8 @@ class GuiVas(BoxLayout):
 
         # Ask user for name of csv file and start the logger
         print("Filename to save as (format:Subject_VAS_pres#_inclinelvl).csv => ") 
-        self.filename = '1'#input()
-        self.headers = ['Time(s)', 'Current Torque Experienced', 'Torque Slider Adjusted', 'VAS Value of Torque Slider', 'Confirm Button Pressed']#, 'Slider_Value_Changed', 'Torque_Button_Pressed']
+        self.filename = input()
+        self.headers = ['Time(s)', 'Trial Num','Presentation Num', 'Current Torque Experienced', 'Torque Slider Adjusted', 'VAS Value of Torque Slider', 'Confirm Button Pressed']
         self.logged_yet = False
         self.start_time = time.time()
         self.prev_btn_instance =  None
@@ -69,9 +62,9 @@ class GuiVas(BoxLayout):
                 
                 elapsed_time = time.time() - self.start_time
                 if(config.bool_confirm_button_pressed == True):
-                    log_array = [elapsed_time, self.prev_btn_instance, self.prev_slider_selected, self.prev_value_of_slider, config.bool_confirm_button_pressed]
+                    log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num,self.prev_btn_instance, self.prev_slider_selected, self.prev_value_of_slider, config.bool_confirm_button_pressed]
                 else:
-                    log_array = [elapsed_time, btn_instance, slider_selected, config.button_slider_values[chr(65+slider_index)] , config.bool_confirm_button_pressed]
+                    log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num,btn_instance, slider_selected, config.button_slider_values[chr(65+slider_index)] , config.bool_confirm_button_pressed]
                     self.prev_btn_instance = btn_instance 
                     self.prev_slider_selected = slider_selected
                     self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
@@ -84,12 +77,12 @@ class GuiVas(BoxLayout):
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
-    def on_slider_value(self,additional_variable, instance_slider: Slider, value: float):
+    def on_slider_value(self,additional_variable,instance_slider: Slider, value: float):
         """Slider value change event method"""
         self.vas_value = value
 
         # Find the index of the slider that triggered the event
-        #index = self.ids.slider_layout.children.index(instance_slider.parent)
+        #index = self.num_torque_options - self.ids.slider_layout.children.index(instance_slider.parent) - 1
 
         if(additional_variable == 'A'):
             index = 0
@@ -101,6 +94,7 @@ class GuiVas(BoxLayout):
             index = 3
         elif(additional_variable == 'E'):
             index = 4
+
         # Print the VAS value and the index of the slider
         #print(f"VAS value: {self.vas_value}, Slider: {chr(65+index)}")
 
@@ -122,26 +116,38 @@ class GuiVas(BoxLayout):
 
     def press(self, instance_btn: Button):
         """Button press response method"""
-        if(instance_btn.text == 'A'):
-            torque = 1
-        elif(instance_btn.text == 'B'):
-            torque = 2
-        elif(instance_btn.text == 'C'):
-            torque = 3
-        elif(instance_btn.text == 'D'):
-            torque = 4
-        elif(instance_btn.text == 'E'):
-            torque = 5
-        with grpc.insecure_channel(config.server_ip) as channel:
-            stub = Message_pb2_grpc.GUIStub(channel)
-            response = stub.UserButton(Message_pb2.Input(torque=torque))
-
         print(f"You pressed the button: {instance_btn.text}")
+
+        # randomized button-torque mapping for each trial (wtihout replacement)
+        np.random.seed(config.curr_trial_num)
+        pseudo_random_presentation_torques = np.random.choice(config.torque_settings, size = config.num_of_tot_torque_settings, replace=False)
         
+        # select a subset of the pseudo-randomized torques based on current presentation number
+        if config.current_presentation_num == 1:
+            pseudo_random_presentation_torques = pseudo_random_presentation_torques[:config.torques_per_presentation]
+        elif config.current_presentation_num == 2:
+            pseudo_random_presentation_torques = pseudo_random_presentation_torques[config.torques_per_presentation:]
+            
+        # Set the torque value based on the button pressed
+        if(instance_btn.text == 'A'):
+            torque = pseudo_random_presentation_torques[0]
+        elif(instance_btn.text == 'B'):
+            torque = pseudo_random_presentation_torques[1]
+        elif(instance_btn.text == 'C'):
+            torque = pseudo_random_presentation_torques[2]
+        elif(instance_btn.text == 'D'):
+            torque = pseudo_random_presentation_torques[3]
+        elif(instance_btn.text == 'E'):
+            torque = pseudo_random_presentation_torques[4]
+
         # Log the new torque option to a csv file
         self.csvlogger(instance_btn.text)
 
-        # TODO: insert the logic for the torque-button mapping here (also include trial #)
+        # Send the torque value to the server via gRPC
+        if config.grpc_needed:
+            with grpc.insecure_channel(config.server_ip) as channel:
+                stub = Message_pb2_grpc.GUIStub(channel)
+                response = stub.UserButton(Message_pb2.Input(torque=torque))
 
     def confirm_button_pressed(self, instance_btn: Button):
         """Confirm button press response method"""
@@ -150,7 +156,7 @@ class GuiVas(BoxLayout):
         config.bool_confirm_button_pressed = True
         self.csvlogger(instance_btn.text)
 
-        config.button_order = sorted(config.button_order, key=lambda button: config.button_slider_values.get(button, -15), reverse=True)
+        config.button_order = sorted(config.button_order, key=lambda button: config.button_slider_values.get(button, config.NPO_MV), reverse=True)
 
         # Clear the old button layout
         self.ids.button_layout.clear_widgets()
@@ -188,14 +194,14 @@ class GuiVas(BoxLayout):
             box_layout = BoxLayout(orientation='horizontal')
 
             # Create the slider
-            slider = Slider(min=-15, max=50, value=config.button_slider_values[i], cursor_size=(25, 25), cursor_image="pin_1.png")
+            slider = Slider(min=config.NPO_MV, max=config.EPO_MV, value=config.button_slider_values[i], cursor_size=(25, 25), cursor_image="pin_1.png")
             self.last_pressed_button = i
             additional_variable = i
             slider.bind(value=partial(self.on_slider_value, additional_variable))
+
             # Create the cursor label and initially set the opacity to 0
             cursor_label = Label(text=f"${round(slider.value, 2)}", size_hint=(None, None), color=slider_colors[count],opacity=1)
             self.labels.append(cursor_label)
-
 
             # Add the labels and the slider to the BoxLayout
             box_layout.add_widget(slider)
