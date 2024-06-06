@@ -12,4 +12,7 @@ service GUI{
 
 message Input{
     float torque = 1;
+    /*
+    ToDo: Send a dictionary (with all VAS buttons as keys to access their respective values) to the server in order to log it.
+    */
 }

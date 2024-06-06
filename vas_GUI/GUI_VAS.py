@@ -59,15 +59,20 @@ class GuiVas(BoxLayout):
                     slider_selected = {chr(65+slider_index)}
                 else:
                     slider_selected = None
-                
+
                 elapsed_time = time.time() - self.start_time
                 if(config.bool_confirm_button_pressed == True):
                     log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num,self.prev_btn_instance, self.prev_slider_selected, self.prev_value_of_slider, config.bool_confirm_button_pressed]
                 else:
-                    log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num,btn_instance, slider_selected, config.button_slider_values[chr(65+slider_index)] , config.bool_confirm_button_pressed]
-                    self.prev_btn_instance = btn_instance 
-                    self.prev_slider_selected = slider_selected
-                    self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
+                    # if a slider has not been moved, but only a button has been pressed
+                    if slider_selected == None: 
+                        log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num,btn_instance, '', '' , config.bool_confirm_button_pressed]
+                        self.prev_btn_instance = btn_instance 
+                    else:
+                        log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num,btn_instance, slider_selected, config.button_slider_values[chr(65+slider_index)] , config.bool_confirm_button_pressed]
+                        self.prev_btn_instance = btn_instance 
+                        self.prev_slider_selected = slider_selected
+                        self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
             
                 csvwriter.writerow(log_array)   
                 config.bool_confirm_button_pressed = False
@@ -92,8 +97,6 @@ class GuiVas(BoxLayout):
             index = 2
         elif(additional_variable == 'D'):
             index = 3
-        elif(additional_variable == 'E'):
-            index = 4
 
         # Print the VAS value and the index of the slider
         #print(f"VAS value: {self.vas_value}, Slider: {chr(65+index)}")
@@ -112,7 +115,7 @@ class GuiVas(BoxLayout):
         print("config.button_slider_values: ", config.button_slider_values)
 
         # Log the data to a csv file
-        self.csvlogger(value, index)
+        self.csvlogger(value_of_slider=value, slider_index=index)
 
     def press(self, instance_btn: Button):
         """Button press response method"""
@@ -121,7 +124,7 @@ class GuiVas(BoxLayout):
         # randomized button-torque mapping for each trial (wtihout replacement)
         np.random.seed(config.curr_trial_num)
         pseudo_random_presentation_torques = np.random.choice(config.torque_settings, size = config.num_of_tot_torque_settings, replace=False)
-        
+
         # select a subset of the pseudo-randomized torques based on current presentation number
         if config.current_presentation_num == 1:
             pseudo_random_presentation_torques = pseudo_random_presentation_torques[:config.torques_per_presentation]
@@ -137,11 +140,10 @@ class GuiVas(BoxLayout):
             torque = pseudo_random_presentation_torques[2]
         elif(instance_btn.text == 'D'):
             torque = pseudo_random_presentation_torques[3]
-        elif(instance_btn.text == 'E'):
-            torque = pseudo_random_presentation_torques[4]
-
+            
+        print(torque)
         # Log the new torque option to a csv file
-        self.csvlogger(instance_btn.text)
+        self.csvlogger(btn_instance=instance_btn.text)
 
         # Send the torque value to the server via gRPC
         if config.grpc_needed:
