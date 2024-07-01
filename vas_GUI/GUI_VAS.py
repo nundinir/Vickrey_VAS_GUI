@@ -19,8 +19,8 @@ import time
 import csv
 from functools import partial
 
-import Message_pb2
-import Message_pb2_grpc
+import Message_2_pb2
+import Message_2_pb2_grpc
 import config
 import grpc
 
@@ -37,7 +37,7 @@ class GuiVas(BoxLayout):
         # Ask user for name of csv file and start the logger
         print("Filename to save as (format:Subject_VAS_pres#_inclinelvl).csv => ") 
         self.filename = input()
-        self.headers = ['Time(s)', 'Trial Num','Presentation Num', 'Current Torque Experienced', 'Torque Slider Adjusted', 'VAS Value of Torque Slider', 'Confirm Button Pressed']
+        self.headers = ['Time(s)', 'Trial Num','Presentation Num', 'Current Torque Experienced', 'Btn Letter', 'Torque Slider Adjusted', 'VAS Value of Torque Slider', 'Confirm Button Pressed']
         self.logged_yet = False
         self.start_time = time.time()
         self.prev_btn_instance =  None
@@ -45,7 +45,7 @@ class GuiVas(BoxLayout):
         self.prev_value_of_slider = None
         self.last_pressed_button = None
         
-    def csvlogger(self, value_of_slider=None, slider_index=None, btn_instance=None):
+    def csvlogger(self, slider_index=None, btn_instance=None, curr_torque:float=0.0):
         """Log the data to a csv file"""
 
         try:
@@ -60,22 +60,46 @@ class GuiVas(BoxLayout):
                 else:
                     slider_selected = None
 
-                elapsed_time = time.time() - self.start_time
+                elapsed_time = round(time.time() - self.start_time, 4)
                 if(config.bool_confirm_button_pressed == True):
-                    log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num,self.prev_btn_instance, self.prev_slider_selected, self.prev_value_of_slider, config.bool_confirm_button_pressed]
+                    log_array = [elapsed_time, config.curr_trial_num, config.current_presentation_num, self.prev_btn_instance, self.prev_slider_selected, self.prev_value_of_slider, config.bool_confirm_button_pressed]
                 else:
                     # if a slider has not been moved, but only a button has been pressed
                     if slider_selected == None: 
-                        log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num,btn_instance, '', '' , config.bool_confirm_button_pressed]
+                        log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num, curr_torque, btn_instance, '', '' , config.bool_confirm_button_pressed]
                         self.prev_btn_instance = btn_instance 
                     else:
-                        log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num,btn_instance, slider_selected, config.button_slider_values[chr(65+slider_index)] , config.bool_confirm_button_pressed]
+                        log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num, curr_torque, btn_instance, slider_selected, config.button_slider_values[chr(65+slider_index)] , config.bool_confirm_button_pressed]
                         self.prev_btn_instance = btn_instance 
                         self.prev_slider_selected = slider_selected
                         self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
             
                 csvwriter.writerow(log_array)   
                 config.bool_confirm_button_pressed = False
+                
+                # Send the torque value to the server via gRPC
+                if self.prev_value_of_slider == None:
+                    logged_value_of_slider = 0.0
+                else:
+                    logged_value_of_slider = float(self.prev_value_of_slider)
+                    
+                if config.bool_confirm_button_pressed == True:
+                    logged_confirm_press = 1.0
+                else:
+                    logged_confirm_press = 0.0
+                    
+                if config.grpc_needed:
+                    with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
+                        try:
+                            stub = Message_2_pb2_grpc.CommunicationServiceStub(channel)
+                            response = stub.Input(Message_2_pb2.Request(data_array = [elapsed_time,
+                                                                                    curr_torque,
+                                                                                    logged_value_of_slider,
+                                                                                    logged_confirm_press
+                                                                                    ]))
+                        except grpc.RpcError as e:
+                            print("Error",e)
+            
         except IOError:
             print("An error occurred while trying to write to the file.")
 
@@ -115,7 +139,7 @@ class GuiVas(BoxLayout):
         print("config.button_slider_values: ", config.button_slider_values)
 
         # Log the data to a csv file
-        self.csvlogger(value_of_slider=value, slider_index=index)
+        self.csvlogger(slider_index=index)
 
     def press(self, instance_btn: Button):
         """Button press response method"""
@@ -141,16 +165,10 @@ class GuiVas(BoxLayout):
         elif(instance_btn.text == 'D'):
             torque = pseudo_random_presentation_torques[3]
             
-        print(torque)
+        print(round(torque, 3), "Nm")
         # Log the new torque option to a csv file
-        self.csvlogger(btn_instance=instance_btn.text)
-
-        # Send the torque value to the server via gRPC
-        if config.grpc_needed:
-            with grpc.insecure_channel(config.server_ip) as channel:
-                stub = Message_pb2_grpc.GUIStub(channel)
-                response = stub.UserButton(Message_pb2.Input(torque=torque))
-
+        self.csvlogger(btn_instance=instance_btn.text, curr_torque=round(torque, 3))
+            
     def confirm_button_pressed(self, instance_btn: Button):
         """Confirm button press response method"""
         button = Button(text=f"{'CONFIRM'}")
