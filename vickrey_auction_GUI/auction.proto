@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+/*
+messages between client(caller) and server(auctionhouse)
+*/
+message Null {};
+
+message bid {
+   float amount = 1;
+}
+
+message receipt {
+   bool received = 1;
+}
+
+message result{
+   float win = 1;
+   float amount = 2;
+}
+
+
+service auction {
+   // caller sends bids to auctionhouse
+   rpc call (bid) returns (receipt) {};
+
+   // auctionhouse sends result back to caller
+   rpc close (Null) returns (result) {};
+}
