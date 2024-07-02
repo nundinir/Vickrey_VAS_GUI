@@ -137,6 +137,11 @@ class GuiVas(BoxLayout):
     def press(self, instance_btn: Button):
         """Button press response method"""
         print(f"You pressed the button: {instance_btn.text}")
+        
+        # on button press, disable the other buttons and then reenable them after 3 sec
+        for child in self.ids.button_layout.children:
+            child.disabled = True
+        Clock.schedule_once(self.reenable_widgets, 3)
 
         # randomized button-torque mapping for each trial (wtihout replacement)
         np.random.seed(config.curr_trial_num)
@@ -162,7 +167,12 @@ class GuiVas(BoxLayout):
         
         # Log the new torque option
         self.serverlogger(btn_instance=instance_btn.text, curr_torque=round(torque, 3))
-            
+        
+    def reenable_widgets(self, *args):
+        """Reenables button presses after 3 seconds/3 strides"""
+        for child in self.ids.button_layout.children:
+            child.disabled = False
+                 
     def confirm_button_pressed(self, instance_btn: Button):
         """Confirm button press response method"""
         button = Button(text=f"{'CONFIRM'}")

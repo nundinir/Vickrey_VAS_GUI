@@ -9,6 +9,9 @@ button_slider_values = {}
 for i in button_order:
     button_slider_values[i] = 0
 
+# keeps track of whether all the buttons have been pressed/experienced yet
+btn_pressed_yet = [0] * 4   # 0 means not pressed yet, 1 means pressed
+
 # Initializing values of the log variables
 bool_confirm_button_pressed: bool = False
 
