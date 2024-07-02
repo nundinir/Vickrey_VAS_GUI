@@ -19,8 +19,10 @@ import time
 import csv
 from functools import partial
 
-import Message_2_pb2
-import Message_2_pb2_grpc
+# import Message_2_pb2
+# import Message_2_pb2_grpc
+import gui2pi_messenger_pb2
+import gui2pi_messenger_pb2_grpc
 import config
 import grpc
 
@@ -29,79 +31,71 @@ class GuiVas(BoxLayout):
     """Actual Class for the GUI"""
     # set the number of torque options (create equal # of buttons and sliders)
     num_torque_options = NumericProperty(config.torques_per_presentation)  # Defined as Kivy property 
-
+    
     def __init__(self, **kwargs):
         """Initialize the GUI"""
         super(GuiVas, self).__init__(**kwargs)
 
-        # Ask user for name of csv file and start the logger
-        print("Filename to save as (format:Subject_VAS_pres#_inclinelvl).csv => ") 
-        self.filename = input()
-        self.headers = ['Time(s)', 'Trial Num','Presentation Num', 'Current Torque Experienced', 'Btn Letter', 'Torque Slider Adjusted', 'VAS Value of Torque Slider', 'Confirm Button Pressed']
-        self.logged_yet = False
         self.start_time = time.time()
         self.prev_btn_instance =  None
         self.prev_slider_selected = None
         self.prev_value_of_slider = None
         self.last_pressed_button = None
         
-    def csvlogger(self, slider_index=None, btn_instance=None, curr_torque:float=0.0):
-        """Log the data to a csv file"""
+    def serverlogger(self, slider_index=None, btn_instance=None, curr_torque:float=0.0):
+        """Log the data/current torque selection and send to the Server/Rpi file"""
 
         try:
-            with open(self.filename+'.csv', 'a') as csvfile:
-                csvwriter = csv.writer(csvfile)
-                if self.logged_yet == False: # write headers & time stamp to csv file only once
-                    csvwriter.writerow(self.headers)
-                    self.logged_yet = True
-    
-                if slider_index != None:
-                    slider_selected = {chr(65+slider_index)}
-                else:
-                    slider_selected = None
+            # if a slider is being adjusted, find that slider's A,B,C,D index
+            if slider_index != None:
+                slider_selected = {chr(65+slider_index)}
+            else:
+                slider_selected = None
 
-                elapsed_time = round(time.time() - self.start_time, 4)
-                if(config.bool_confirm_button_pressed == True):
-                    log_array = [elapsed_time, config.curr_trial_num, config.current_presentation_num, self.prev_btn_instance, self.prev_slider_selected, self.prev_value_of_slider, config.bool_confirm_button_pressed]
-                else:
-                    # if a slider has not been moved, but only a button has been pressed
-                    if slider_selected == None: 
-                        log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num, curr_torque, btn_instance, '', '' , config.bool_confirm_button_pressed]
-                        self.prev_btn_instance = btn_instance 
-                    else:
-                        log_array = [elapsed_time, config.curr_trial_num,config.current_presentation_num, curr_torque, btn_instance, slider_selected, config.button_slider_values[chr(65+slider_index)] , config.bool_confirm_button_pressed]
-                        self.prev_btn_instance = btn_instance 
-                        self.prev_slider_selected = slider_selected
-                        self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
-            
-                csvwriter.writerow(log_array)   
-                config.bool_confirm_button_pressed = False
+            # compute elapsed time
+            elapsed_time = round(time.time() - self.start_time, 4)
+          
+            #  If a slider has not been moved, but only a button has been pressed, log the appropriate button's data
+            if slider_selected == None: 
                 
                 # Send the torque value to the server via gRPC
-                if self.prev_value_of_slider == None:
-                    logged_value_of_slider = 0.0
-                else:
-                    logged_value_of_slider = float(self.prev_value_of_slider)
-                    
-                if config.bool_confirm_button_pressed == True:
-                    logged_confirm_press = 1.0
-                else:
-                    logged_confirm_press = 0.0
-                    
                 if config.grpc_needed:
                     with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
                         try:
-                            stub = Message_2_pb2_grpc.CommunicationServiceStub(channel)
-                            response = stub.Input(Message_2_pb2.Request(data_array = [elapsed_time,
-                                                                                    curr_torque,
-                                                                                    logged_value_of_slider,
-                                                                                    logged_confirm_press
+                            stub = gui2pi_messenger_pb2_grpc.CommunicationServiceStub(channel)
+                            response = stub.GUI_Messenger(gui2pi_messenger_pb2.data_stream(logging_data = [gui2pi_messenger_pb2.Value(time=elapsed_time),
+                                                                                    gui2pi_messenger_pb2.Value(current_torque_selected=curr_torque),
+                                                                                    gui2pi_messenger_pb2.Value(adjusted_slider_btn=str('nan')),
+                                                                                    gui2pi_messenger_pb2.Value(adjusted_slider_value=float('nan')),
+                                                                                    gui2pi_messenger_pb2.Value(confirm_btn_pressed=config.bool_confirm_button_pressed)
                                                                                     ]))
                         except grpc.RpcError as e:
                             print("Error",e)
-            
-        except IOError:
-            print("An error occurred while trying to write to the file.")
+                
+                self.prev_btn_instance = btn_instance 
+                
+            # otherwise, if a slider has been moved, log the appropriate slider's data
+            else:
+                # Send the torque value to the server via gRPC
+                if config.grpc_needed:
+                    with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
+                        try:
+                            stub = gui2pi_messenger_pb2_grpc.CommunicationServiceStub(channel)
+                            response = stub.GUI_Messenger(gui2pi_messenger_pb2.data_stream(logging_data = [gui2pi_messenger_pb2.Value(time=elapsed_time),
+                                                                                    gui2pi_messenger_pb2.Value(current_torque_selected=curr_torque),
+                                                                                    gui2pi_messenger_pb2.Value(adjusted_slider_btn=str(slider_selected)),
+                                                                                    gui2pi_messenger_pb2.Value(adjusted_slider_value= float(config.button_slider_values[chr(65+slider_index)]) ),
+                                                                                    gui2pi_messenger_pb2.Value(confirm_btn_pressed=config.bool_confirm_button_pressed)
+                                                                                    ]))
+                        except grpc.RpcError as e:
+                            print("Error",e)
+                
+                self.prev_btn_instance = btn_instance 
+                self.prev_slider_selected = slider_selected
+                self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
+         
+            # reset the confirm button press after logging
+            config.bool_confirm_button_pressed = False
 
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
@@ -134,12 +128,11 @@ class GuiVas(BoxLayout):
         self.labels[index].opacity = 1
 
         config.bool_slider_value_changed = True
-
-        config.button_slider_values[chr(65+index)] = self.vas_value
+        config.button_slider_values[chr(65+index)] = self.vas_value # Update the dictionary with the new slider value
         print("config.button_slider_values: ", config.button_slider_values)
 
-        # Log the data to a csv file
-        self.csvlogger(slider_index=index)
+        # Log the data
+        self.serverlogger(slider_index=index)
 
     def press(self, instance_btn: Button):
         """Button press response method"""
@@ -166,14 +159,15 @@ class GuiVas(BoxLayout):
             torque = pseudo_random_presentation_torques[3]
             
         print(round(torque, 3), "Nm")
-        # Log the new torque option to a csv file
-        self.csvlogger(btn_instance=instance_btn.text, curr_torque=round(torque, 3))
+        
+        # Log the new torque option
+        self.serverlogger(btn_instance=instance_btn.text, curr_torque=round(torque, 3))
             
     def confirm_button_pressed(self, instance_btn: Button):
         """Confirm button press response method"""
         button = Button(text=f"{'CONFIRM'}")
         config.bool_confirm_button_pressed = True
-        self.csvlogger(instance_btn.text)
+        self.serverlogger(instance_btn.text)
 
         config.button_order = sorted(config.button_order, key=lambda button: config.button_slider_values.get(button, config.NPO_MV), reverse=True)
 

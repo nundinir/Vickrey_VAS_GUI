@@ -2,13 +2,14 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import Message_2_pb2 as Message__2__pb2
+import gui2pi_messenger_pb2 as gui2pi__messenger__pb2
 
 
 class CommunicationServiceStub(object):
     """This service is between
-    Client: (GUI running on tablet) -- This will send the user selection (i.e. torque) as well as other info as a data array)
-    Server: (running on rPi) -- once receiving the data array, it sends a null message
+    Client: Sending logging data array from GUI
+    Server: Once receiving the logging data array, RPI sends a null message
+
     """
 
     def __init__(self, channel):
@@ -17,20 +18,21 @@ class CommunicationServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Input = channel.unary_unary(
-                '/CommunicationService/Input',
-                request_serializer=Message__2__pb2.Request.SerializeToString,
-                response_deserializer=Message__2__pb2.Null.FromString,
+        self.GUI_Messenger = channel.unary_unary(
+                '/CommunicationService/GUI_Messenger',
+                request_serializer=gui2pi__messenger__pb2.data_stream.SerializeToString,
+                response_deserializer=gui2pi__messenger__pb2.Null.FromString,
                 )
 
 
 class CommunicationServiceServicer(object):
     """This service is between
-    Client: (GUI running on tablet) -- This will send the user selection (i.e. torque) as well as other info as a data array)
-    Server: (running on rPi) -- once receiving the data array, it sends a null message
+    Client: Sending logging data array from GUI
+    Server: Once receiving the logging data array, RPI sends a null message
+
     """
 
-    def Input(self, request, context):
+    def GUI_Messenger(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -39,10 +41,10 @@ class CommunicationServiceServicer(object):
 
 def add_CommunicationServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Input': grpc.unary_unary_rpc_method_handler(
-                    servicer.Input,
-                    request_deserializer=Message__2__pb2.Request.FromString,
-                    response_serializer=Message__2__pb2.Null.SerializeToString,
+            'GUI_Messenger': grpc.unary_unary_rpc_method_handler(
+                    servicer.GUI_Messenger,
+                    request_deserializer=gui2pi__messenger__pb2.data_stream.FromString,
+                    response_serializer=gui2pi__messenger__pb2.Null.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -53,12 +55,13 @@ def add_CommunicationServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class CommunicationService(object):
     """This service is between
-    Client: (GUI running on tablet) -- This will send the user selection (i.e. torque) as well as other info as a data array)
-    Server: (running on rPi) -- once receiving the data array, it sends a null message
+    Client: Sending logging data array from GUI
+    Server: Once receiving the logging data array, RPI sends a null message
+
     """
 
     @staticmethod
-    def Input(request,
+    def GUI_Messenger(request,
             target,
             options=(),
             channel_credentials=None,
@@ -68,8 +71,8 @@ class CommunicationService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/CommunicationService/Input',
-            Message__2__pb2.Request.SerializeToString,
-            Message__2__pb2.Null.FromString,
+        return grpc.experimental.unary_unary(request, target, '/CommunicationService/GUI_Messenger',
+            gui2pi__messenger__pb2.data_stream.SerializeToString,
+            gui2pi__messenger__pb2.Null.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
