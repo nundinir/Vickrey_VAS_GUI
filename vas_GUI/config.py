@@ -1,7 +1,10 @@
 import numpy as np
 
-server_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address of the Controller (rPi)
-client_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address of the Tablet (GUI)
+# server_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address of the Controller (rPi)
+# client_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address of the Tablet (GUI)
+
+server_ip = f"{'67.194.45.127'}:" f"{'50051'}"   # IP address of the Controller (rPi)
+client_ip = f"{'0.0.0.0'}:" f"{'50051'}"    # IP address of my laptop running the GUI
 
 # Initializing the torque mapping button order
 button_order = ['D', 'C', 'B', 'A']

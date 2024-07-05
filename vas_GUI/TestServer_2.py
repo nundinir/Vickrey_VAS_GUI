@@ -15,7 +15,7 @@ class CommunicationService(gui2pi_messenger_pb2_grpc.CommunicationServiceService
         print("Server received data:", request.logging_data)
         
         # store a csv with the logged data
-        filename = 'Sub'+str(config.sub_num)+'_'+'T'+str(config.curr_trial_num)+'P'+str(config.current_presentation_num)
+        filename = 'Sub'+str(config.sub_num)+'_'+'T'+str(config.curr_trial_num)+'P'+str(config.current_presentation_num)+'.csv'
         headers = ['Time(s)', 'Current Torque Experienced(Nm)', 'Adjusted Slider Btn', 
                    'Adjusted Slider Value($)', 'Confirm Button Pressed']
         

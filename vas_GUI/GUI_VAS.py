@@ -63,12 +63,13 @@ class GuiVas(BoxLayout):
                     with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
                         try:
                             stub = gui2pi_messenger_pb2_grpc.CommunicationServiceStub(channel)
-                            response = stub.GUI_Messenger(gui2pi_messenger_pb2.data_stream(logging_data = [gui2pi_messenger_pb2.Value(time=elapsed_time),
-                                                                                    gui2pi_messenger_pb2.Value(current_torque_selected=curr_torque),
-                                                                                    gui2pi_messenger_pb2.Value(adjusted_slider_btn=str('nan')),
-                                                                                    gui2pi_messenger_pb2.Value(adjusted_slider_value=float('nan')),
-                                                                                    gui2pi_messenger_pb2.Value(confirm_btn_pressed=config.bool_confirm_button_pressed)
-                                                                                    ]))
+                            # response = stub.GUI_Messenger(gui2pi_messenger_pb2.data_stream(logging_data = [gui2pi_messenger_pb2.Value(time=elapsed_time),
+                            #                                                         gui2pi_messenger_pb2.Value(current_torque_selected=curr_torque),
+                            #                                                         gui2pi_messenger_pb2.Value(adjusted_slider_btn=str('nan')),
+                            #                                                         gui2pi_messenger_pb2.Value(adjusted_slider_value=float('nan')),
+                            #                                                         gui2pi_messenger_pb2.Value(confirm_btn_pressed=config.bool_confirm_button_pressed)
+                            #                                                         ]))
+
                         except grpc.RpcError as e:
                             print("Error",e)
                 
