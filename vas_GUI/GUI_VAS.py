@@ -19,10 +19,8 @@ import time
 import csv
 from functools import partial
 
-# import Message_2_pb2
-# import Message_2_pb2_grpc
-import gui2pi_messenger_pb2
-import gui2pi_messenger_pb2_grpc
+import gui2controller_pb2
+import gui2controller_pb2_grpc
 import config
 import grpc
 
@@ -54,6 +52,11 @@ class GuiVas(BoxLayout):
 
             # compute elapsed time
             elapsed_time = round(time.time() - self.start_time, 4)
+            
+            if config.bool_confirm_button_pressed:
+                confirm_btn_pressed_state = "True"
+            else:
+                confirm_btn_pressed_state = "False"
           
             #  If a slider has not been moved, but only a button has been pressed, log the appropriate button's data
             if slider_selected == None: 
@@ -62,13 +65,13 @@ class GuiVas(BoxLayout):
                 if config.grpc_needed:
                     with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
                         try:
-                            stub = gui2pi_messenger_pb2_grpc.CommunicationServiceStub(channel)
-                            # response = stub.GUI_Messenger(gui2pi_messenger_pb2.data_stream(logging_data = [gui2pi_messenger_pb2.Value(time=elapsed_time),
-                            #                                                         gui2pi_messenger_pb2.Value(current_torque_selected=curr_torque),
-                            #                                                         gui2pi_messenger_pb2.Value(adjusted_slider_btn=str('nan')),
-                            #                                                         gui2pi_messenger_pb2.Value(adjusted_slider_value=float('nan')),
-                            #                                                         gui2pi_messenger_pb2.Value(confirm_btn_pressed=config.bool_confirm_button_pressed)
-                            #                                                         ]))
+                            stub = gui2controller_pb2_grpc.CommunicationServiceStub(channel)
+                            response = stub.GUI_Messenger(gui2controller_pb2.data_stream(time=elapsed_time,
+                                                        current_torque_selected=curr_torque,
+                                                        adjusted_slider_btn=str('nan'),
+                                                        adjusted_slider_value=float('nan'),
+                                                        confirm_btn_pressed=confirm_btn_pressed_state
+                                                        ))
 
                         except grpc.RpcError as e:
                             print("Error",e)
@@ -81,13 +84,14 @@ class GuiVas(BoxLayout):
                 if config.grpc_needed:
                     with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
                         try:
-                            stub = gui2pi_messenger_pb2_grpc.CommunicationServiceStub(channel)
-                            response = stub.GUI_Messenger(gui2pi_messenger_pb2.data_stream(logging_data = [gui2pi_messenger_pb2.Value(time=elapsed_time),
-                                                                                    gui2pi_messenger_pb2.Value(current_torque_selected=curr_torque),
-                                                                                    gui2pi_messenger_pb2.Value(adjusted_slider_btn=str(slider_selected)),
-                                                                                    gui2pi_messenger_pb2.Value(adjusted_slider_value= float(config.button_slider_values[chr(65+slider_index)]) ),
-                                                                                    gui2pi_messenger_pb2.Value(confirm_btn_pressed=config.bool_confirm_button_pressed)
-                                                                                    ]))
+                            stub = gui2controller_pb2_grpc.CommunicationServiceStub(channel)
+                            response = stub.GUI_Messenger(gui2controller_pb2.data_stream(time=elapsed_time,
+                                                                                        current_torque_selected=curr_torque,
+                                                                                        adjusted_slider_btn=str(slider_selected),
+                                                                                        adjusted_slider_value=float(config.button_slider_values[chr(65+slider_index)]),
+                                                                                        confirm_btn_pressed=confirm_btn_pressed_state
+                                                                                        ))
+                        
                         except grpc.RpcError as e:
                             print("Error",e)
                 

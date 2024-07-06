@@ -1,14 +1,14 @@
 """Communication Server-side test script"""
 import grpc
-import gui2pi_messenger_pb2
-import gui2pi_messenger_pb2_grpc
+import gui2controller_pb2
+import gui2controller_pb2_grpc
 from concurrent import futures
 import random
 import config
 import csv
 import os
 
-class CommunicationService(gui2pi_messenger_pb2_grpc.CommunicationServiceServicer):
+class CommunicationService(gui2controller_pb2_grpc.CommunicationServiceServicer):
     
     def GUI_Messenger(self, request, context):
         # Printing out the request from the client
@@ -31,11 +31,11 @@ class CommunicationService(gui2pi_messenger_pb2_grpc.CommunicationServiceService
             csvwriter.writerow(request.logging_data)  # Directly write logging_data as a row
 
         # Sending the Null response(to close the communication loop)
-        return gui2pi_messenger_pb2.Null()
+        return gui2controller_pb2.Null()
     
 def starting_server():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    gui2pi_messenger_pb2_grpc.add_CommunicationServiceServicer_to_server(CommunicationService(),server)
+    gui2controller_pb2_grpc.add_CommunicationServiceServicer_to_server(CommunicationService(),server)
     server.add_insecure_port(config.client_ip)
     server.start()
     server.wait_for_termination()

@@ -2,13 +2,13 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import gui2pi_messenger_pb2 as gui2pi__messenger__pb2
+import gui2controller_pb2 as gui2controller__pb2
 
 
 class CommunicationServiceStub(object):
     """This service is between
-    Client: Sending logging data array from GUI
-    Server: Once receiving the logging data array, RPI sends a null message
+    Client: Sending logging data from GUI
+    Server: Once receiving the logging data, RPI sends a null message
 
     """
 
@@ -20,15 +20,15 @@ class CommunicationServiceStub(object):
         """
         self.GUI_Messenger = channel.unary_unary(
                 '/CommunicationService/GUI_Messenger',
-                request_serializer=gui2pi__messenger__pb2.data_stream.SerializeToString,
-                response_deserializer=gui2pi__messenger__pb2.Null.FromString,
+                request_serializer=gui2controller__pb2.data_stream.SerializeToString,
+                response_deserializer=gui2controller__pb2.Null.FromString,
                 )
 
 
 class CommunicationServiceServicer(object):
     """This service is between
-    Client: Sending logging data array from GUI
-    Server: Once receiving the logging data array, RPI sends a null message
+    Client: Sending logging data from GUI
+    Server: Once receiving the logging data, RPI sends a null message
 
     """
 
@@ -43,8 +43,8 @@ def add_CommunicationServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GUI_Messenger': grpc.unary_unary_rpc_method_handler(
                     servicer.GUI_Messenger,
-                    request_deserializer=gui2pi__messenger__pb2.data_stream.FromString,
-                    response_serializer=gui2pi__messenger__pb2.Null.SerializeToString,
+                    request_deserializer=gui2controller__pb2.data_stream.FromString,
+                    response_serializer=gui2controller__pb2.Null.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -55,8 +55,8 @@ def add_CommunicationServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class CommunicationService(object):
     """This service is between
-    Client: Sending logging data array from GUI
-    Server: Once receiving the logging data array, RPI sends a null message
+    Client: Sending logging data from GUI
+    Server: Once receiving the logging data, RPI sends a null message
 
     """
 
@@ -72,7 +72,7 @@ class CommunicationService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/CommunicationService/GUI_Messenger',
-            gui2pi__messenger__pb2.data_stream.SerializeToString,
-            gui2pi__messenger__pb2.Null.FromString,
+            gui2controller__pb2.data_stream.SerializeToString,
+            gui2controller__pb2.Null.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
