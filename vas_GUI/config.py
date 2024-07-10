@@ -1,10 +1,10 @@
 import numpy as np
 
-# server_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address of the Controller (rPi)
-# client_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address of the Tablet (GUI)
+# server_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address when just testing on same machine
+# client_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address when just testing on same machine
 
 server_ip = f"{'67.194.45.127'}:" f"{'50051'}"   # IP address of the Controller (rPi)
-client_ip = f"{'0.0.0.0'}:" f"{'50051'}"    # IP address of my laptop running the GUI
+client_ip = f"{'0.0.0.0'}:" f"{'50051'}"         # IP address of my laptop running the GUI
 
 # Initializing the torque mapping button order
 button_order = ['D', 'C', 'B', 'A']
@@ -18,10 +18,10 @@ btn_pressed_yet = [0] * 4   # 0 means not pressed yet, 1 means pressed
 # Initializing values of the log variables
 bool_confirm_button_pressed: bool = False
 
-NPO_MV = -15        # Value of the slider at the extreme negative end
-EPO_MV = 50         # Value of the slider at the extreme positive end
-starting_val = 0    # Initial value of the slider cursor
-grpc_needed = True  # set to false if just doing GUI testing without commanding exo
+NPO_MV:float = -15        # Value of the slider at the extreme negative end
+EPO_MV:float = 50         # Value of the slider at the extreme positive end
+starting_val:int = 0      # Initial value of the slider cursor
+grpc_needed:bool = True   # set to false if just doing GUI testing without commanding exo
 
 
 ##################################################

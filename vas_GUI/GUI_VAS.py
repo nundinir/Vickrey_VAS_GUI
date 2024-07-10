@@ -19,8 +19,8 @@ import time
 import csv
 from functools import partial
 
-import gui2controller_pb2
-import gui2controller_pb2_grpc
+import gui2controller2_pb2
+import gui2controller2_pb2_grpc
 import config
 import grpc
 
@@ -33,8 +33,6 @@ class GuiVas(BoxLayout):
     def __init__(self, **kwargs):
         """Initialize the GUI"""
         super(GuiVas, self).__init__(**kwargs)
-
-        self.start_time = time.time()
         self.prev_btn_instance =  None
         self.prev_slider_selected = None
         self.prev_value_of_slider = None
@@ -49,48 +47,44 @@ class GuiVas(BoxLayout):
                 slider_selected = {chr(65+slider_index)}
             else:
                 slider_selected = None
-
-            # compute elapsed time
-            elapsed_time = round(time.time() - self.start_time, 4)
-            
-            if config.bool_confirm_button_pressed:
-                confirm_btn_pressed_state = "True"
-            else:
-                confirm_btn_pressed_state = "False"
           
-            #  If a slider has not been moved, but only a button has been pressed, log the appropriate button's data
+            #  If a slider has not been moved, but only a button has been pressed (including confirm btn), log the appropriate button's data
             if slider_selected == None: 
-                
-                # Send the torque value to the server via gRPC
-                if config.grpc_needed:
-                    with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
-                        try:
-                            stub = gui2controller_pb2_grpc.CommunicationServiceStub(channel)
-                            response = stub.GUI_Messenger(gui2controller_pb2.data_stream(time=elapsed_time,
-                                                        current_torque_selected=curr_torque,
-                                                        adjusted_slider_btn=str('nan'),
-                                                        adjusted_slider_value=float('nan'),
-                                                        confirm_btn_pressed=confirm_btn_pressed_state
-                                                        ))
-
-                        except grpc.RpcError as e:
-                            print("Error",e)
-                
-                self.prev_btn_instance = btn_instance 
+                if curr_torque != 0.0:  # if the torque value is provided via btn press 
+                    temp_logging_data = [str(curr_torque), str('nan'), str('nan'), str(config.bool_confirm_button_pressed)]
+                    # Send the torque value to the server via gRPC
+                    if config.grpc_needed:
+                        with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
+                            try:
+                                stub = gui2controller2_pb2_grpc.CommunicationServiceStub(channel)
+                                response = stub.GUI_Messenger(gui2controller2_pb2.data_stream(logging_data=temp_logging_data))
+                                
+                            except grpc.RpcError as e:
+                                print("Error",e)
+                    
+                    self.prev_btn_instance = btn_instance 
+                else:   # if the torque value is not provided (i.e. confirm btn is pressed)
+                    temp_logging_data = [str('nan'), str('nan'), str('nan'), str(config.bool_confirm_button_pressed)]
+                    # Send the torque value to the server via gRPC
+                    if config.grpc_needed:
+                        with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
+                            try:
+                                stub = gui2controller2_pb2_grpc.CommunicationServiceStub(channel)
+                                response = stub.GUI_Messenger(gui2controller2_pb2.data_stream(logging_data=temp_logging_data))
+                                
+                            except grpc.RpcError as e:
+                                print("Error",e)
                 
             # otherwise, if a slider has been moved, log the appropriate slider's data
             else:
+                temp_logging_data = [str('nan'), str(slider_selected),str(config.button_slider_values[chr(65+slider_index)]), str(config.bool_confirm_button_pressed)]
                 # Send the torque value to the server via gRPC
                 if config.grpc_needed:
                     with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
                         try:
-                            stub = gui2controller_pb2_grpc.CommunicationServiceStub(channel)
-                            response = stub.GUI_Messenger(gui2controller_pb2.data_stream(time=elapsed_time,
-                                                                                        current_torque_selected=curr_torque,
-                                                                                        adjusted_slider_btn=str(slider_selected),
-                                                                                        adjusted_slider_value=float(config.button_slider_values[chr(65+slider_index)]),
-                                                                                        confirm_btn_pressed=confirm_btn_pressed_state
-                                                                                        ))
+                            stub = gui2controller2_pb2_grpc.CommunicationServiceStub(channel)
+                            response = stub.GUI_Messenger(gui2controller2_pb2.data_stream(logging_data=temp_logging_data))
+                        
                         
                         except grpc.RpcError as e:
                             print("Error",e)
@@ -182,7 +176,8 @@ class GuiVas(BoxLayout):
         """Confirm button press response method"""
         button = Button(text=f"{'CONFIRM'}")
         config.bool_confirm_button_pressed = True
-        self.serverlogger(instance_btn.text)
+        print(config.bool_confirm_button_pressed)
+        self.serverlogger()
 
         config.button_order = sorted(config.button_order, key=lambda button: config.button_slider_values.get(button, config.NPO_MV), reverse=True)
 
