@@ -27,9 +27,14 @@ import grpc
 # Define the GUI class
 class GuiVas(BoxLayout):
     """Actual Class for the GUI"""
+    
     # set the number of torque options (create equal # of buttons and sliders)
     num_torque_options = NumericProperty(config.torques_per_presentation)  # Defined as Kivy property 
-    
+    npo_mv = NumericProperty(config.NPO_MV)
+    epo_mv = NumericProperty(config.EPO_MV)
+    npo_mv_text = StringProperty(f"Assistance\nNot Valued:\n${config.NPO_MV}")
+    epo_mv_text = StringProperty(f"Assistance\nValued:\n${config.EPO_MV}")
+
     def __init__(self, **kwargs):
         """Initialize the GUI"""
         super(GuiVas, self).__init__(**kwargs)
@@ -104,19 +109,12 @@ class GuiVas(BoxLayout):
         self.vas_value = value
 
         # Find the index of the slider that triggered the event
-        #index = self.num_torque_options - self.ids.slider_layout.children.index(instance_slider.parent) - 1
-
-        if(additional_variable == 'A'):
-            index = 0
-        elif(additional_variable == 'B'):
-            index = 1
-        elif(additional_variable == 'C'):
-            index = 2
-        elif(additional_variable == 'D'):
-            index = 3
+        index = self.ids.slider_layout.children.index(instance_slider.parent)   # A = 0, B = 1, ...
+        
+        # TO FLIP THE INDEX ORDER: index = self.num_torque_options - self.ids.slider_layout.children.index(instance_slider.parent) - 1
 
         # Print the VAS value and the index of the slider
-        #print(f"VAS value: {self.vas_value}, Slider: {chr(65+index)}")
+        print(f"VAS value: {self.vas_value}, Slider: {chr(65+index)}")
 
         # Update the text and position of the corresponding label
         self.labels[index].text = f"${round(value, 2)}"
@@ -142,27 +140,66 @@ class GuiVas(BoxLayout):
             child.disabled = True
         Clock.schedule_once(self.reenable_widgets, 3)
 
-        # randomized button-torque mapping for each trial (wtihout replacement)
-        np.random.seed(config.curr_trial_num)
-        pseudo_random_presentation_torques = np.random.choice(config.torque_settings, size = config.num_of_tot_torque_settings, replace=False)
-
-        # select a subset of the pseudo-randomized torques based on current presentation number
-        if config.current_presentation_num == 1:
-            pseudo_random_presentation_torques = pseudo_random_presentation_torques[:config.torques_per_presentation]
-        elif config.current_presentation_num == 2:
-            pseudo_random_presentation_torques = pseudo_random_presentation_torques[config.torques_per_presentation:]
+        if config.GUI_btn_setup == '4btn':
+            # randomized button-torque mapping for each trial (wtihout replacement)
+            np.random.seed(config.curr_trial_num)
             
-        # Set the torque value based on the button pressed
-        if(instance_btn.text == 'A'):
-            torque = pseudo_random_presentation_torques[0]
-        elif(instance_btn.text == 'B'):
-            torque = pseudo_random_presentation_torques[1]
-        elif(instance_btn.text == 'C'):
-            torque = pseudo_random_presentation_torques[2]
-        elif(instance_btn.text == 'D'):
-            torque = pseudo_random_presentation_torques[3]
+            pseudo_random_presentation_torques = np.random.choice(config.torque_settings, size = config.num_of_tot_torque_settings, replace=False)
             
-        print(round(torque, 3), "Nm")
+            print(pseudo_random_presentation_torques)
+            
+            # select a subset of the pseudo-randomized torques based on current presentation number
+            if config.current_presentation_num == 1:
+                pseudo_random_presentation_torques = pseudo_random_presentation_torques[0:config.torques_per_presentation]
+            elif config.current_presentation_num == 2:
+                pseudo_random_presentation_torques = pseudo_random_presentation_torques[config.torques_per_presentation:config.torques_per_presentation*2]
+            elif config.current_presentation_num == 3:
+                pseudo_random_presentation_torques = pseudo_random_presentation_torques[config.torques_per_presentation*2:config.num_of_tot_torque_settings]
+            
+            # Set the torque value based on the button pressed
+            if(instance_btn.text == 'A'):
+                torque = pseudo_random_presentation_torques[0]
+            elif(instance_btn.text == 'B'):
+                torque = pseudo_random_presentation_torques[1]
+            elif(instance_btn.text == 'C'):
+                torque = pseudo_random_presentation_torques[2]
+            elif(instance_btn.text == 'D'):
+                torque = pseudo_random_presentation_torques[3]
+                
+            print(round(torque, 3), "Nm")
+                
+        elif config.GUI_btn_setup == 'full':
+            # randomized button-torque mapping for each trial (wtihout replacement)
+            np.random.seed(config.curr_trial_num)
+            pseudo_random_presentation_torques = np.random.choice(config.torque_settings, size = config.num_of_tot_torque_settings, replace=False)
+            
+            # Set the torque value based on the button pressed
+            if(instance_btn.text == 'A'):
+                torque = pseudo_random_presentation_torques[0]
+            elif(instance_btn.text == 'B'):
+                torque = pseudo_random_presentation_torques[1]
+            elif(instance_btn.text == 'C'):
+                torque = pseudo_random_presentation_torques[2]
+            elif(instance_btn.text == 'D'):
+                torque = pseudo_random_presentation_torques[3]
+            elif(instance_btn.text == 'E'):
+                torque = pseudo_random_presentation_torques[4]
+            elif(instance_btn.text == 'F'):
+                torque = pseudo_random_presentation_torques[5]
+            elif(instance_btn.text == 'G'):
+                torque = pseudo_random_presentation_torques[6]
+            elif(instance_btn.text == 'H'):
+                torque = pseudo_random_presentation_torques[7]
+            elif(instance_btn.text == 'I'):
+                torque = pseudo_random_presentation_torques[8]
+            elif(instance_btn.text == 'J'):
+                torque = pseudo_random_presentation_torques[9]
+            elif(instance_btn.text == 'K'):
+                torque = pseudo_random_presentation_torques[10]
+            elif(instance_btn.text == 'L'):
+                torque = pseudo_random_presentation_torques[11]
+                
+            print(round(torque, 3), "Nm")
         
         # Log the new torque option
         self.serverlogger(btn_instance=instance_btn.text, curr_torque=round(torque, 3))
@@ -188,7 +225,7 @@ class GuiVas(BoxLayout):
 
     def create_buttons(self):
         """Create variable number of buttons"""
-        button_colors = ['#0d9c35','#00954b','#92dc7e','#64c987','#39b48e','#089f8f','#00898a','#08737f','#215d6e','#2a4858']
+        button_colors = ['#0d9c35','#00954b','#92dc7e','#64c987','#39b48e','#089f8f','#00898a','#08737f','#215d6e','#2a4858','#219ebc','#FFB703']
         button_colors = button_colors[:self.num_torque_options]  # limit the number of buttons to the number of torque options
         self.ids.button_layout.rows =  self.num_torque_options   # set the number of columns in the grid layout
         for count, i in enumerate(config.button_order):
@@ -205,7 +242,7 @@ class GuiVas(BoxLayout):
     def create_sliders(self):
         """Create variable number of sliders (called only once at the beginning)"""
         
-        slider_colors = ['#0d9c35','#00954b','#92dc7e','#64c987','#39b48e','#089f8f','#00898a','#08737f','#215d6e','#2a4858']
+        slider_colors = ['#0d9c35','#00954b','#92dc7e','#64c987','#39b48e','#089f8f','#00898a','#08737f','#215d6e','#2a4858','#219ebc','#FFB703']
         slider_colors = slider_colors[:self.num_torque_options]  # limit the number of buttons to the number of torque options
         self.ids.slider_layout.rows = self.num_torque_options
         self.labels = []

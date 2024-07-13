@@ -21,22 +21,6 @@ class CommunicationService(gui2controller2_pb2_grpc.CommunicationServiceServicer
         else: 
             print("New commanded torque is:", gui_commanded_torque)
             gui_commanded_torque = float(gui_commanded_torque)
-        
-        # # store a csv with the logged data
-        # filename = 'Sub'+str(config.sub_num)+'_'+'T'+str(config.curr_trial_num)+'P'+str(config.current_presentation_num)+'.csv'
-        # headers = ['Time(s)', 'Current Torque Experienced(Nm)', 'Adjusted Slider Btn', 
-        #            'Adjusted Slider Value($)', 'Confirm Button Pressed']
-        
-        # # Check if file exists and is empty to decide on writing headers
-        # write_headers = not os.path.exists(filename) or os.stat(filename).st_size == 0
-        
-        # with open(filename, 'a', newline='') as csvfile:
-        #     csvwriter = csv.writer(csvfile)
-            
-        #     if write_headers:  # Step 3: Check if headers need to be written
-        #         csvwriter.writerow(headers)
-            
-        #     csvwriter.writerow(request.logging_data)  # Directly write logging_data as a row
 
         # Sending the Null response(to close the communication loop)
         return gui2controller2_pb2.Null()
