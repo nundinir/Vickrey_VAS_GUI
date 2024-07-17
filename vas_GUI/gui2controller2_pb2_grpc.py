@@ -6,11 +6,7 @@ import gui2controller2_pb2 as gui2controller2__pb2
 
 
 class CommunicationServiceStub(object):
-    """This service is between
-    Client: Sending logging data from GUI
-    Server: Once receiving the logging data, RPI sends a null message
-
-    """
+    """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
         """Constructor.
@@ -24,13 +20,8 @@ class CommunicationServiceStub(object):
                 response_deserializer=gui2controller2__pb2.Null.FromString,
                 )
 
-
 class CommunicationServiceServicer(object):
-    """This service is between
-    Client: Sending logging data from GUI
-    Server: Once receiving the logging data, RPI sends a null message
-
-    """
+    """Missing associated documentation comment in .proto file."""
 
     def GUI_Messenger(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -54,11 +45,7 @@ def add_CommunicationServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class CommunicationService(object):
-    """This service is between
-    Client: Sending logging data from GUI
-    Server: Once receiving the logging data, RPI sends a null message
-
-    """
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
     def GUI_Messenger(request,

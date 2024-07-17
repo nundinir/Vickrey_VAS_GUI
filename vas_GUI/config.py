@@ -1,10 +1,12 @@
 import numpy as np
 
+# for use when not using the exos and testing on local machine
 # server_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address when just testing on same machine
 # client_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address when just testing on same machine
 
-server_ip = f"{'67.194.45.127'}:" f"{'50051'}"   # IP address of the Controller (rPi)
-client_ip = f"{'0.0.0.0'}:" f"{'50051'}"         # IP address of my laptop running the GUI
+# for testing with the exos
+server_ip = server_ip = f"{'67.194.47.115'}:" f"{'50051'}"   # IP address of the Controller (rPi) 
+# client_ip = f"{'0.0.0.0'}:" f"{'50051'}"         # IP address of GUI
 
 # keeps track of whether all the buttons have been pressed/experienced yet
 btn_pressed_yet = [0] * 4   # 0 means not pressed yet, 1 means pressed
@@ -15,7 +17,7 @@ bool_confirm_button_pressed: bool = False
 NPO_MV:float = -18.60        # Value of the slider at the extreme negative end (REMEMBER TO CHANGE IN .KV FILE)
 EPO_MV:float = 19.80         # Value of the slider at the extreme positive end (REMEMBER TO CHANGE IN .KV FILE)
 starting_val:int = 0         # Initial value of the slider cursor
-grpc_needed:bool = False     # SET TO FALSE IF DOING GUI TESTING W/O COMMANDING EXO
+grpc_needed:bool = True      # SET TO FALSE IF DOING GUI TESTING W/O COMMANDING EXO
 
 # Set Torque settings
 min_torque:float = 0.0                                  # Minimum torque value

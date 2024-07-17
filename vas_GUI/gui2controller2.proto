@@ -7,11 +7,10 @@ Client: Sending logging data from GUI
 Server: Once receiving the logging data, RPI sends a null message
 */
 
-service CommunicationService{
-  rpc GUI_Messenger (data_stream) returns (Null) {}
-
-}
-
 message data_stream {
     repeated string logging_data = 1;
+}
+
+service CommunicationService{
+  rpc GUI_Messenger (data_stream) returns (Null) {}
 }
