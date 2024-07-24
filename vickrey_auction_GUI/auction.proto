@@ -10,8 +10,11 @@ message receipt {
 }
 
 message result {
-   float win = 1;
-   float amount = 2;
+   float t = 1;
+   float subject_bid = 2;
+   bool user_win_flag = 3;
+   float current_payout = 4;
+   float total_winnings = 5;
 }
 
 message testmsg {

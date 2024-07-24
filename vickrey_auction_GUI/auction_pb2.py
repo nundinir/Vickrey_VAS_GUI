@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rauction.proto\"\x06\n\x04Null\"\x1b\n\x07receipt\x12\x10\n\x08received\x18\x01 \x01(\x08\"%\n\x06result\x12\x0b\n\x03win\x18\x01 \x01(\x02\x12\x0e\n\x06\x61mount\x18\x02 \x01(\x02\"\x1a\n\x07testmsg\x12\x0f\n\x07subject\x18\x01 \x01(\t2N\n\x07\x61uction\x12\x1b\n\x04\x63\x61ll\x12\x07.result\x1a\x08.receipt\"\x00\x12&\n\x0etestconnection\x12\x08.testmsg\x1a\x08.receipt\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rauction.proto\"\x06\n\x04Null\"\x1b\n\x07receipt\x12\x10\n\x08received\x18\x01 \x01(\x08\"o\n\x06result\x12\t\n\x01t\x18\x01 \x01(\x02\x12\x13\n\x0bsubject_bid\x18\x02 \x01(\x02\x12\x15\n\ruser_win_flag\x18\x03 \x01(\x08\x12\x16\n\x0e\x63urrent_payout\x18\x04 \x01(\x02\x12\x16\n\x0etotal_winnings\x18\x05 \x01(\x02\"\x1a\n\x07testmsg\x12\x0f\n\x07subject\x18\x01 \x01(\t2N\n\x07\x61uction\x12\x1b\n\x04\x63\x61ll\x12\x07.result\x1a\x08.receipt\"\x00\x12&\n\x0etestconnection\x12\x08.testmsg\x1a\x08.receipt\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -26,9 +26,9 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_RECEIPT']._serialized_start=25
   _globals['_RECEIPT']._serialized_end=52
   _globals['_RESULT']._serialized_start=54
-  _globals['_RESULT']._serialized_end=91
-  _globals['_TESTMSG']._serialized_start=93
-  _globals['_TESTMSG']._serialized_end=119
-  _globals['_AUCTION']._serialized_start=121
-  _globals['_AUCTION']._serialized_end=199
+  _globals['_RESULT']._serialized_end=165
+  _globals['_TESTMSG']._serialized_start=167
+  _globals['_TESTMSG']._serialized_end=193
+  _globals['_AUCTION']._serialized_start=195
+  _globals['_AUCTION']._serialized_end=273
 # @@protoc_insertion_point(module_scope)

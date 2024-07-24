@@ -1,17 +1,19 @@
 from constants import *
 from Robobidders import *
 
+# Statemachine class
 class VA_StateMachine:
     def __init__(self, screenmanager):
         self.sm = screenmanager
 
         # Init RoboBidders
         self.robomodel = roboModel(k_RB, b_RB, 2)
-        self.auction_tally = 0
+        self.auction_tally = 0 # Starts from 0th auction
 
         # Auction state
         self.state = False
         self.prev_state = False
+        self.total_winnings = 0
 
         # Screen states
         self.next_screen_dict = {"dummy": "pushtostartscreen", 
@@ -47,6 +49,7 @@ class VA_StateMachine:
         # Find if subject won
         if winning_bid_idx == 0:
             state = True
+            self.total_winnings += payout
         else:
             state = False
             robo_walk_time = ROBOWALK_DUR * (self.auction_tally + 1)
@@ -56,8 +59,14 @@ class VA_StateMachine:
         self.prev_state = self.state
         self.state = state
 
+        # Auction logging values
+        t = (self.auction_tally + 1) * ROBOWALK_DUR
+
         # Send auction results to auctionhouse
-        self.sm.callergrpc.call(state, winning_bid) #, winning_bid)
+        self.sm.callergrpc.call(t, subject_bid, self.state, payout, self.total_winnings) #, winning_bid)
+
+        # Increment auction tally
+        self.auction_tally += 1
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once

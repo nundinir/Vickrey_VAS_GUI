@@ -108,11 +108,6 @@ for t in timecount:
 		# make winning robot walk - cus it's not tired 
 		print("Human lost")
 		# Since human 1st idx, do 'lowest idx-1' to get lowest robot idx
-
-
-		print("asdf", time_elapsed, walk_start_time)
-		# Questions
-		# 	1. Why is walk_start_time always 0? Currently robobidder is walking longer than 2 minutes if it wins after the first auction
 		currentRobomodel.robobidderlist[lowestBid_idx-1].walk_old(time_elapsed, walk_start_time)
 
 	# append each list of collected values  (bid matrix is list of lists)

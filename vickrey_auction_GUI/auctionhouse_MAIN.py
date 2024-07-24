@@ -1,3 +1,5 @@
+import csv
+
 import grpc
 from concurrent import futures
 import auction_pb2 as pb2
@@ -9,25 +11,38 @@ class AuctionHouse(pb2_grpc.auctionServicer):
         self.subject_name = ""
         self.bid = 0
 
+        self.filename = "testing.csv"
+        self.header = ["t", "subject_bid", "user_win_flag", "current_payout", "total_winnings"]
+
+        with open(self.filename, 'a', newline='') as f:
+            csv.writer(f).writerow(self.header)
+
     def reset_bid(self):
         self.bid = 0
 
     def testconnection(self, request, context):
         print("Received subject: {}".format(request.subject))
         self.subject_name = request.subject
-
         return pb2.receipt(received=True)
 
-    def call(self, bid, context):
-        self.log(bid.amount, bid.win)
+    def call(self, resultmsg, context):
+        t = resultmsg.t
+        subject_bid = resultmsg.subject_bid
+        user_win_flag = resultmsg.user_win_flag
+        current_payout = resultmsg.current_payout
+        total_winnings = resultmsg.total_winnings
+
+        self.log(t, subject_bid, user_win_flag, current_payout, total_winnings)
 
         return pb2.receipt(received=True)
     
-    def log(self, *argv):
-        for arg in argv:
-            print(arg, end=" ")
-        print()
-        
+    def log(self, t, subject_bid, user_win_flag, current_payout, total_winnings):
+        datalist = [t, subject_bid, user_win_flag, current_payout, total_winnings]
+        print("Received results: {}, {}, {}, {}, {}".format(t, subject_bid, user_win_flag, current_payout, total_winnings))
+
+        with open(self.filename, 'a', newline='') as f:
+            csv.writer(f).writerow([t, subject_bid, user_win_flag, current_payout, total_winnings])
+
 
 def start_auction():
     auctionhouse = AuctionHouse()
@@ -36,7 +51,6 @@ def start_auction():
     server.add_insecure_port("[::]:50051")
     server.start()
     server.wait_for_termination()
-
 
 if __name__ == "__main__":
     try:

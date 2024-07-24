@@ -1,24 +1,22 @@
 import numpy as np
 from functools import partial
 
-import grpc
-import auction_pb2 as pb2
-import auction_pb2_grpc as pb2_grpc
-
 import kivy
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.animation import Animation
 from kivy.clock import Clock
-
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import StringProperty, NumericProperty
 
-from constants import *
-from statemachine import VA_StateMachine
-from auction_schedules import *
+import grpc
+import auction_pb2 as pb2
+import auction_pb2_grpc as pb2_grpc
 
+from constants import *
+from auction_schedules import *
+from statemachine import VA_StateMachine
 
 # Button Callbacks
 def callback(instance):
@@ -116,9 +114,14 @@ class CallerGRPC:
         else:
             raise ConnectionError("AuctionHouse connection unsuccessful.")
 
-    def call(self, win, amount):
-        bid = pb2.result(win=win, amount=amount)
-        response = self.stub.call(bid)
+    def call(self, t, subject_bid, user_win_flag, current_payout, total_winnings):
+        resultmsg = pb2.result(t=t,
+                         subject_bid=subject_bid,
+                         user_win_flag=user_win_flag,
+                         current_payout=current_payout,
+                         total_winnings=total_winnings
+                         )
+        response = self.stub.call(resultmsg)
         return response
 
 # Combines kivy screen manager, statemachine, and GRPC into app

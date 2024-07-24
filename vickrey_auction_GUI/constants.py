@@ -14,7 +14,7 @@ RESULT_SHOW = 100/squeeze
 # Robobidder constants
 k_RB = 0.4395073979128712
 b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
-ROBOWALK_DUR = 2    # Minutes
+ROBOWALK_DUR = 2 # minutes
 
 # Other Functions
 def decimal_format(str):
