@@ -19,9 +19,15 @@ import time
 import csv
 from functools import partial
 
+<<<<<<< Updated upstream
 import gui2controller2_pb2
 import gui2controller2_pb2_grpc
 import config
+=======
+import gui2controller_pb2
+import gui2controller_pb2_grpc
+import vickrey_auction_GUI.constants as constants
+>>>>>>> Stashed changes
 import grpc
 
 # Define the GUI class
@@ -29,12 +35,17 @@ class GuiVas(BoxLayout):
     """Actual Class for the GUI"""
     
     # set the number of torque options (create equal # of buttons and sliders)
+<<<<<<< Updated upstream
     num_torque_options = NumericProperty(config.torques_per_presentation)  # Defined as Kivy property 
     npo_mv = NumericProperty(config.NPO_MV)
     epo_mv = NumericProperty(config.EPO_MV)
     npo_mv_text = StringProperty(f"Assistance\nNot Valued:\n${config.NPO_MV}")
     epo_mv_text = StringProperty(f"Assistance\nValued:\n${config.EPO_MV}")
 
+=======
+    num_torque_options = NumericProperty(constants.torques_per_presentation)  # Defined as Kivy property 
+    
+>>>>>>> Stashed changes
     def __init__(self, **kwargs):
         """Initialize the GUI"""
         super(GuiVas, self).__init__(**kwargs)
@@ -52,9 +63,21 @@ class GuiVas(BoxLayout):
                 slider_selected = {chr(65+slider_index)}
             else:
                 slider_selected = None
+<<<<<<< Updated upstream
+=======
+
+            # compute elapsed time
+            elapsed_time = round(time.time() - self.start_time, 4)
+            
+            if constants.bool_confirm_button_pressed:
+                confirm_btn_pressed_state = "True"
+            else:
+                confirm_btn_pressed_state = "False"
+>>>>>>> Stashed changes
           
             #  If a slider has not been moved, but only a button has been pressed (including confirm btn), log the appropriate button's data
             if slider_selected == None: 
+<<<<<<< Updated upstream
                 if curr_torque != 0.0:  # if the torque value is provided via btn press 
                     temp_logging_data = [str(curr_torque), str('nan'), str('nan'), str(config.bool_confirm_button_pressed)]
                     # Send the torque value to the server via gRPC
@@ -79,27 +102,56 @@ class GuiVas(BoxLayout):
                                 
                             except grpc.RpcError as e:
                                 print("Error",e)
+=======
+                
+                # Send the torque value to the server via gRPC
+                if constants.grpc_needed:
+                    with grpc.insecure_channel(constants.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
+                        try:
+                            stub = gui2controller_pb2_grpc.CommunicationServiceStub(channel)
+                            response = stub.GUI_Messenger(gui2controller_pb2.data_stream(time=elapsed_time,
+                                                        current_torque_selected=curr_torque,
+                                                        adjusted_slider_btn=str('nan'),
+                                                        adjusted_slider_value=float('nan'),
+                                                        confirm_btn_pressed=confirm_btn_pressed_state
+                                                        ))
+
+                        except grpc.RpcError as e:
+                            print("Error",e)
+                
+                self.prev_btn_instance = btn_instance 
+>>>>>>> Stashed changes
                 
             # otherwise, if a slider has been moved, log the appropriate slider's data
             else:
                 temp_logging_data = [str('nan'), str(slider_selected),str(config.button_slider_values[chr(65+slider_index)]), str(config.bool_confirm_button_pressed)]
                 # Send the torque value to the server via gRPC
-                if config.grpc_needed:
-                    with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
+                if constants.grpc_needed:
+                    with grpc.insecure_channel(constants.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
                         try:
+<<<<<<< Updated upstream
                             stub = gui2controller2_pb2_grpc.CommunicationServiceStub(channel)
                             response = stub.GUI_Messenger(gui2controller2_pb2.data_stream(logging_data=temp_logging_data))
                         
+=======
+                            stub = gui2controller_pb2_grpc.CommunicationServiceStub(channel)
+                            response = stub.GUI_Messenger(gui2controller_pb2.data_stream(time=elapsed_time,
+                                                                                        current_torque_selected=curr_torque,
+                                                                                        adjusted_slider_btn=str(slider_selected),
+                                                                                        adjusted_slider_value=float(constants.button_slider_values[chr(65+slider_index)]),
+                                                                                        confirm_btn_pressed=confirm_btn_pressed_state
+                                                                                        ))
+>>>>>>> Stashed changes
                         
                         except grpc.RpcError as e:
                             print("Error",e)
                 
                 self.prev_btn_instance = btn_instance 
                 self.prev_slider_selected = slider_selected
-                self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
+                self.prev_value_of_slider = constants.button_slider_values[chr(65+slider_index)]
          
             # reset the confirm button press after logging
-            config.bool_confirm_button_pressed = False
+            constants.bool_confirm_button_pressed = False
 
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
@@ -124,9 +176,9 @@ class GuiVas(BoxLayout):
         # Set the opacity of the label to 1
         self.labels[index].opacity = 1
 
-        config.bool_slider_value_changed = True
-        config.button_slider_values[chr(65+index)] = self.vas_value # Update the dictionary with the new slider value
-        print("config.button_slider_values: ", config.button_slider_values)
+        constants.bool_slider_value_changed = True
+        constants.button_slider_values[chr(65+index)] = self.vas_value # Update the dictionary with the new slider value
+        print("config.button_slider_values: ", constants.button_slider_values)
 
         # Log the data
         self.serverlogger(slider_index=index)
@@ -140,9 +192,21 @@ class GuiVas(BoxLayout):
             child.disabled = True
         Clock.schedule_once(self.reenable_widgets, 3)
 
+<<<<<<< Updated upstream
         if config.GUI_btn_setup == '4btn':
             # randomized button-torque mapping for each trial (wtihout replacement)
             np.random.seed(config.curr_trial_num)
+=======
+        # randomized button-torque mapping for each trial (wtihout replacement)
+        np.random.seed(constants.curr_trial_num)
+        pseudo_random_presentation_torques = np.random.choice(constants.torque_settings, size = constants.num_of_tot_torque_settings, replace=False)
+
+        # select a subset of the pseudo-randomized torques based on current presentation number
+        if constants.current_presentation_num == 1:
+            pseudo_random_presentation_torques = pseudo_random_presentation_torques[:constants.torques_per_presentation]
+        elif constants.current_presentation_num == 2:
+            pseudo_random_presentation_torques = pseudo_random_presentation_torques[constants.torques_per_presentation:]
+>>>>>>> Stashed changes
             
             pseudo_random_presentation_torques = np.random.choice(config.torque_settings, size = config.num_of_tot_torque_settings, replace=False)
             
@@ -212,11 +276,16 @@ class GuiVas(BoxLayout):
     def confirm_button_pressed(self, instance_btn: Button):
         """Confirm button press response method"""
         button = Button(text=f"{'CONFIRM'}")
+<<<<<<< Updated upstream
         config.bool_confirm_button_pressed = True
         print(config.bool_confirm_button_pressed)
         self.serverlogger()
+=======
+        constants.bool_confirm_button_pressed = True
+        self.serverlogger(instance_btn.text)
+>>>>>>> Stashed changes
 
-        config.button_order = sorted(config.button_order, key=lambda button: config.button_slider_values.get(button, config.NPO_MV), reverse=True)
+        constants.button_order = sorted(constants.button_order, key=lambda button: constants.button_slider_values.get(button, constants.NPO_MV), reverse=True)
 
         # Clear the old button layout
         self.ids.button_layout.clear_widgets()
@@ -228,7 +297,7 @@ class GuiVas(BoxLayout):
         button_colors = ['#0d9c35','#00954b','#92dc7e','#64c987','#39b48e','#089f8f','#00898a','#08737f','#215d6e','#2a4858','#219ebc','#FFB703']
         button_colors = button_colors[:self.num_torque_options]  # limit the number of buttons to the number of torque options
         self.ids.button_layout.rows =  self.num_torque_options   # set the number of columns in the grid layout
-        for count, i in enumerate(config.button_order):
+        for count, i in enumerate(constants.button_order):
             # Create the button
             button = Button(text=f"{i}") # unicode point for 'A' is 65
             self.last_pressed_button= i
@@ -248,13 +317,13 @@ class GuiVas(BoxLayout):
         self.labels = []
 
         self.ids.slider_layout.clear_widgets()
-        for count,i in enumerate(config.button_order):
+        for count,i in enumerate(constants.button_order):
             #for i in range(self.num_torque_options):
             # Create a BoxLayout for each slider
             box_layout = BoxLayout(orientation='horizontal')
 
             # Create the slider
-            slider = Slider(min=config.NPO_MV, max=config.EPO_MV, value=config.button_slider_values[i], cursor_size=(25, 25), cursor_image="pin_1.png")
+            slider = Slider(min=constants.NPO_MV, max=constants.EPO_MV, value=constants.button_slider_values[i], cursor_size=(25, 25), cursor_image="pin_1.png")
             self.last_pressed_button = i
             additional_variable = i
             slider.bind(value=partial(self.on_slider_value, additional_variable))
