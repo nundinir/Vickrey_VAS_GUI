@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rauction.proto\"\x06\n\x04Null\"\x15\n\x03\x62id\x12\x0e\n\x06\x61mount\x18\x01 \x01(\x02\"\x1b\n\x07receipt\x12\x10\n\x08received\x18\x01 \x01(\x08\"%\n\x06result\x12\x0b\n\x03win\x18\x01 \x01(\x02\x12\x0e\n\x06\x61mount\x18\x02 \x01(\x02\x32>\n\x07\x61uction\x12\x18\n\x04\x63\x61ll\x12\x04.bid\x1a\x08.receipt\"\x00\x12\x19\n\x05\x63lose\x12\x05.Null\x1a\x07.result\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rauction.proto\"\x06\n\x04Null\"\x1b\n\x07receipt\x12\x10\n\x08received\x18\x01 \x01(\x08\"%\n\x06result\x12\x0b\n\x03win\x18\x01 \x01(\x02\x12\x0e\n\x06\x61mount\x18\x02 \x01(\x02\"\x1a\n\x07testmsg\x12\x0f\n\x07subject\x18\x01 \x01(\t2N\n\x07\x61uction\x12\x1b\n\x04\x63\x61ll\x12\x07.result\x1a\x08.receipt\"\x00\x12&\n\x0etestconnection\x12\x08.testmsg\x1a\x08.receipt\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,12 +23,12 @@ if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_NULL']._serialized_start=17
   _globals['_NULL']._serialized_end=23
-  _globals['_BID']._serialized_start=25
-  _globals['_BID']._serialized_end=46
-  _globals['_RECEIPT']._serialized_start=48
-  _globals['_RECEIPT']._serialized_end=75
-  _globals['_RESULT']._serialized_start=77
-  _globals['_RESULT']._serialized_end=114
-  _globals['_AUCTION']._serialized_start=116
-  _globals['_AUCTION']._serialized_end=178
+  _globals['_RECEIPT']._serialized_start=25
+  _globals['_RECEIPT']._serialized_end=52
+  _globals['_RESULT']._serialized_start=54
+  _globals['_RESULT']._serialized_end=91
+  _globals['_TESTMSG']._serialized_start=93
+  _globals['_TESTMSG']._serialized_end=119
+  _globals['_AUCTION']._serialized_start=121
+  _globals['_AUCTION']._serialized_end=199
 # @@protoc_insertion_point(module_scope)

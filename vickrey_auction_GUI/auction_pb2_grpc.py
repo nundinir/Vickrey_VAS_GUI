@@ -41,13 +41,13 @@ class auctionStub(object):
         """
         self.call = channel.unary_unary(
                 '/auction/call',
-                request_serializer=auction__pb2.bid.SerializeToString,
+                request_serializer=auction__pb2.result.SerializeToString,
                 response_deserializer=auction__pb2.receipt.FromString,
                 _registered_method=True)
-        self.close = channel.unary_unary(
-                '/auction/close',
-                request_serializer=auction__pb2.Null.SerializeToString,
-                response_deserializer=auction__pb2.result.FromString,
+        self.testconnection = channel.unary_unary(
+                '/auction/testconnection',
+                request_serializer=auction__pb2.testmsg.SerializeToString,
+                response_deserializer=auction__pb2.receipt.FromString,
                 _registered_method=True)
 
 
@@ -55,15 +55,14 @@ class auctionServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def call(self, request, context):
-        """caller sends bids to auctioneer
+        """caller sends bids to auctionhouse
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def close(self, request, context):
-        """auctioneer sends result back to caller
-        """
+    def testconnection(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -73,13 +72,13 @@ def add_auctionServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'call': grpc.unary_unary_rpc_method_handler(
                     servicer.call,
-                    request_deserializer=auction__pb2.bid.FromString,
+                    request_deserializer=auction__pb2.result.FromString,
                     response_serializer=auction__pb2.receipt.SerializeToString,
             ),
-            'close': grpc.unary_unary_rpc_method_handler(
-                    servicer.close,
-                    request_deserializer=auction__pb2.Null.FromString,
-                    response_serializer=auction__pb2.result.SerializeToString,
+            'testconnection': grpc.unary_unary_rpc_method_handler(
+                    servicer.testconnection,
+                    request_deserializer=auction__pb2.testmsg.FromString,
+                    response_serializer=auction__pb2.receipt.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -107,7 +106,7 @@ class auction(object):
             request,
             target,
             '/auction/call',
-            auction__pb2.bid.SerializeToString,
+            auction__pb2.result.SerializeToString,
             auction__pb2.receipt.FromString,
             options,
             channel_credentials,
@@ -120,7 +119,7 @@ class auction(object):
             _registered_method=True)
 
     @staticmethod
-    def close(request,
+    def testconnection(request,
             target,
             options=(),
             channel_credentials=None,
@@ -133,9 +132,9 @@ class auction(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/auction/close',
-            auction__pb2.Null.SerializeToString,
-            auction__pb2.result.FromString,
+            '/auction/testconnection',
+            auction__pb2.testmsg.SerializeToString,
+            auction__pb2.receipt.FromString,
             options,
             channel_credentials,
             insecure,
