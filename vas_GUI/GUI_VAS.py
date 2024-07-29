@@ -84,8 +84,8 @@ class GuiVas(BoxLayout):
             else:
                 temp_logging_data = [str('nan'), str(slider_selected),str(config.button_slider_values[chr(65+slider_index)]), str(config.bool_confirm_button_pressed)]
                 # Send the torque value to the server via gRPC
-                if constants.grpc_needed:
-                    with grpc.insecure_channel(constants.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
+                if config.grpc_needed:
+                    with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
                         try:
                             stub = gui2controller2_pb2_grpc.CommunicationServiceStub(channel)
                             response = stub.GUI_Messenger(gui2controller2_pb2.data_stream(logging_data=temp_logging_data))
@@ -96,10 +96,10 @@ class GuiVas(BoxLayout):
                 
                 self.prev_btn_instance = btn_instance 
                 self.prev_slider_selected = slider_selected
-                self.prev_value_of_slider = constants.button_slider_values[chr(65+slider_index)]
+                self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
          
             # reset the confirm button press after logging
-            constants.bool_confirm_button_pressed = False
+            config.bool_confirm_button_pressed = False
 
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
@@ -124,9 +124,9 @@ class GuiVas(BoxLayout):
         # Set the opacity of the label to 1
         self.labels[index].opacity = 1
 
-        constants.bool_slider_value_changed = True
-        constants.button_slider_values[chr(65+index)] = self.vas_value # Update the dictionary with the new slider value
-        print("config.button_slider_values: ", constants.button_slider_values)
+        config.bool_slider_value_changed = True
+        config.button_slider_values[chr(65+index)] = self.vas_value # Update the dictionary with the new slider value
+        print("config.button_slider_values: ", config.button_slider_values)
 
         # Log the data
         self.serverlogger(slider_index=index)
@@ -216,7 +216,7 @@ class GuiVas(BoxLayout):
         print(config.bool_confirm_button_pressed)
         self.serverlogger()
 
-        constants.button_order = sorted(constants.button_order, key=lambda button: constants.button_slider_values.get(button, constants.NPO_MV), reverse=True)
+        config.button_order = sorted(config.button_order, key=lambda button: config.button_slider_values.get(button, config.NPO_MV), reverse=True)
 
         # Clear the old button layout
         self.ids.button_layout.clear_widgets()
@@ -228,7 +228,7 @@ class GuiVas(BoxLayout):
         button_colors = ['#0d9c35','#00954b','#92dc7e','#64c987','#39b48e','#089f8f','#00898a','#08737f','#215d6e','#2a4858','#219ebc','#FFB703']
         button_colors = button_colors[:self.num_torque_options]  # limit the number of buttons to the number of torque options
         self.ids.button_layout.rows =  self.num_torque_options   # set the number of columns in the grid layout
-        for count, i in enumerate(constants.button_order):
+        for count, i in enumerate(config.button_order):
             # Create the button
             button = Button(text=f"{i}") # unicode point for 'A' is 65
             self.last_pressed_button= i
@@ -248,13 +248,13 @@ class GuiVas(BoxLayout):
         self.labels = []
 
         self.ids.slider_layout.clear_widgets()
-        for count,i in enumerate(constants.button_order):
+        for count,i in enumerate(config.button_order):
             #for i in range(self.num_torque_options):
             # Create a BoxLayout for each slider
             box_layout = BoxLayout(orientation='horizontal')
 
             # Create the slider
-            slider = Slider(min=constants.NPO_MV, max=constants.EPO_MV, value=constants.button_slider_values[i], cursor_size=(25, 25), cursor_image="pin_1.png")
+            slider = Slider(min=config.NPO_MV, max=config.EPO_MV, value=config.button_slider_values[i], cursor_size=(25, 25), cursor_image="pin_1.png")
             self.last_pressed_button = i
             additional_variable = i
             slider.bind(value=partial(self.on_slider_value, additional_variable))

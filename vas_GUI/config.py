@@ -5,7 +5,7 @@ import numpy as np
 # client_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address when just testing on same machine
 
 # for testing with the exos
-server_ip = server_ip = f"{'67.194.47.115'}:" f"{'50051'}"   # IP address of the Controller (rPi) 
+server_ip = f"{'67.194.47.115'}:" f"{'50051'}"   # IP address of the Controller (rPi) 
 # client_ip = f"{'0.0.0.0'}:" f"{'50051'}"         # IP address of GUI
 
 # keeps track of whether all the buttons have been pressed/experienced yet
@@ -31,27 +31,27 @@ torque_settings = np.arange(torque_step,max_torque+torque_step,torque_step)  # A
 ##################################################
 
 # UNCOMMENT WHEN TESTING FULL 12btn GUI AT ONCE
-# GUI_btn_setup:str = 'full'                             # Full 12 btn setup
-# sub_num:int = 1
-# curr_trial_num:int = 1                                  # Current trial number (out of 3)
-# current_presentation_num:int = 1                        # Only 1 presentation
-# torques_per_presentation:int = 12                       # All 12 settings at once
-
-# # Initializing the torque mapping button order
-# button_order = ['L', 'K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A']
-# button_slider_values = {}
-# for i in button_order:
-#     button_slider_values[i] = 0
-
-# UNCOMMENT WHEN TESTING 4btn GUI
-GUI_btn_setup:str = '4btn'                             # Full 12 btn setup
+GUI_btn_setup:str = 'full'                             # Full 12 btn setup
 sub_num:int = 1
-curr_trial_num:int = 5                                  # Current trial number (Out of 4)
-current_presentation_num:int = 1                        # Current presentation number (Out of 3)
-torques_per_presentation:int = 4                        # Number of torque options per presentation
+curr_trial_num:int = 1                                  # Current trial number (out of 3)
+current_presentation_num:int = 1                        # Only 1 presentation
+torques_per_presentation:int = 12                       # All 12 settings at once
 
-# INITIALIZING the torque mapping button order
-button_order = ['D', 'C', 'B', 'A']
+# Initializing the torque mapping button order
+button_order = ['L', 'K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A']
 button_slider_values = {}
 for i in button_order:
     button_slider_values[i] = 0
+
+# UNCOMMENT WHEN TESTING 4btn GUI
+# GUI_btn_setup:str = '4btn'                             # Full 12 btn setup
+# sub_num:int = 1
+# curr_trial_num:int = 5                                  # Current trial number (Out of 4)
+# current_presentation_num:int = 1                        # Current presentation number (Out of 3)
+# torques_per_presentation:int = 4                        # Number of torque options per presentation
+
+# # INITIALIZING the torque mapping button order
+# button_order = ['D', 'C', 'B', 'A']
+# button_slider_values = {}
+# for i in button_order:
+#     button_slider_values[i] = 0

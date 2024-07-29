@@ -17,6 +17,7 @@ import auction_pb2_grpc as pb2_grpc
 from constants import *
 from auction_schedules import *
 from statemachine import VA_StateMachine
+from vickrey_auction_GUI import constants
 
 # Button Callbacks
 def callback(instance):
@@ -100,7 +101,7 @@ class CountDownTimer(Label):
 # GRPC object
 class CallerGRPC:
     def __init__(self):
-        self.channel = grpc.insecure_channel("localhost:50051")
+        self.channel = grpc.insecure_channel(constants.server_ip)
         self.stub = pb2_grpc.auctionStub(self.channel)
 
     def testconnection(self, subject_name):
