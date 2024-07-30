@@ -32,10 +32,11 @@ class VA_StateMachine:
     def determine_auction(self):
         # Get bid as float
         if not self.sm.bid:
-            subject_bid = float(0)
+            # If no bid, default to previous bid
+            subject_bid = float(self.sm.previous_bid) * 0.01
         else:
             subject_bid = float(self.sm.bid) * 0.01
-            subject_bid = max(min(subject_bid, MAX_BID), 0)
+        subject_bid = max(min(subject_bid, MAX_BID), 0)
 
         # Get all bids from subject/robobidders
         all_bids = [subject_bid]
@@ -73,7 +74,7 @@ class VA_StateMachine:
         self.auction_tally += 1
 
     def close_survey(self):
-        t = (self.auction_tally + 1) * ROBOWALK_DUR
+        t = self.auction_tally * ROBOWALK_DUR
         print("Closing survey", t, self.sm.enjoyment, self.sm.rpe)
         self.sm.callergrpc.question(t, self.sm.enjoyment, self.sm.rpe)
 

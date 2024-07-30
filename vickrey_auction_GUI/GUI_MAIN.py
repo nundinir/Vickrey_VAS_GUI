@@ -194,11 +194,13 @@ class CallerGUI(App):
         sm.enjoyment = 0
         sm.rpe = 0
 
+        label_fontsize = '50'
+
         # Create Screens
         dummyscreen = Screen(name="dummy")
 
         pushtostartscreen = Screen(name="pushtostartscreen")
-        startbttn = Button(text="Touch to begin")
+        startbttn = Button(text="Touch to begin", font_size=label_fontsize, color=(1, 1, 1, 1))
         startbttn.bind(on_press=startbttn_CB)
         pushtostartscreen.add_widget(startbttn)
 
@@ -214,22 +216,22 @@ class CallerGUI(App):
 
         # Result screens: 4 cases
         sm.continuewalkingscreen = Screen(name="continuewalkingscreen")
-        sm.continuewalkingscreen.label = Label(text='')
+        sm.continuewalkingscreen.label = Label(text='', font_size=label_fontsize)
         sm.continuewalkingscreen.add_widget(sm.continuewalkingscreen.label)
         sm.continuewalkingscreen.on_enter = partial(result_screens_schedule, sm)
 
         sm.startwalkingscreen = Screen(name="startwalkingscreen")
-        sm.startwalkingscreen.label = Label(text='')
+        sm.startwalkingscreen.label = Label(text='', font_size=label_fontsize)
         sm.startwalkingscreen.add_widget(sm.startwalkingscreen.label)
         sm.startwalkingscreen.on_enter = partial(result_screens_schedule, sm)
 
         sm.stopwalkingscreen = Screen(name="stopwalkingscreen")
-        sm.stopwalkingscreen.label = Label(text='')
+        sm.stopwalkingscreen.label = Label(text='', font_size=label_fontsize)
         sm.stopwalkingscreen.add_widget(sm.stopwalkingscreen.label)
         sm.stopwalkingscreen.on_enter = partial(result_screens_schedule, sm)
 
         sm.continuesittingscreen = Screen(name="continuesittingscreen")
-        sm.continuesittingscreen.label = Label(text='')
+        sm.continuesittingscreen.label = Label(text='', font_size=label_fontsize)
         sm.continuesittingscreen.add_widget(sm.continuesittingscreen.label)
         sm.continuesittingscreen.on_enter = partial(result_screens_schedule, sm)
 

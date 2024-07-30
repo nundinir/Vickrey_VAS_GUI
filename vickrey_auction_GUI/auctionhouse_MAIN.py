@@ -24,6 +24,8 @@ class AuctionHouse(pb2_grpc.auctionServicer):
         with open(self.surveyfilename, 'a', newline='') as f:
             csv.writer(f).writerow(self.surveyheader)
 
+        print("\nStarting auctions\n")
+
     def testconnection(self, request, context):
         print("Testing Connection: {}".format(request.msg))
         self.subject_name = request.msg
