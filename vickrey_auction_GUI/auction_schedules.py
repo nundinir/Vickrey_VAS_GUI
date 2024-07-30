@@ -28,13 +28,18 @@ def bidding_close_event(sm, dt):
     sm.statemachine.next_screen()
 
 
-def waitingscreen_pre_enter(waitingscreen, sm):
-    waitingscreen.label.text = "waitingscreen\nstate: {}\nprev_state: {}".format(sm.statemachine.state, sm.statemachine.prev_state)
+# def waitingscreen_pre_enter(waitingscreen, sm):
+#     waitingscreen.label.text = "waitingscreen\nstate: {}\nprev_state: {}".format(sm.statemachine.state, sm.statemachine.prev_state)
 
-def waitingscreen_schedule(sm):
+# def waitingscreen_schedule(sm):
+#     Clock.schedule_once(partial(display_result_event,sm), RESULT_SHOW-BIDDING_CLOSE)
+
+def survey_schedule(sm):
     Clock.schedule_once(partial(display_result_event,sm), RESULT_SHOW-BIDDING_CLOSE)
 
 def display_result_event(sm, dt):
+    sm.statemachine.close_survey()
+
     state = sm.statemachine.state
     prev_state = sm.statemachine.prev_state
     
@@ -44,6 +49,7 @@ def display_result_event(sm, dt):
         sm.current = "startwalkingscreen"
     if not state and prev_state:
         sm.current = "stopwalkingscreen"
+        sm.statemachine.send_treadmill_msg(state)
     if not state and not prev_state:
         sm.current = "continuesittingscreen"
 

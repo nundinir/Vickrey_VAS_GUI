@@ -18,7 +18,7 @@ class VA_StateMachine:
         # Screen states
         self.next_screen_dict = {"dummy": "pushtostartscreen", 
                                  "pushtostartscreen": "numpad", 
-                                 "numpad": "waitingscreen",
+                                 "numpad": "survey",
                                  "continuewalkingscreen": "numpad",
                                  "startwalkingscreen": "pushtostartscreen",
                                  "stopwalkingscreen": "numpad",
@@ -67,6 +67,14 @@ class VA_StateMachine:
 
         # Increment auction tally
         self.auction_tally += 1
+
+    def close_survey(self):
+        t = (self.auction_tally + 1) * ROBOWALK_DUR
+        print("Closing survey", t, self.sm.enjoyment, self.sm.rpe)
+        self.sm.callergrpc.question(t, self.sm.enjoyment, self.sm.rpe)
+
+    def send_treadmill_msg(self, state):
+        self.sm.callergrpc.treadmill_message(state)
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once

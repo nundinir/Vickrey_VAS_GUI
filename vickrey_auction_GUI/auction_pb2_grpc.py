@@ -39,14 +39,24 @@ class auctionStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.testconnection = channel.unary_unary(
+                '/auction/testconnection',
+                request_serializer=auction__pb2.testmsg.SerializeToString,
+                response_deserializer=auction__pb2.receipt.FromString,
+                _registered_method=True)
         self.call = channel.unary_unary(
                 '/auction/call',
                 request_serializer=auction__pb2.result.SerializeToString,
                 response_deserializer=auction__pb2.receipt.FromString,
                 _registered_method=True)
-        self.testconnection = channel.unary_unary(
-                '/auction/testconnection',
-                request_serializer=auction__pb2.testmsg.SerializeToString,
+        self.question = channel.unary_unary(
+                '/auction/question',
+                request_serializer=auction__pb2.survey.SerializeToString,
+                response_deserializer=auction__pb2.receipt.FromString,
+                _registered_method=True)
+        self.treadmill_message = channel.unary_unary(
+                '/auction/treadmill_message',
+                request_serializer=auction__pb2.treadmill.SerializeToString,
                 response_deserializer=auction__pb2.receipt.FromString,
                 _registered_method=True)
 
@@ -54,14 +64,26 @@ class auctionStub(object):
 class auctionServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def call(self, request, context):
+    def testconnection(self, request, context):
         """caller sends bids to auctionhouse
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def testconnection(self, request, context):
+    def call(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def question(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def treadmill_message(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -70,14 +92,24 @@ class auctionServicer(object):
 
 def add_auctionServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'testconnection': grpc.unary_unary_rpc_method_handler(
+                    servicer.testconnection,
+                    request_deserializer=auction__pb2.testmsg.FromString,
+                    response_serializer=auction__pb2.receipt.SerializeToString,
+            ),
             'call': grpc.unary_unary_rpc_method_handler(
                     servicer.call,
                     request_deserializer=auction__pb2.result.FromString,
                     response_serializer=auction__pb2.receipt.SerializeToString,
             ),
-            'testconnection': grpc.unary_unary_rpc_method_handler(
-                    servicer.testconnection,
-                    request_deserializer=auction__pb2.testmsg.FromString,
+            'question': grpc.unary_unary_rpc_method_handler(
+                    servicer.question,
+                    request_deserializer=auction__pb2.survey.FromString,
+                    response_serializer=auction__pb2.receipt.SerializeToString,
+            ),
+            'treadmill_message': grpc.unary_unary_rpc_method_handler(
+                    servicer.treadmill_message,
+                    request_deserializer=auction__pb2.treadmill.FromString,
                     response_serializer=auction__pb2.receipt.SerializeToString,
             ),
     }
@@ -90,6 +122,33 @@ def add_auctionServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class auction(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def testconnection(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/auction/testconnection',
+            auction__pb2.testmsg.SerializeToString,
+            auction__pb2.receipt.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def call(request,
@@ -119,7 +178,7 @@ class auction(object):
             _registered_method=True)
 
     @staticmethod
-    def testconnection(request,
+    def question(request,
             target,
             options=(),
             channel_credentials=None,
@@ -132,8 +191,35 @@ class auction(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/auction/testconnection',
-            auction__pb2.testmsg.SerializeToString,
+            '/auction/question',
+            auction__pb2.survey.SerializeToString,
+            auction__pb2.receipt.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def treadmill_message(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/auction/treadmill_message',
+            auction__pb2.treadmill.SerializeToString,
             auction__pb2.receipt.FromString,
             options,
             channel_credentials,
