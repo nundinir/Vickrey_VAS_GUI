@@ -49,7 +49,6 @@ def display_result_event(sm, dt):
         sm.current = "startwalkingscreen"
     if not state and prev_state:
         sm.current = "stopwalkingscreen"
-        sm.statemachine.send_treadmill_msg(state)
     if not state and not prev_state:
         sm.current = "continuesittingscreen"
 
@@ -74,11 +73,13 @@ def result_screen_text_event(sm, dt):
         sm.stopwalkingscreen.label.text = "You have lost. Step off treadmill to sit out the round. Winning Bid: {:.2f}. Payout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
         sm.stopwalkingscreen.label.color =(1, 0, 0, 1)
         sm.stopwalkingscreen.label.font_size='30'
-        sm.statemachine.send_treadmill_msg(state)
     if screen =="continuesittingscreen":
         sm.continuesittingscreen.label.text = "You have lost. Continue Sitting. Winning Bid: {:.2f}. Payout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
         sm.continuesittingscreen.label.color =(1, 0, 0, 1)
         sm.continuesittingscreen.label.font_size='30'
 
 def result_screens_event(sm, dt):
+    state = sm.statemachine.state
+    if not state:
+        sm.statemachine.send_treadmill_msg(state)
     sm.statemachine.next_screen()

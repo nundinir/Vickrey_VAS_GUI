@@ -2,7 +2,7 @@
 MAX_BID = 100
 
 # Speed up auction time by squeeze factor FOR TESTING
-squeeze = 1
+squeeze = 10
 
 SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
 # CLIENT_IP = f"{'35.3.147.189'}:" f"{'50051'}"   # IP address of the tablet
