@@ -15,6 +15,10 @@ class VA_StateMachine:
         self.prev_state = False
         self.total_winnings = 0
 
+        # Auction stats
+        self.winning_bid = 0
+        self.payout = 0
+
         # Screen states
         self.next_screen_dict = {"dummy": "pushtostartscreen", 
                                  "pushtostartscreen": "numpad", 
@@ -40,16 +44,16 @@ class VA_StateMachine:
         print("asdf", all_bids)
         # Get winner
         ordered_bids = sorted(all_bids)
-        winning_bid = ordered_bids[0]
-        winning_bid_idx = all_bids.index(winning_bid)
+        self.winning_bid = ordered_bids[0]
+        winning_bid_idx = all_bids.index(self.winning_bid)
 
         # Get payout (Second price)
-        payout = ordered_bids[1] 
+        self.payout = ordered_bids[1] 
 
         # Find if subject won
         if winning_bid_idx == 0:
             state = True
-            self.total_winnings += payout
+            self.total_winnings += self.payout
         else:
             state = False
             robo_walk_time = ROBOWALK_DUR * (self.auction_tally + 1)
@@ -63,7 +67,7 @@ class VA_StateMachine:
         t = (self.auction_tally + 1) * ROBOWALK_DUR
 
         # Send auction results to auctionhouse
-        self.sm.callergrpc.call(t, subject_bid, self.state, payout, self.total_winnings) #, winning_bid)
+        self.sm.callergrpc.call(t, subject_bid, self.state, self.payout, self.total_winnings) #, winning_bid)
 
         # Increment auction tally
         self.auction_tally += 1

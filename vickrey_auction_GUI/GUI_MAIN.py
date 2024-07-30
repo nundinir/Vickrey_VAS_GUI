@@ -213,21 +213,25 @@ class CallerGUI(App):
         # waitingscreen.on_enter = partial(waitingscreen_schedule, sm)
 
         # Result screens: 4 cases
-        continuewalkingscreen = Screen(name="continuewalkingscreen")
-        continuewalkingscreen.add_widget(Label(text="You have won! Continue Walking. Winning Bid. Payout.", color =(1, 1, 1, 1)))
-        continuewalkingscreen.on_enter = partial(result_screens_schedule, sm)
+        sm.continuewalkingscreen = Screen(name="continuewalkingscreen")
+        sm.continuewalkingscreen.label = Label(text='')
+        sm.continuewalkingscreen.add_widget(sm.continuewalkingscreen.label)
+        sm.continuewalkingscreen.on_enter = partial(result_screens_schedule, sm)
 
-        startwalkingscreen = Screen(name="startwalkingscreen")
-        startwalkingscreen.add_widget(Label(text="You have won! Step on treadmill to begin walking. Winning Bid. Payout.", color =(1, 1, 1, 1)))
-        startwalkingscreen.on_enter = partial(result_screens_schedule, sm)
+        sm.startwalkingscreen = Screen(name="startwalkingscreen")
+        sm.startwalkingscreen.label = Label(text='')
+        sm.startwalkingscreen.add_widget(sm.startwalkingscreen.label)
+        sm.startwalkingscreen.on_enter = partial(result_screens_schedule, sm)
 
-        stopwalkingscreen = Screen(name="stopwalkingscreen")
-        stopwalkingscreen.add_widget(Label(text="You have lost. Step off treadmill to sit out the round. Winning Bid. Payout.", color =(1, 1, 1, 1)))
-        stopwalkingscreen.on_enter = partial(result_screens_schedule, sm)
+        sm.stopwalkingscreen = Screen(name="stopwalkingscreen")
+        sm.stopwalkingscreen.label = Label(text='')
+        sm.stopwalkingscreen.add_widget(sm.stopwalkingscreen.label)
+        sm.stopwalkingscreen.on_enter = partial(result_screens_schedule, sm)
 
-        continuesittingscreen = Screen(name="continuesittingscreen")
-        continuesittingscreen.add_widget(Label(text="You have lost. Continue Sitting. Winning Bid. Payout.", color =(1, 1, 1, 1)))
-        continuesittingscreen.on_enter = partial(result_screens_schedule, sm)
+        sm.continuesittingscreen = Screen(name="continuesittingscreen")
+        sm.continuesittingscreen.label = Label(text='')
+        sm.continuesittingscreen.add_widget(sm.continuesittingscreen.label)
+        sm.continuesittingscreen.on_enter = partial(result_screens_schedule, sm)
 
         # Add screens to ScreenManager
         sm.add_widget(dummyscreen)
@@ -235,10 +239,10 @@ class CallerGUI(App):
         sm.add_widget(numpad)
         sm.add_widget(survey)
         # sm.add_widget(waitingscreen)
-        sm.add_widget(continuewalkingscreen)
-        sm.add_widget(startwalkingscreen)
-        sm.add_widget(stopwalkingscreen)
-        sm.add_widget(continuesittingscreen)
+        sm.add_widget(sm.continuewalkingscreen)
+        sm.add_widget(sm.startwalkingscreen)
+        sm.add_widget(sm.stopwalkingscreen)
+        sm.add_widget(sm.continuesittingscreen)
 
         # Switch from dummy to startscreen to run on_enter
         sm.current = "pushtostartscreen"

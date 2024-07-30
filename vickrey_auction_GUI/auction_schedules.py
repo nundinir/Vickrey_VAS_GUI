@@ -55,7 +55,30 @@ def display_result_event(sm, dt):
 
 
 def result_screens_schedule(sm):
+    Clock.schedule_once(partial(result_screen_text_event,sm), 0)
     Clock.schedule_once(partial(result_screens_event,sm), AUCTION_CLOSE - RESULT_SHOW)
+
+def result_screen_text_event(sm, dt):
+    state = sm.statemachine.state
+    screen = sm.current
+    print(screen, state)
+    if screen == 'continuewalkingscreen':
+        sm.continuewalkingscreen.label.text="You have won! Continue Walking. Winning Bid: {}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
+        sm.continuewalkingscreen.label.color =(0, 1, 0, 1)
+        sm.continuewalkingscreen.label.font_size='30'
+    if screen == 'startwalkingscreen':
+        sm.startwalkingscreen.label.text = "You have won! Step on treadmill to begin walking. Winning Bid: {}. Payout: {}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
+        sm.startwalkingscreen.label.color =(0, 1, 0, 1)
+        sm.startwalkingscreen.label.font_size='30'
+    if screen == "stopwalkingscreen":
+        sm.stopwalkingscreen.label.text = "You have lost. Step off treadmill to sit out the round. Winning Bid: {}. Payout: {}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
+        sm.stopwalkingscreen.label.color =(1, 0, 0, 1)
+        sm.stopwalkingscreen.label.font_size='30'
+        sm.statemachine.send_treadmill_msg(state)
+    if screen =="continuesittingscreen":
+        sm.continuesittingscreen.label.text = "You have lost. Continue Sitting. Winning Bid: {}. Payout: {}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
+        sm.continuesittingscreen.label.color =(1, 0, 0, 1)
+        sm.continuesittingscreen.label.font_size='30'
 
 def result_screens_event(sm, dt):
     sm.statemachine.next_screen()
