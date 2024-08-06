@@ -6,7 +6,7 @@ from constants import *
 
 
 def numpad_schedule(sm):
-    # Reset numpad bid variables
+    # Reset numpad bid variables on enter
     sm.previous_bid = sm.bid
     sm.bid = ''
     sm.bid_input.text = decimal_format(sm.bid)
@@ -62,16 +62,16 @@ def result_screen_text_event(sm, dt):
     screen = sm.current
     print(screen, state)
     if screen == 'continuewalkingscreen':
-        sm.continuewalkingscreen.label.text="You have won! Continue Walking. Winning Bid: {:.2f}. Payout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
+        sm.continuewalkingscreen.label.text="You have won! Continue Walking.\nWinning Bid: ${:.2f}.\nPayout: ${:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
         sm.continuewalkingscreen.label.color =(0, 1, 0, 1)
     if screen == 'startwalkingscreen':
-        sm.startwalkingscreen.label.text = "You have won! Step on treadmill to begin walking. Winning Bid: {:.2f}. Payout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
+        sm.startwalkingscreen.label.text = "You have won! Step on treadmill to begin walking.\nWinning Bid: {:.2f}.\nPayout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
         sm.startwalkingscreen.label.color =(0, 1, 0, 1)
     if screen == "stopwalkingscreen":
-        sm.stopwalkingscreen.label.text = "You have lost. Step off treadmill to sit out the round. Winning Bid: {:.2f}. Payout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
+        sm.stopwalkingscreen.label.text = "You have lost. Step off treadmill to sit out the round.\nWinning Bid: {:.2f}.\nPayout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
         sm.stopwalkingscreen.label.color =(1, 0, 0, 1)
     if screen =="continuesittingscreen":
-        sm.continuesittingscreen.label.text = "You have lost. Continue Sitting. Winning Bid: {:.2f}. Payout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
+        sm.continuesittingscreen.label.text = "You have lost. Continue Sitting. Winning Bid:\n{:.2f}.\nPayout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
         sm.continuesittingscreen.label.color =(1, 0, 0, 1)
 
 def result_screens_event(sm, dt):

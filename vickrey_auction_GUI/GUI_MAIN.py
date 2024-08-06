@@ -63,6 +63,7 @@ def buildNumPadScreen(sm):
 
     bid_input = Label(text=decimal_format(sm.bid), font_size='100', size_hint=(4/gn_x, 1/gn_y), pos_hint={'x':0/gn_x, 'y':4/gn_y},  color =(0.5, 0.5, 0.5, 1))
     sm.bid_input = bid_input
+
     btn0 = Button(text="0", font_size='70', size_hint=(3/gn_x, 1/gn_y), pos_hint={'x':0/gn_x, 'y':0/gn_y},  background_color =(0.5, 0.5, 0.5, 1))
     btn0.val = '0'
     btn0.bind(on_press=numpad_cb)
@@ -73,13 +74,16 @@ def buildNumPadScreen(sm):
     btnCLEAR = Button(text="CLEAR", font_size='70', size_hint=(1/gn_x, 2/gn_y), pos_hint={'x':3/gn_x, 'y':0/gn_y},  background_color =(0.5, 0.5, 0.5, 1))
     btnCLEAR.bind(on_press=CLEAR_CB)
 
-    sm.cdt = CountDownTimer(text='', font_size = '70', size_hint=(1/gn_x, 3/gn_y), pos_hint={'x':0/gn_x, 'y':4/gn_y})
+    sm.cdt = CountDownTimer(text='', font_size = '70', size_hint=(1/gn_x, 3/gn_y), pos_hint={'x':3/gn_x, 'y':4/gn_y})
+    
+    timerlabel = Label(text='Close in: ', font_size = '50',size_hint=(1/gn_x, 3/gn_y), pos_hint={'x':2/gn_x, 'y':4/gn_y})
 
     screen_.add_widget(bid_input)
     screen_.add_widget(btn0)
     screen_.add_widget(btnBCKSPC)
     screen_.add_widget(btnCLEAR)
     screen_.add_widget(sm.cdt)
+    screen_.add_widget(timerlabel)
 
     for i in range(1, 10):
         x_p = ((i-1) % 3) / gn_x

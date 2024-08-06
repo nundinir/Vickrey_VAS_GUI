@@ -31,11 +31,26 @@ class VA_StateMachine:
 
     def determine_auction(self):
         # Get bid as float
-        if not self.sm.bid:
-            # If no bid, default to previous bid
-            subject_bid = float(self.sm.previous_bid) * 0.01
-        else:
+        # no_bid = not self.sm.bid
+        # no_prev_bid = not self.sm.previous_bid
+        # if not self.sm.bid:
+        #     # If no bid, default to previous bid
+        #     subject_bid = float(self.sm.previous_bid) * 0.01
+        # else:
+        #     subject_bid = float(self.sm.bid) * 0.01
+
+        no_bid = not self.sm.bid
+        no_prev_bid = not self.sm.previous_bid
+        # Convert bid from string to float
+        if not no_bid:
             subject_bid = float(self.sm.bid) * 0.01
+        elif not no_prev_bid:
+            subject_bid = float(self.sm.previous_bid) * 0.01
+            self.sm.bid = self.sm.previous_bid
+        else:
+            subject_bid = 0
+
+        # Clamp bid
         subject_bid = max(min(subject_bid, MAX_BID), 0)
 
         # Get all bids from subject/robobidders
