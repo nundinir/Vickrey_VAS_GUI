@@ -26,7 +26,7 @@ class CommunicationService(gui2controller2_pb2_grpc.CommunicationServiceServicer
 def starting_server():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     gui2controller2_pb2_grpc.add_CommunicationServiceServicer_to_server(CommunicationService(),server)
-    server.add_insecure_port(config.server_port)#config.client_ip)  
+    server.add_insecure_port(config.server_ip)#config.client_ip)  
     server.start()
     server.wait_for_termination()
 

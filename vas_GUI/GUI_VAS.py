@@ -49,7 +49,7 @@ class GuiVas(BoxLayout):
         try:
             # if a slider is being adjusted, find that slider's A,B,C,D index
             if slider_index != None:
-                slider_selected = {chr(65+slider_index)}
+                slider_selected = chr(65+slider_index)
             else:
                 slider_selected = None
           
@@ -95,8 +95,8 @@ class GuiVas(BoxLayout):
                             print("Error",e)
                 
                 self.prev_btn_instance = btn_instance 
-                self.prev_slider_selected = slider_selected
-                self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
+                # self.prev_slider_selected = slider_selected
+                # self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
          
             # reset the confirm button press after logging
             config.bool_confirm_button_pressed = False
