@@ -2,7 +2,7 @@
 #:import Factory kivy.factory.Factory
 #:import utils kivy.utils
 
-#This describes the layout and the orientation of the 10 buttons on the GUI
+#This describes the layout and the orientation of the VAS GUI
 <GuiVas>:
     GridLayout:
         cols: 2
@@ -60,5 +60,5 @@
                 pos_hint: {'center_x': 0.25}
                 background_normal: ''
                 background_color: utils.get_color_from_hex('#0000FF')
-                on_press: root.confirm_button_pressed(self)
+                on_press: root.confirm_button_pressed()
 

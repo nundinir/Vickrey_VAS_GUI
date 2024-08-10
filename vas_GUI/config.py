@@ -1,57 +1,37 @@
+# This file contains all the global variables that are used throughout the GUI and the Exo communication
+
 import numpy as np
 
-# for use when not using the exos and testing on local machine
+###### FOR TEST SERVER TESTING  ######
 server_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address when just testing on same machine
 client_ip = f"{'0.0.0.0'}:" f"{'50051'}"   # IP address when just testing on same machine
+gui_commanded_torque: float = 0.0          # For TestServer_2.py 
+grpc_needed:bool = True                    # SET TO FALSE IF DOING GUI TESTING W/O COMMANDING EXO
 
-# for testing with the exos
-# server_ip = f"{'35.3.134.250'}:" f"{'50051'}"   # IP address of the Controller (rPi)
-client_ip = f"{'0.0.0.0'}:" f"{'50051'}"         # IP address of GUI
-
-# keeps track of whether all the buttons have been pressed/experienced yet
-btn_pressed_yet = [0] * 4   # 0 means not pressed yet, 1 means pressed
-
-# Initializing values of the log variables
+###### INITIALIZING RELEVANT VARS  ######
 bool_confirm_button_pressed: bool = False
-
-NPO_MV:float = -18.60        # Value of the slider at the extreme negative end (REMEMBER TO CHANGE IN .KV FILE)
-EPO_MV:float = 19.80         # Value of the slider at the extreme positive end (REMEMBER TO CHANGE IN .KV FILE)
 starting_val:int = 0         # Initial value of the slider cursor
-grpc_needed:bool = True      # SET TO FALSE IF DOING GUI TESTING W/O COMMANDING EXO
-
-# Set Torque settings
-min_torque:float = 0.0                                  # Minimum torque value
-max_torque:float = 30.0                                 # Maximum torque value
-num_of_tot_torque_settings:int = 12                     # Total number of torque settings (Maintain 12 for practicality)
-torque_step:float = (max_torque - min_torque)/num_of_tot_torque_settings  # Step size for the torque buttons (maintain 12 btns)
-torque_settings = np.arange(torque_step,max_torque+torque_step,torque_step)  # All Torque settings (np.arrange doesn't include stop value)
 
 ##################################################
 ###### MODIFY THESE VALUES FOR EACH SUBJECT ######
 ##################################################
 
-# UNCOMMENT WHEN TESTING FULL 12btn GUI AT ONCE
-# GUI_btn_setup:str = 'full'                             # Full 12 btn setup
-# sub_num:int = 1
-# curr_trial_num:int = 1                                  # Current trial number (out of 3)
-# current_presentation_num:int = 1                        # Only 1 presentation
-# torques_per_presentation:int = 12                       # All 12 settings at once
-
-# # Initializing the torque mapping button order
-# button_order = ['L', 'K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A']
-# button_slider_values = {}
-# for i in button_order:
-#     button_slider_values[i] = 0
-
-# UNCOMMENT WHEN TESTING 4btn GUI
-GUI_btn_setup:str = '4btn'                             # Full 12 btn setup
+GUI_btn_setup:str = '4btn'                              # Full 12 btn setup or 4 btn setup ('full' or '4btn')
 sub_num:int = 1
-curr_trial_num:int = 1                                  # Current trial number (Out of 4)
-current_presentation_num:int = 1                        # Current presentation number (Out of 3)
-torques_per_presentation:int = 4                        # Number of torque options per presentation
+curr_trial_num:int = 1                                  # Current trial number (out of 4 if '4btn' setup and 3 if 'full' setup)
+current_presentation_num:int = 1                        # Only 1 presentation if 'full' setup and 3 presentations if '4btn' setup
 
-# INITIALIZING the torque mapping button order
-button_order = ['D', 'C', 'B', 'A']
-button_slider_values = {}
-for i in button_order:
-    button_slider_values[i] = 0
+NPO_MV:float = -18.60        # Value of the slider at the extreme negative end (REMEMBER TO CHANGE IN .KV FILE)
+EPO_MV:float = 3.4           # Value of the slider at the extreme positive end (REMEMBER TO CHANGE IN .KV FILE)
+
+
+###### FOR EXO GRPC COMMUNICATION ######
+# server_ip = f"{'35.3.134.250'}:" f"{'50051'}"   # IP address of the Controller (rPi)
+
+
+# Setting up Torque options
+min_torque:float = 0.0                                  # Minimum torque value
+max_torque:float = 30.0                                 # Maximum torque value
+num_of_tot_torque_settings:int = 12                     # Total number of torque settings (Maintain 12 for practicality)
+torque_step:float = (max_torque - min_torque)/num_of_tot_torque_settings  # Step size for the torque buttons (maintain 12 btns)
+torque_settings = np.arange(torque_step,max_torque+torque_step,torque_step)  # All Torque settings (np.arrange doesn't include stop value)

@@ -28,19 +28,35 @@ import grpc
 class GuiVas(BoxLayout):
     """Actual Class for the GUI"""
     
+    if config.GUI_btn_setup == 'full':
+        torques_per_presentation:int = 12                       # All 12 settings at once
+        
+        # Initializing the torque mapping button order
+        button_order = ['L', 'K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A']
+        button_slider_values = {}
+        for i in button_order:
+            button_slider_values[i] = 0
+            
+    elif config.GUI_btn_setup == '4btn':
+        torques_per_presentation:int = 4                        # Number of torque options per presentation
+        
+        # Initializing the torque mapping button order
+        button_order = ['D', 'C', 'B', 'A']
+        button_slider_values = {}
+        for i in button_order:
+            button_slider_values[i] = 0
+    
     # set the number of torque options (create equal # of buttons and sliders)
-    num_torque_options = NumericProperty(config.torques_per_presentation)  # Defined as Kivy property 
+    num_torque_options = NumericProperty(torques_per_presentation)  # Defined as Kivy property 
     npo_mv = NumericProperty(config.NPO_MV)
     epo_mv = NumericProperty(config.EPO_MV)
     npo_mv_text = StringProperty(f"Assistance\nNot Valued:\n${config.NPO_MV}")
     epo_mv_text = StringProperty(f"Assistance\nValued:\n${config.EPO_MV}")
-
+        
     def __init__(self, **kwargs):
         """Initialize the GUI"""
         super(GuiVas, self).__init__(**kwargs)
         self.prev_btn_instance =  None
-        self.prev_slider_selected = None
-        self.prev_value_of_slider = None
         self.last_pressed_button = None
         
     def serverlogger(self, slider_index=None, btn_instance=None, curr_torque:float=0.0):
@@ -82,7 +98,7 @@ class GuiVas(BoxLayout):
                 
             # otherwise, if a slider has been moved, log the appropriate slider's data
             else:
-                temp_logging_data = [str('nan'), str(slider_selected),str(config.button_slider_values[chr(65+slider_index)]), str(config.bool_confirm_button_pressed)]
+                temp_logging_data = [str('nan'), str(slider_selected),str(round(self.button_slider_values[chr(65+slider_index)], 2)), str(config.bool_confirm_button_pressed)]
                 # Send the torque value to the server via gRPC
                 if config.grpc_needed:
                     with grpc.insecure_channel(config.server_ip, options=(('grpc.enable_http_proxy',0), )) as channel:
@@ -95,8 +111,6 @@ class GuiVas(BoxLayout):
                             print("Error",e)
                 
                 self.prev_btn_instance = btn_instance 
-                # self.prev_slider_selected = slider_selected
-                # self.prev_value_of_slider = config.button_slider_values[chr(65+slider_index)]
          
             # reset the confirm button press after logging
             config.bool_confirm_button_pressed = False
@@ -125,8 +139,8 @@ class GuiVas(BoxLayout):
         self.labels[index].opacity = 1
 
         config.bool_slider_value_changed = True
-        config.button_slider_values[chr(65+index)] = self.vas_value # Update the dictionary with the new slider value
-        print("config.button_slider_values: ", config.button_slider_values)
+        self.button_slider_values[chr(65+index)] = self.vas_value # Update the dictionary with the new slider value
+        print("self.button_slider_values: ", self.button_slider_values)
 
         # Log the data
         self.serverlogger(slider_index=index)
@@ -137,8 +151,9 @@ class GuiVas(BoxLayout):
         
         # on button press, disable the other buttons and then reenable them after 3 sec
         for child in self.ids.button_layout.children:
-            child.disabled = True
-        Clock.schedule_once(self.reenable_widgets, 3)
+            if child != instance_btn:
+                child.disabled = True
+        Clock.schedule_once(self.reenable_widgets, 5)
 
         if config.GUI_btn_setup == '4btn':
             # randomized button-torque mapping for each trial (wtihout replacement)
@@ -150,11 +165,11 @@ class GuiVas(BoxLayout):
             
             # select a subset of the pseudo-randomized torques based on current presentation number
             if config.current_presentation_num == 1:
-                pseudo_random_presentation_torques = pseudo_random_presentation_torques[0:config.torques_per_presentation]
+                pseudo_random_presentation_torques = pseudo_random_presentation_torques[0:self.torques_per_presentation]
             elif config.current_presentation_num == 2:
-                pseudo_random_presentation_torques = pseudo_random_presentation_torques[config.torques_per_presentation:config.torques_per_presentation*2]
+                pseudo_random_presentation_torques = pseudo_random_presentation_torques[self.torques_per_presentation:self.torques_per_presentation*2]
             elif config.current_presentation_num == 3:
-                pseudo_random_presentation_torques = pseudo_random_presentation_torques[config.torques_per_presentation*2:config.num_of_tot_torque_settings]
+                pseudo_random_presentation_torques = pseudo_random_presentation_torques[self.torques_per_presentation*2:self.num_of_tot_torque_settings]
             
             # Set the torque value based on the button pressed
             if(instance_btn.text == 'A'):
@@ -209,14 +224,14 @@ class GuiVas(BoxLayout):
         for child in self.ids.button_layout.children:
             child.disabled = False
                  
-    def confirm_button_pressed(self, instance_btn: Button):
+    def confirm_button_pressed(self):
         """Confirm button press response method"""
         button = Button(text=f"{'CONFIRM'}")
         config.bool_confirm_button_pressed = True
         print(config.bool_confirm_button_pressed)
         self.serverlogger()
 
-        config.button_order = sorted(config.button_order, key=lambda button: config.button_slider_values.get(button, config.NPO_MV), reverse=True)
+        self.button_order = sorted(self.button_order, key=lambda button: self.button_slider_values.get(button, config.NPO_MV), reverse=True)
 
         # Clear the old button layout
         self.ids.button_layout.clear_widgets()
@@ -228,7 +243,7 @@ class GuiVas(BoxLayout):
         button_colors = ['#0d9c35','#00954b','#92dc7e','#64c987','#39b48e','#089f8f','#00898a','#08737f','#215d6e','#2a4858','#219ebc','#FFB703']
         button_colors = button_colors[:self.num_torque_options]  # limit the number of buttons to the number of torque options
         self.ids.button_layout.rows =  self.num_torque_options   # set the number of columns in the grid layout
-        for count, i in enumerate(config.button_order):
+        for count, i in enumerate(self.button_order):
             # Create the button
             button = Button(text=f"{i}") # unicode point for 'A' is 65
             self.last_pressed_button= i
@@ -248,13 +263,13 @@ class GuiVas(BoxLayout):
         self.labels = []
 
         self.ids.slider_layout.clear_widgets()
-        for count,i in enumerate(config.button_order):
+        for count,i in enumerate(self.button_order):
             #for i in range(self.num_torque_options):
             # Create a BoxLayout for each slider
             box_layout = BoxLayout(orientation='horizontal')
 
             # Create the slider
-            slider = Slider(min=config.NPO_MV, max=config.EPO_MV, value=config.button_slider_values[i], cursor_size=(25, 25), cursor_image="pin_1.png")
+            slider = Slider(min=config.NPO_MV, max=config.EPO_MV, value=self.button_slider_values[i], cursor_size=(25, 25), cursor_image="pin_1.png")
             self.last_pressed_button = i
             additional_variable = i
             slider.bind(value=partial(self.on_slider_value, additional_variable))
