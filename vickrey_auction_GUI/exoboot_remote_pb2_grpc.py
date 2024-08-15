@@ -42,17 +42,17 @@ class exoboot_over_networkStub(object):
         self.set_pause = channel.unary_unary(
                 '/exoboot_over_network/set_pause',
                 request_serializer=exoboot__remote__pb2.pause.SerializeToString,
-                response_deserializer=exoboot__remote__pb2.receipt.FromString,
+                response_deserializer=exoboot__remote__pb2.receipt_exoboot.FromString,
                 _registered_method=True)
         self.set_quit = channel.unary_unary(
                 '/exoboot_over_network/set_quit',
                 request_serializer=exoboot__remote__pb2.quit.SerializeToString,
-                response_deserializer=exoboot__remote__pb2.receipt.FromString,
+                response_deserializer=exoboot__remote__pb2.receipt_exoboot.FromString,
                 _registered_method=True)
         self.set_torque = channel.unary_unary(
                 '/exoboot_over_network/set_torque',
                 request_serializer=exoboot__remote__pb2.torques.SerializeToString,
-                response_deserializer=exoboot__remote__pb2.receipt.FromString,
+                response_deserializer=exoboot__remote__pb2.receipt_exoboot.FromString,
                 _registered_method=True)
 
 
@@ -83,17 +83,17 @@ def add_exoboot_over_networkServicer_to_server(servicer, server):
             'set_pause': grpc.unary_unary_rpc_method_handler(
                     servicer.set_pause,
                     request_deserializer=exoboot__remote__pb2.pause.FromString,
-                    response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
+                    response_serializer=exoboot__remote__pb2.receipt_exoboot.SerializeToString,
             ),
             'set_quit': grpc.unary_unary_rpc_method_handler(
                     servicer.set_quit,
                     request_deserializer=exoboot__remote__pb2.quit.FromString,
-                    response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
+                    response_serializer=exoboot__remote__pb2.receipt_exoboot.SerializeToString,
             ),
             'set_torque': grpc.unary_unary_rpc_method_handler(
                     servicer.set_torque,
                     request_deserializer=exoboot__remote__pb2.torques.FromString,
-                    response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
+                    response_serializer=exoboot__remote__pb2.receipt_exoboot.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -122,7 +122,7 @@ class exoboot_over_network(object):
             target,
             '/exoboot_over_network/set_pause',
             exoboot__remote__pb2.pause.SerializeToString,
-            exoboot__remote__pb2.receipt.FromString,
+            exoboot__remote__pb2.receipt_exoboot.FromString,
             options,
             channel_credentials,
             insecure,
@@ -149,7 +149,7 @@ class exoboot_over_network(object):
             target,
             '/exoboot_over_network/set_quit',
             exoboot__remote__pb2.quit.SerializeToString,
-            exoboot__remote__pb2.receipt.FromString,
+            exoboot__remote__pb2.receipt_exoboot.FromString,
             options,
             channel_credentials,
             insecure,
@@ -176,7 +176,7 @@ class exoboot_over_network(object):
             target,
             '/exoboot_over_network/set_torque',
             exoboot__remote__pb2.torques.SerializeToString,
-            exoboot__remote__pb2.receipt.FromString,
+            exoboot__remote__pb2.receipt_exoboot.FromString,
             options,
             channel_credentials,
             insecure,

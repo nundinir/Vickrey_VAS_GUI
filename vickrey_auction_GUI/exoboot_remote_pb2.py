@@ -14,25 +14,21 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x65xoboot_remote.proto\"\x06\n\x04Null\"#\n\x0b\x64\x61ta_stream\x12\x14\n\x0clogging_data\x18\x01 \x03(\t\"\x1b\n\x07receipt\x12\x10\n\x08received\x18\x01 \x01(\x08\"\x17\n\x05pause\x12\x0e\n\x06mybool\x18\x01 \x01(\x08\"\x16\n\x04quit\x12\x0e\n\x06mybool\x18\x01 \x01(\x08\">\n\x07torques\x12\x18\n\x10peak_torque_left\x18\x03 \x01(\x02\x12\x19\n\x11peak_torque_right\x18\x04 \x01(\x02\x32z\n\x14\x65xoboot_over_network\x12\x1f\n\tset_pause\x12\x06.pause\x1a\x08.receipt\"\x00\x12\x1d\n\x08set_quit\x12\x05.quit\x1a\x08.receipt\"\x00\x12\"\n\nset_torque\x12\x08.torques\x1a\x08.receipt\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x65xoboot_remote.proto\"#\n\x0freceipt_exoboot\x12\x10\n\x08received\x18\x01 \x01(\x08\"\x17\n\x05pause\x12\x0e\n\x06mybool\x18\x01 \x01(\x08\"\x16\n\x04quit\x12\x0e\n\x06mybool\x18\x01 \x01(\x08\">\n\x07torques\x12\x18\n\x10peak_torque_left\x18\x01 \x01(\x02\x12\x19\n\x11peak_torque_right\x18\x02 \x01(\x02\x32\x92\x01\n\x14\x65xoboot_over_network\x12\'\n\tset_pause\x12\x06.pause\x1a\x10.receipt_exoboot\"\x00\x12%\n\x08set_quit\x12\x05.quit\x1a\x10.receipt_exoboot\"\x00\x12*\n\nset_torque\x12\x08.torques\x1a\x10.receipt_exoboot\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'exoboot_remote_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_NULL']._serialized_start=24
-  _globals['_NULL']._serialized_end=30
-  _globals['_DATA_STREAM']._serialized_start=32
-  _globals['_DATA_STREAM']._serialized_end=67
-  _globals['_RECEIPT']._serialized_start=69
-  _globals['_RECEIPT']._serialized_end=96
-  _globals['_PAUSE']._serialized_start=98
-  _globals['_PAUSE']._serialized_end=121
-  _globals['_QUIT']._serialized_start=123
-  _globals['_QUIT']._serialized_end=145
-  _globals['_TORQUES']._serialized_start=147
-  _globals['_TORQUES']._serialized_end=209
-  _globals['_EXOBOOT_OVER_NETWORK']._serialized_start=211
-  _globals['_EXOBOOT_OVER_NETWORK']._serialized_end=333
+  _globals['_RECEIPT_EXOBOOT']._serialized_start=24
+  _globals['_RECEIPT_EXOBOOT']._serialized_end=59
+  _globals['_PAUSE']._serialized_start=61
+  _globals['_PAUSE']._serialized_end=84
+  _globals['_QUIT']._serialized_start=86
+  _globals['_QUIT']._serialized_end=108
+  _globals['_TORQUES']._serialized_start=110
+  _globals['_TORQUES']._serialized_end=172
+  _globals['_EXOBOOT_OVER_NETWORK']._serialized_start=175
+  _globals['_EXOBOOT_OVER_NETWORK']._serialized_end=321
 # @@protoc_insertion_point(module_scope)

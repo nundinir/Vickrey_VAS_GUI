@@ -1,16 +1,10 @@
 syntax = "proto3";
 
-message Null {};
-
 /* General Communication to Exoboot_Wrapper class
 build command: python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. exoboot_remote.proto
 */
 
-message data_stream {
-    repeated string logging_data = 1;
-}
-
-message receipt {
+message receipt_exoboot {
    bool received = 1;
 }
 
@@ -23,12 +17,12 @@ message quit {
 }
 
 message torques {
-    float peak_torque_left = 3;
-    float peak_torque_right = 4;
+    float peak_torque_left = 1;
+    float peak_torque_right = 2;
 }
 
 service exoboot_over_network{
-    rpc set_pause (pause) returns (receipt) {}
-    rpc set_quit (quit) returns (receipt) {}
-    rpc set_torque (torques) returns (receipt) {}
+    rpc set_pause (pause) returns (receipt_exoboot) {}
+    rpc set_quit (quit) returns (receipt_exoboot) {}
+    rpc set_torque (torques) returns (receipt_exoboot) {}
 }

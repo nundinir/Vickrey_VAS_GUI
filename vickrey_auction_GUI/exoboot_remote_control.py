@@ -28,7 +28,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         else:
             self.mainwrapper.pause_event.set()
 
-        return pb2.receipt(received=True)
+        return pb2.receipt_exoboot(received=True)
 
     def set_quit(self, quit_msg, context):
         quit = quit_msg.quit
@@ -38,7 +38,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         else:
             self.mainwrapper.quit_event.set()
 
-        return pb2.receipt(received=True)
+        return pb2.receipt_exoboot(received=True)
 
     def command_exoboots(self, torque_msg, context):
         # Printing out the request from the client        
@@ -49,7 +49,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         self.mainwrapper.gse_thread.set_peak_torque_left(peak_torque_left)
         self.mainwrapper.gse_thread.set_peak_torque_right(peak_torque_right)
 
-        return pb2.receipt(received=True)
+        return pb2.receipt_exoboot(received=True)
 
 
 class RemoteThread(BaseThread):
