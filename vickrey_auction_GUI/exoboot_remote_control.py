@@ -7,10 +7,10 @@ import exoboot_remote_pb2_grpc as pb2_grpc
 from typing import Type
 import time
 
-from vickrey_auction_GUI.utils import MovingAverageFilter
+from utils import MovingAverageFilter
 from constants import PI_IP
 
-from vickrey_auction_GUI.BaseExoThread import BaseThread
+from BaseExoThread import BaseThread
 
 class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
     """
@@ -86,12 +86,12 @@ class ExobootRemoteClient:
         self.stub = pb2_grpc.exoboot_over_networkStub(self.channel)
 
     def set_pause(self, pause=False):
-        pause_msg = pb2.pause(pause=pause)
+        pause_msg = pb2.pause(mybool=pause)
         receipt = self.stub.set_pause(pause_msg)
         return receipt
     
     def set_quit(self, quit=False):
-        quit_msg = pb2.quit(quit=quit)
+        quit_msg = pb2.quit(mybool=quit)
         receipt = self.stub.set_quit(quit_msg)
         return receipt
 
