@@ -12,14 +12,12 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import StringProperty, NumericProperty
 
 import grpc
-import auction_pb2 as pb2
-import auction_pb2_grpc as pb2_grpc
-
-from BertecMan import Bertec
+import gui2controller2_pb2 as pb2
+import gui2controller2_pb2_grpc as pb2_grpc
 
 from constants import *
 from auction_schedules import *
-from statemachine import VA_StateMachine
+from statemachine import JNDStateMachine
 
 # Button Callbacks
 def numpad_cb(instance):
@@ -42,7 +40,6 @@ def startbttn_CB(instance):
     sm = instance.parent.parent
     if sm.statemachine.auction_tally > 0:
         sm.statemachine.send_treadmill_msg(sm.statemachine.state)
-        sm.bertec.write_command(BERTEC_SPEED_RIGHT, BERTEC_SPEED_LEFT, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
     sm.statemachine.next_screen()
 
 def enjoyment_cb(instance):
@@ -133,6 +130,11 @@ def buildsurveyscreen(sm):
 
     return screen_
 
+def build_leftorright_screen(sm):
+    screen_ = Screen(name="leftorright")
+    screen_.sm = sm
+
+
 # Timer class
 class CountDownTimer(Label):
     dur = NumericProperty(0)
@@ -149,41 +151,15 @@ class CountDownTimer(Label):
         self.text = '{:.2f}'.format(value)
 
 # GRPC object
-class CallerGRPC:
+class JND_GRPC:
     def __init__(self):
         self.channel = grpc.insecure_channel(SERVER_IP)
         self.stub = pb2_grpc.auctionStub(self.channel)
-        self.testconnection()
 
-    def testconnection(self):
-        # Send testmsg to AuctionHouse
-        msg = pb2.testmsg(msg="Hello there")
-        response = self.stub.testconnection(msg)
-        
-        # See response received
-        if response:
-            print("Connection Successful\n")
-        else:
-            raise ConnectionError("AuctionHouse connection unsuccessful.")
-
-    def call(self, t, subject_bid, user_win_flag, current_payout, total_winnings):
-        resultmsg = pb2.result(t=t,
-                         subject_bid=subject_bid,
-                         user_win_flag=user_win_flag,
-                         current_payout=current_payout,
-                         total_winnings=total_winnings
-                         )
-        response = self.stub.call(resultmsg)
-        return response
-    
-    def question(self, t, enjoyment, rpe):
-        surveymsg = pb2.survey(t=t, enjoyment=enjoyment, rpe=rpe)
-        response = self.stub.question(surveymsg)
-        return response
-    
-    def treadmill_message(self, state):
-        treadmillmsg = pb2.treadmill(state=state)
-        response = self.stub.treadmill_message(treadmillmsg)
+    def send_torques(self, peak_torque_left, peak_torque_right):
+        temp_data = [peak_torque_left, peak_torque_right]
+        resultmsg = pb2.data_stream(temp_data)
+        response = self.stub.GUI_Messenger(resultmsg)
         return response
 
 
@@ -191,16 +167,8 @@ class CallerGRPC:
 class CallerGUI(App):
     def build(self):
         sm = ScreenManager()
-        sm.statemachine = VA_StateMachine(sm)
-        sm.callergrpc = CallerGRPC()
-        sm.bertec  = Bertec()
-
-        sm.previous_bid = ''
-        sm.bid = ''
-
-        # Survey
-        sm.enjoyment = 0
-        sm.rpe = 0
+        sm.statemachine = JNDStateMachine(sm)
+        sm.callergrpc = JND_GRPC()
 
         label_fontsize = '50'
 
@@ -256,6 +224,7 @@ class CallerGUI(App):
 
         # Switch from dummy to startscreen to run on_enter
         sm.current = "pushtostartscreen"
+        # sm.current = "survey"
 
         return sm
 

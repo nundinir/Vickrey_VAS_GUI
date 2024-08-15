@@ -15,8 +15,6 @@ import grpc
 import auction_pb2 as pb2
 import auction_pb2_grpc as pb2_grpc
 
-from BertecMan import Bertec
-
 from constants import *
 from auction_schedules import *
 from statemachine import VA_StateMachine
@@ -42,7 +40,6 @@ def startbttn_CB(instance):
     sm = instance.parent.parent
     if sm.statemachine.auction_tally > 0:
         sm.statemachine.send_treadmill_msg(sm.statemachine.state)
-        sm.bertec.write_command(BERTEC_SPEED_RIGHT, BERTEC_SPEED_LEFT, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
     sm.statemachine.next_screen()
 
 def enjoyment_cb(instance):
@@ -193,7 +190,6 @@ class CallerGUI(App):
         sm = ScreenManager()
         sm.statemachine = VA_StateMachine(sm)
         sm.callergrpc = CallerGRPC()
-        sm.bertec  = Bertec()
 
         sm.previous_bid = ''
         sm.bid = ''
@@ -256,6 +252,7 @@ class CallerGUI(App):
 
         # Switch from dummy to startscreen to run on_enter
         sm.current = "pushtostartscreen"
+        # sm.current = "survey"
 
         return sm
 
