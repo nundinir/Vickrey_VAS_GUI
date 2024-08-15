@@ -40,7 +40,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
 
         return pb2.receipt_exoboot(received=True)
 
-    def command_exoboots(self, torque_msg, context):
+    def set_torque(self, torque_msg, context):
         # Printing out the request from the client        
         peak_torque_left  = torque_msg.peak_torque_left
         peak_torque_right = torque_msg.peak_torque_right
@@ -63,7 +63,7 @@ class RemoteThread(BaseThread):
     def __init__(self, mainwrapper, name='GUICommunication', daemon=True, pause_event=Type[threading.Event], quit_event=Type[threading.Event]):
         super().__init__(name=name, daemon=daemon, pause_event=pause_event, quit_event=quit_event)
         self.mainwrapper = mainwrapper
-        self.exoboot_remote_grpc = ExobootCommServicer(self, self.mainwrapper)
+        self.exoboot_remote_grpc = ExobootCommServicer(self.mainwrapper)
     
     def starting_server(self):
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=5))
@@ -97,5 +97,5 @@ class ExobootRemoteClient:
 
     def set_torques(self, peak_torque_left=0, peak_torque_right=0):
         torque_msg = pb2.torques(peak_torque_left=peak_torque_left, peak_torque_right=peak_torque_right)
-        receipt = self.stub.command_exoboots(torque_msg)
+        receipt = self.stub.set_torque(torque_msg)
         return receipt

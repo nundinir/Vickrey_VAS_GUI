@@ -15,8 +15,6 @@ from kivy.core.window import Window
 import grpc
 import auction_pb2 as pb2
 import auction_pb2_grpc as pb2_grpc
-
-from BertecMan import Bertec
 from exoboot_remote_control import ExobootRemoteClient
 
 from constants import *
@@ -192,7 +190,6 @@ class CallerGRPC:
         response = self.stub.treadmill_message(treadmillmsg)
         return response
 
-
 # Combines kivy screen manager, statemachine, and GRPC into app
 class CallerGUI(App):
     def build(self):
@@ -208,8 +205,8 @@ class CallerGUI(App):
         sm.exoboot_remote.set_torques(peak_torque_left=PEAK_TORQUE_LEFT, peak_torque_right=PEAK_TORQUE_RIGHT)
 
         # Bertec over network thread
-        sm.bertec = Bertec()
-        sm.bertec.start()
+        # sm.bertec = Bertec()
+        # sm.bertec.start()
 
         # Vickrey bids
         sm.previous_bid = ''
