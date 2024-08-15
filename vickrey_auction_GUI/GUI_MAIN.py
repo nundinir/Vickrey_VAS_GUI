@@ -10,12 +10,14 @@ from kivy.uix.image import Image, AsyncImage
 from kivy.clock import Clock
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import StringProperty, NumericProperty
+from kivy.core.window import Window
 
 import grpc
 import auction_pb2 as pb2
 import auction_pb2_grpc as pb2_grpc
 
 from BertecMan import Bertec
+from exoboot_remote_control import ExobootRemoteClient
 
 from constants import *
 from auction_schedules import *
@@ -42,7 +44,11 @@ def startbttn_CB(instance):
     sm = instance.parent.parent
     if sm.statemachine.auction_tally > 0:
         sm.statemachine.send_treadmill_msg(sm.statemachine.state)
+        
+        # Start treadmill and unpause exoboots
         sm.bertec.write_command(BERTEC_SPEED_RIGHT, BERTEC_SPEED_LEFT, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+        sm.exoboot_remote.set_pause(pause=False)
+
     sm.statemachine.next_screen()
 
 def enjoyment_cb(instance):
@@ -193,8 +199,19 @@ class CallerGUI(App):
         sm = ScreenManager()
         sm.statemachine = VA_StateMachine(sm)
         sm.callergrpc = CallerGRPC()
-        sm.bertec  = Bertec()
+        
+        # Connect to Exoboot
+        sm.exoboot_remote = ExobootRemoteClient()
 
+        # Pause Exos and set torques
+        sm.exoboot_remote.set_pause(pause=True)
+        sm.exoboot_remote.set_torques(peak_torque_left=PEAK_TORQUE_LEFT, peak_torque_right=PEAK_TORQUE_RIGHT)
+
+        # Bertec over network thread
+        sm.bertec = Bertec()
+        sm.bertec.start()
+
+        # Vickrey bids
         sm.previous_bid = ''
         sm.bid = ''
 
@@ -257,7 +274,17 @@ class CallerGUI(App):
         # Switch from dummy to startscreen to run on_enter
         sm.current = "pushtostartscreen"
 
+        self.sm = sm
+        Window.bind(on_request_close=self.on_request_close)
+
         return sm
 
+    def on_request_close(self, *args):
+        print("Closing Bertec")
+        self.sm.bertec.stop()
+
+        print("Shutting down exoboots")
+        self.sm.exoboot_remote.set_quit(quit=True)
+
 if __name__ == "__main__":
-    CallerGUI().run()
+    bertec = CallerGUI().run()
