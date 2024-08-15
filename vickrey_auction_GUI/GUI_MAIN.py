@@ -274,17 +274,18 @@ class CallerGUI(App):
         # Switch from dummy to startscreen to run on_enter
         sm.current = "pushtostartscreen"
 
-        self.sm = sm
-        Window.bind(on_request_close=self.on_request_close)
+        # self.sm = sm
+        # Window.bind(on_request_close=self.on_request_close)
 
         return sm
 
-    def on_request_close(self, *args):
-        print("Closing Bertec")
-        self.sm.bertec.stop()
+    # def on_request_close(self, *args):
+    #     print("Closing Bertec")
+    #     self.sm.bertec.stop()
 
-        print("Shutting down exoboots")
-        self.sm.exoboot_remote.set_quit(quit=True)
+    #     print("Shutting down exoboots")
+    #     self.sm.exoboot_remote.set_quit(quit=True)
 
 if __name__ == "__main__":
     bertec = CallerGUI().run()
+    bertec.stop()
