@@ -82,6 +82,6 @@ def result_screens_event(sm, dt):
         
         # Stop Bertec and pause exoboots
         sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-        sm.exoboot_remote.set_pause(pause=True)
+        sm.exoboot_remote.set_pause(mybool=True)
 
     sm.statemachine.next_screen()

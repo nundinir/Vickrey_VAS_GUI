@@ -77,25 +77,25 @@ class RemoteThread(BaseThread):
             self.starting_server()
 
 
-# class ExobootRemoteClient:
-#     """
-#     Client running on network
-#     """
-#     def __init__(self):
-#         self.channel = grpc.insecure_channel(PI_IP)
-#         self.stub = pb2_grpc_r.exoboot_over_networkStub(self.channel)
+class ExobootRemoteClient:
+    """
+    Client running on network
+    """
+    def __init__(self):
+        self.channel = grpc.insecure_channel(PI_IP)
+        self.stub = pb2_grpc_r.exoboot_over_networkStub(self.channel)
 
-#     def set_pause(self, pause=False):
-#         pause_msg = pb2_r.pause(mybool=pause)
-#         receipt = self.stub.set_pause(pause_msg)
-#         return receipt
+    def set_pause(self, mybool=False):
+        pause_msg = pb2_r.pause(mybool=mybool)
+        receipt = self.stub.set_pause(pause_msg)
+        return receipt
     
-#     def set_quit(self, quit=False):
-#         quit_msg = pb2_r.quit(mybool=quit)
-#         receipt = self.stub.set_quit(quit_msg)
-#         return receipt
+    def set_quit(self, mybool=False):
+        quit_msg = pb2_r.quit(mybool=mybool)
+        receipt = self.stub.set_quit(quit_msg)
+        return receipt
 
-#     def set_torques(self, peak_torque_left=0, peak_torque_right=0):
-#         torque_msg = pb2_r.torques(peak_torque_left=peak_torque_left, peak_torque_right=peak_torque_right)
-#         receipt = self.stub.set_torque(torque_msg)
-#         return receipt
+    def set_torques(self, peak_torque_left=0, peak_torque_right=0):
+        torque_msg = pb2_r.torques(peak_torque_left=peak_torque_left, peak_torque_right=peak_torque_right)
+        receipt = self.stub.set_torque(torque_msg)
+        return receipt
