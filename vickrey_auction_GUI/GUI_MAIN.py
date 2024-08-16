@@ -190,6 +190,26 @@ class CallerGRPC:
         response = self.stub.treadmill_message(treadmillmsg)
         return response
 
+# class ExobootRemote:
+#     def __init__(self):
+#         self.channel = grpc.insecure_channel(PI_IP)
+#         self.stub = pb2_grpc_r.exoboot_over_networkStub(self.channel)
+
+#     def set_pause(self, pause=False):
+#         pause_msg = pb2_r.pause(mybool=pause)
+#         receipt = self.stub.set_pause(pause_msg)
+#         return receipt
+    
+#     def set_quit(self, quit=False):
+#         quit_msg = pb2_r.quit(mybool=quit)
+#         receipt = self.stub.set_quit(quit_msg)
+#         return receipt
+
+#     def set_torques(self, peak_torque_left=0, peak_torque_right=0):
+#         torque_msg = pb2_r.torques(peak_torque_left=peak_torque_left, peak_torque_right=peak_torque_right)
+#         receipt = self.stub.command_exoboots(torque_msg)
+#         return receipt
+
 # Combines kivy screen manager, statemachine, and GRPC into app
 class CallerGUI(App):
     def build(self):
