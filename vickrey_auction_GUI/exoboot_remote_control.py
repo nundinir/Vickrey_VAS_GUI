@@ -52,7 +52,7 @@ class ExobootCommServicer(pb2_grpc_r.exoboot_over_networkServicer):
         return pb2_r.receipt_exoboot(received=True)
 
 
-class RemoteThread(BaseThread):
+class ExobootRemoteThread(BaseThread):
     """
     Thread class for receiving remote commands
 
@@ -60,7 +60,7 @@ class RemoteThread(BaseThread):
      
     Does not pause
     """
-    def __init__(self, mainwrapper, name='GUICommunication', daemon=True, pause_event=Type[threading.Event], quit_event=Type[threading.Event]):
+    def __init__(self, mainwrapper, name='exoboot_remote_thread', daemon=True, pause_event=Type[threading.Event], quit_event=Type[threading.Event]):
         super().__init__(name=name, daemon=daemon, pause_event=pause_event, quit_event=quit_event)
         self.mainwrapper = mainwrapper
         self.exoboot_remote_grpc = ExobootCommServicer(self.mainwrapper)

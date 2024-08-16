@@ -83,7 +83,7 @@ class VA_StateMachine:
         t = (self.auction_tally + 1) * ROBOWALK_DUR
 
         # Send auction results to auctionhouse
-        self.sm.callergrpc.call(t, subject_bid, self.state, self.payout, self.total_winnings) #, winning_bid)
+        self.sm.auction_client.call(t, subject_bid, self.state, self.payout, self.total_winnings) #, winning_bid)
 
         # Increment auction tally
         self.auction_tally += 1
@@ -91,10 +91,10 @@ class VA_StateMachine:
     def close_survey(self):
         t = self.auction_tally * ROBOWALK_DUR
         print("Closing survey", t, self.sm.enjoyment, self.sm.rpe)
-        self.sm.callergrpc.question(t, self.sm.enjoyment, self.sm.rpe)
+        self.sm.auction_client.question(t, self.sm.enjoyment, self.sm.rpe)
 
     def send_treadmill_msg(self, state):
-        self.sm.callergrpc.treadmill_message(state)
+        self.sm.auction_client.treadmill_state(state)
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
