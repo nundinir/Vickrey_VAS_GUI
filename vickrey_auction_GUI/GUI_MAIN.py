@@ -15,7 +15,10 @@ from kivy.core.window import Window
 import grpc
 import auction_pb2 as pb2
 import auction_pb2_grpc as pb2_grpc
-from exoboot_remote_control import ExobootRemoteClient
+# from exoboot_remote_control import ExobootRemoteClient
+
+import exoboot_remote_pb2 as pb2_r
+import exoboot_remote_pb2_grpc as pb2_grpc_r
 
 from constants import *
 from auction_schedules import *
@@ -190,25 +193,25 @@ class CallerGRPC:
         response = self.stub.treadmill_message(treadmillmsg)
         return response
 
-# class ExobootRemote:
-#     def __init__(self):
-#         self.channel = grpc.insecure_channel(PI_IP)
-#         self.stub = pb2_grpc_r.exoboot_over_networkStub(self.channel)
+class ExobootRemote:
+    def __init__(self):
+        self.channel = grpc.insecure_channel(PI_IP)
+        self.stub = pb2_grpc_r.exoboot_over_networkStub(self.channel)
 
-#     def set_pause(self, pause=False):
-#         pause_msg = pb2_r.pause(mybool=pause)
-#         receipt = self.stub.set_pause(pause_msg)
-#         return receipt
+    def set_pause(self, mybool=False):
+        pause_msg = pb2_r.pause(mybool=mybool)
+        receipt = self.stub.set_pause(pause_msg)
+        return receipt
     
-#     def set_quit(self, quit=False):
-#         quit_msg = pb2_r.quit(mybool=quit)
-#         receipt = self.stub.set_quit(quit_msg)
-#         return receipt
+    def set_quit(self, mybool=False):
+        quit_msg = pb2_r.quit(mybool=mybool)
+        receipt = self.stub.set_quit(quit_msg)
+        return receipt
 
-#     def set_torques(self, peak_torque_left=0, peak_torque_right=0):
-#         torque_msg = pb2_r.torques(peak_torque_left=peak_torque_left, peak_torque_right=peak_torque_right)
-#         receipt = self.stub.command_exoboots(torque_msg)
-#         return receipt
+    def set_torques(self, peak_torque_left=0, peak_torque_right=0):
+        torque_msg = pb2_r.torques(peak_torque_left=peak_torque_left, peak_torque_right=peak_torque_right)
+        receipt = self.stub.command_exoboots(torque_msg)
+        return receipt
 
 # Combines kivy screen manager, statemachine, and GRPC into app
 class CallerGUI(App):
@@ -218,7 +221,7 @@ class CallerGUI(App):
         sm.callergrpc = CallerGRPC()
         
         # Connect to Exoboot
-        sm.exoboot_remote = ExobootRemoteClient()
+        sm.exoboot_remote = ExobootRemote()
 
         # Pause Exos and set torques
         sm.exoboot_remote.set_pause(pause=True)
