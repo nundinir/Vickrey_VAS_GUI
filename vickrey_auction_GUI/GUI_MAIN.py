@@ -158,7 +158,7 @@ class VickreyGUI(App):
     """
     Creates screen manager to run Vickrey Auction
 
-    auction_client  - communicates with auctionhouse server for logging of bids and surveys
+    logging_client  - communicates with auctionhouse server for logging of bids and surveys
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
@@ -170,8 +170,8 @@ class VickreyGUI(App):
         sm.statemachine = VA_StateMachine(sm)
 
         # Client to LoggingServer
-        sm.auction_client = LoggingClient(guiname='VickreyGUI')
-        subjectID, trial_type, description = sm.auction_client.get_subject_info()
+        sm.logging_client = LoggingClient(guiname='VickreyGUI')
+        subjectID, trial_type, description = sm.logging_client.get_subject_info()
 
         # Connect to Exoboot
         sm.exoboot_remote = ExobootRemoteClient()
@@ -252,7 +252,7 @@ class VickreyGUI(App):
             sm.bertec.stop()
 
             print("Exiting Logging Server")
-            sm.auction_client.chop()
+            sm.logging_client.chop()
 
             print("Shutting down exoboots")
             sm.exoboot_remote.set_quit(mybool=True)
