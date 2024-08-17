@@ -39,6 +39,11 @@ class exoboot_over_networkStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.send_subject_info = channel.unary_unary(
+                '/exoboot_over_network/send_subject_info',
+                request_serializer=exoboot__remote__pb2.subject_info_eb.SerializeToString,
+                response_deserializer=exoboot__remote__pb2.receipt_exoboot.FromString,
+                _registered_method=True)
         self.set_pause = channel.unary_unary(
                 '/exoboot_over_network/set_pause',
                 request_serializer=exoboot__remote__pb2.pause.SerializeToString,
@@ -58,6 +63,12 @@ class exoboot_over_networkStub(object):
 
 class exoboot_over_networkServicer(object):
     """Missing associated documentation comment in .proto file."""
+
+    def send_subject_info(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def set_pause(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -80,6 +91,11 @@ class exoboot_over_networkServicer(object):
 
 def add_exoboot_over_networkServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'send_subject_info': grpc.unary_unary_rpc_method_handler(
+                    servicer.send_subject_info,
+                    request_deserializer=exoboot__remote__pb2.subject_info_eb.FromString,
+                    response_serializer=exoboot__remote__pb2.receipt_exoboot.SerializeToString,
+            ),
             'set_pause': grpc.unary_unary_rpc_method_handler(
                     servicer.set_pause,
                     request_deserializer=exoboot__remote__pb2.pause.FromString,
@@ -105,6 +121,33 @@ def add_exoboot_over_networkServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class exoboot_over_network(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def send_subject_info(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/exoboot_over_network/send_subject_info',
+            exoboot__remote__pb2.subject_info_eb.SerializeToString,
+            exoboot__remote__pb2.receipt_exoboot.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def set_pause(request,

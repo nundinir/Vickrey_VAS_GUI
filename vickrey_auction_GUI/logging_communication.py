@@ -19,16 +19,16 @@ class LoggingClient:
 
     Includes general logging methods
     """
-    def __init__(self):
+    def __init__(self, guiname):
         self.channel = grpc.insecure_channel(SERVER_IP)
         self.stub = pb2_grpc.logStub(self.channel)
-        self.testconnection()
+        self.testconnection(guiname)
 
-    def testconnection(self):
+    def testconnection(self, guiname='None'):
         """
         Sends test message to LoggingServer
         """
-        msg = pb2.testmsg(msg="Hello from GUI")
+        msg = pb2.testmsg(msg="Hello from {}".format(guiname))
         response = self.stub.testconnection(msg)
         
         # See response received
@@ -37,12 +37,18 @@ class LoggingClient:
         else:
             raise ConnectionError("AuctionServer connection unsuccessful.")
     
+    def get_subject_info(self, trial_type):
+        """
+        Sends null message to LoggingServer to get subject details
+        """
+        subject_info = self.stub.get_subject_info(pb2.testmsg(msg=trial_type))
+        return subject_info.subjectID, subject_info.trial_type, subject_info.description
+
     def chop(self):
         """
-        Kill LoggingServer
+        Kill LoggingServer from client(GUI)
         """
-        msg = pb2.beaver()
-        response = self.stub.chop(msg)
+        response = self.stub.chop(pb2.beaver())
         return response
 
     def treadmill_state(self, state):
@@ -118,36 +124,22 @@ class LoggingServer(pb2_grpc.logServicer):
     Prints internal state messages for trial oversight
     """
     def __init__(self, stop_event):
-        self.auctionfilename = 'TEMP_AUCTION.csv'
-        self.surveyfilename = 'TEMP_SURVEY.csv'
-        self.vaspresentationfilename = 'TEMP_VASPRESENTATION.csv'
-        self.jndfilename = 'TEMP_JND.csv'
-        self.exodatafilename = 'TEMP_EXODATA.csv'
-
         self.stop_event = stop_event
-
-    def create_filenames(self, name, trialtype, description, date, path):
-        """
-        TODO good description
-        """
-        print("Creating filenames")
-        auctionfilename = "{}_{}_{}_AUCTION_{}.csv".format(name, trialtype, description, date)
-        surveyfilename = "{}_{}_{}_SURVEY_{}.csv".format(name, trialtype, description, date)
-        vaspresentationfilename = "{}_{}_{}_VASPRESENTATION_{}.csv".format(name, trialtype, description, date)
-        jndfilename = "{}_{}_{}_JND_{}.csv".format(name, trialtype, description, date)
-        exodatafilename = "{}_{}_{}_EXODATA_{}.csv".format(name, trialtype, description, date)
-
-        self.auctionfilename = os.path.join(path, auctionfilename)
-        self.surveyfilename = os.path.join(path, surveyfilename)
-        self.vaspresentationfilename = os.path.join(path, vaspresentationfilename)
-        self.jndfilename = os.path.join(path, jndfilename)
-        self.exodatafilename = os.path.join(path, exodatafilename)
+        
+        # Get subject info to use for logging filenames across GUI/Exoboot_Wrapper
+        self.subjectID = input("Enter subject ID: ")
+        self.trial_type = 'from_gui'
+        self.description = input("Additional Information: ")
 
     def testconnection(self, request, context):
         print("Testing Connection: {}".format(request.msg))
         self.subject_name = request.msg
         return pb2.receipt(received=True)
     
+    def get_subject_info(self, msg, context):
+        self.trial_type = msg.msg
+        return pb2.subject_info(subjectID=self.subjectID, trial_type=self.trial_type, description=self.description)
+
     def treadmill_state(self, treadmillmsg, context):
         if treadmillmsg.state:
             print("Starting treadmill")
@@ -220,18 +212,6 @@ class LoggingServer(pb2_grpc.logServicer):
         
         print("Received comparison results: {}, {}".format(torques, higher))
         return pb2.receipt(received=True)
-    
-    def set_prefix(self, prefixmsg, context):
-        name = prefixmsg.name
-        trialtype = prefixmsg.trialtype
-        description = prefixmsg.description
-        date = prefixmsg.date
-        path = prefixmsg.path
-
-        print("Received Prefix: {}, {}, {}, {}, {}".format(name, trialtype, description, date, path))
-        self.create_filenames(name, trialtype, description, date, path)
-
-        return pb2.receipt(received=True)
 
     def set_header(self, names):
         # TODO
@@ -259,6 +239,7 @@ def start_auction(client_ip):
         while not stop_event.is_set():
             pass
         server.stop(1.0)
+
     except KeyboardInterrupt:
         print('Goodbye')
         server.stop(1.0)

@@ -15,10 +15,19 @@ from BaseExoThread import BaseThread
 class ExobootCommServicer(pb2_grpc_r.exoboot_over_networkServicer):
     """
     Communication between anything and pi
+
+    This class is rpi side
     """
     def __init__(self, mainwrapper):
         super().__init__()
         self.mainwrapper = mainwrapper
+
+    def send_subject_info(self, infomsg, context):
+        """
+        Set subject info in Exoboot_Wrapper
+        """
+        self.mainwrapper.set_subject_info(infomsg.subjectID, infomsg.trial_type, infomsg.description)
+        return pb2_r.receipt_exoboot(received=True)
 
     def set_pause(self, pause_msg, context):
         pause = pause_msg.mybool
@@ -52,7 +61,7 @@ class ExobootCommServicer(pb2_grpc_r.exoboot_over_networkServicer):
         return pb2_r.receipt_exoboot(received=True)
 
 
-class ExobootRemoteThread(BaseThread):
+class ExobootRemoteServerThread(BaseThread):
     """
     Thread class for receiving remote commands
 
@@ -63,11 +72,11 @@ class ExobootRemoteThread(BaseThread):
     def __init__(self, mainwrapper, name='exoboot_remote_thread', daemon=True, pause_event=Type[threading.Event], quit_event=Type[threading.Event]):
         super().__init__(name=name, daemon=daemon, pause_event=pause_event, quit_event=quit_event)
         self.mainwrapper = mainwrapper
-        self.exoboot_remote_grpc = ExobootCommServicer(self.mainwrapper)
+        self.exoboot_remote_servicer = ExobootCommServicer(self.mainwrapper)
     
     def starting_server(self):
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=5))
-        pb2_grpc_r.add_exoboot_over_networkServicer_to_server(self.exoboot_remote_grpc, server)
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        pb2_grpc_r.add_exoboot_over_networkServicer_to_server(self.exoboot_remote_servicer, server)
         server.add_insecure_port(PI_IP)
         server.start()
         server.wait_for_termination()        
@@ -84,6 +93,11 @@ class ExobootRemoteClient:
     def __init__(self):
         self.channel = grpc.insecure_channel(PI_IP)
         self.stub = pb2_grpc_r.exoboot_over_networkStub(self.channel)
+
+    def send_subject_info(self, subjectID, trial_type, description):
+        infomsg = pb2_r.subject_info_eb(subjectID=subjectID, trial_type=trial_type, description=description)
+        receipt = self.stub.send_subject_info(infomsg)
+        return receipt
 
     def set_pause(self, mybool=False):
         pause_msg = pb2_r.pause(mybool=mybool)

@@ -166,11 +166,16 @@ class VickreyGUI(App):
         sm = ScreenManager()
         self.sm = sm
 
+        # State machine
         sm.statemachine = VA_StateMachine(sm)
-        sm.auction_client = LoggingClient()
-        
+
+        # Client to LoggingServer
+        sm.auction_client = LoggingClient(guiname='VickreyGUI')
+        subjectID, trial_type, description = sm.auction_client.get_subject_info()
+
         # Connect to Exoboot
         sm.exoboot_remote = ExobootRemoteClient()
+        sm.exoboot_remote.send_subject_info(subjectID, trial_type, description)
 
         # # Pause Exos and set torques
         sm.exoboot_remote.set_pause(mybool=True)

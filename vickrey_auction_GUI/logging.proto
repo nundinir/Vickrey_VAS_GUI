@@ -2,12 +2,20 @@ syntax = "proto3";
 // build command: python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. logging.proto
 
 // General Messages
+message null {}
+
 message receipt {
     bool received = 1;
 }
 
 message testmsg {
     string msg = 1;
+}
+
+message subject_info {
+    string subjectID = 1;
+    string trial_type = 2;
+    string description = 3;
 }
 
 message treadmillstate {
@@ -52,14 +60,6 @@ message comparison {
 }
 
 // Logging Messages
-message subject_prefix {
-    string name = 1;
-    string trialtype = 2;
-    string description = 3;
-    string date = 4;
-    string path = 5;
-    }
-
 message header {
     repeated string names = 1;
 }
@@ -72,6 +72,7 @@ message datastream {
 service log {
     // General
     rpc testconnection (testmsg) returns (receipt) {};
+    rpc get_subject_info(testmsg) returns (subject_info);
     rpc treadmill_state (treadmillstate) returns (receipt) {};
     rpc chop (beaver) returns (receipt) {}; // LoggingServer kill message
 
@@ -87,7 +88,6 @@ service log {
     rpc comparison_result (comparison) returns (receipt) {};
 
     // Logging General
-    rpc set_prefix (subject_prefix) returns (receipt) {};
     rpc set_header (header) returns (receipt) {};
     rpc log (datastream) returns (receipt) {};
 }

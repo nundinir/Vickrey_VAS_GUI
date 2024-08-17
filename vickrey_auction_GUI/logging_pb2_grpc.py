@@ -44,6 +44,11 @@ class logStub(object):
                 request_serializer=logging__pb2.testmsg.SerializeToString,
                 response_deserializer=logging__pb2.receipt.FromString,
                 _registered_method=True)
+        self.get_subject_info = channel.unary_unary(
+                '/log/get_subject_info',
+                request_serializer=logging__pb2.testmsg.SerializeToString,
+                response_deserializer=logging__pb2.subject_info.FromString,
+                _registered_method=True)
         self.treadmill_state = channel.unary_unary(
                 '/log/treadmill_state',
                 request_serializer=logging__pb2.treadmillstate.SerializeToString,
@@ -79,11 +84,6 @@ class logStub(object):
                 request_serializer=logging__pb2.comparison.SerializeToString,
                 response_deserializer=logging__pb2.receipt.FromString,
                 _registered_method=True)
-        self.set_prefix = channel.unary_unary(
-                '/log/set_prefix',
-                request_serializer=logging__pb2.subject_prefix.SerializeToString,
-                response_deserializer=logging__pb2.receipt.FromString,
-                _registered_method=True)
         self.set_header = channel.unary_unary(
                 '/log/set_header',
                 request_serializer=logging__pb2.header.SerializeToString,
@@ -102,6 +102,12 @@ class logServicer(object):
     def testconnection(self, request, context):
         """General
         """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def get_subject_info(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -151,15 +157,9 @@ class logServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def set_prefix(self, request, context):
+    def set_header(self, request, context):
         """Logging General
         """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def set_header(self, request, context):
-        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -177,6 +177,11 @@ def add_logServicer_to_server(servicer, server):
                     servicer.testconnection,
                     request_deserializer=logging__pb2.testmsg.FromString,
                     response_serializer=logging__pb2.receipt.SerializeToString,
+            ),
+            'get_subject_info': grpc.unary_unary_rpc_method_handler(
+                    servicer.get_subject_info,
+                    request_deserializer=logging__pb2.testmsg.FromString,
+                    response_serializer=logging__pb2.subject_info.SerializeToString,
             ),
             'treadmill_state': grpc.unary_unary_rpc_method_handler(
                     servicer.treadmill_state,
@@ -211,11 +216,6 @@ def add_logServicer_to_server(servicer, server):
             'comparison_result': grpc.unary_unary_rpc_method_handler(
                     servicer.comparison_result,
                     request_deserializer=logging__pb2.comparison.FromString,
-                    response_serializer=logging__pb2.receipt.SerializeToString,
-            ),
-            'set_prefix': grpc.unary_unary_rpc_method_handler(
-                    servicer.set_prefix,
-                    request_deserializer=logging__pb2.subject_prefix.FromString,
                     response_serializer=logging__pb2.receipt.SerializeToString,
             ),
             'set_header': grpc.unary_unary_rpc_method_handler(
@@ -256,6 +256,33 @@ class log(object):
             '/log/testconnection',
             logging__pb2.testmsg.SerializeToString,
             logging__pb2.receipt.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def get_subject_info(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/log/get_subject_info',
+            logging__pb2.testmsg.SerializeToString,
+            logging__pb2.subject_info.FromString,
             options,
             channel_credentials,
             insecure,
@@ -444,33 +471,6 @@ class log(object):
             target,
             '/log/comparison_result',
             logging__pb2.comparison.SerializeToString,
-            logging__pb2.receipt.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def set_prefix(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/log/set_prefix',
-            logging__pb2.subject_prefix.SerializeToString,
             logging__pb2.receipt.FromString,
             options,
             channel_credentials,
