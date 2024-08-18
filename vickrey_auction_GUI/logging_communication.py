@@ -131,6 +131,9 @@ class LoggingServer(pb2_grpc.logServicer):
         self.trial_type = 'from_gui'
         self.description = input("Additional Information: ")
 
+        self.set_file_prefix()
+
+    def set_file_prefix(self):
         self.file_prefix = '{}_{}_{}'.format(self.subjectID, self.trial_type, self.description)
 
     def testconnection(self, request, context):
@@ -140,6 +143,7 @@ class LoggingServer(pb2_grpc.logServicer):
     
     def get_subject_info(self, msg, context):
         self.trial_type = msg.msg
+        self.set_file_prefix()
         return pb2.subject_info(subjectID=self.subjectID, trial_type=self.trial_type, description=self.description)
 
     def treadmill_state(self, treadmillmsg, context):
