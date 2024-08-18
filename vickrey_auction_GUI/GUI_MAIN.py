@@ -171,7 +171,7 @@ class VickreyGUI(App):
 
         # Client to LoggingServer
         sm.logging_client = LoggingClient(guiname='VickreyGUI')
-        subjectID, trial_type, description = sm.logging_client.get_subject_info()
+        subjectID, trial_type, description = sm.logging_client.get_subject_info(trial_type='Vickrey')
 
         # Connect to Exoboot
         sm.exoboot_remote = ExobootRemoteClient()

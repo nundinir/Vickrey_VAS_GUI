@@ -131,6 +131,8 @@ class LoggingServer(pb2_grpc.logServicer):
         self.trial_type = 'from_gui'
         self.description = input("Additional Information: ")
 
+        self.file_prefix = '{}_{}_{}'.format(self.subjectID, self.trial_type, self.description)
+
     def testconnection(self, request, context):
         print("Testing Connection: {}".format(request.msg))
         self.subject_name = request.msg
@@ -163,7 +165,9 @@ class LoggingServer(pb2_grpc.logServicer):
 
         print("Received auction results: {}, {}, {}, {}, {}".format(t, subject_bid, user_win_flag, current_payout, total_winnings))
         datalist = [t, subject_bid, user_win_flag, current_payout, total_winnings]
-        with open(self.auctionfilename, 'a', newline='') as f:
+
+        auction_filename = self.file_prefix + '_auction.csv'
+        with open(auction_filename, 'a', newline='') as f:
             csv.writer(f).writerow(datalist)
 
         return pb2.receipt(received=True)
@@ -175,7 +179,9 @@ class LoggingServer(pb2_grpc.logServicer):
 
         print("Received survey results: {}, {}, {}".format(t, enjoyment, rpe))
         datalist = [t, enjoyment, rpe]
-        with open(self.surveyfilename, 'a', newline='') as f:
+
+        surveyfilename = self.file_prefix + '_survey.csv'
+        with open(surveyfilename, 'a', newline='') as f:
             csv.writer(f).writerow(datalist)
 
         return pb2.receipt(received=True)
