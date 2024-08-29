@@ -10,10 +10,12 @@ from kivy.uix.image import Image, AsyncImage
 from kivy.clock import Clock
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import StringProperty, NumericProperty
+from kivy.core.window import Window
 
-import grpc
-import auction_pb2 as pb2
-import auction_pb2_grpc as pb2_grpc
+from logging_communication import LoggingClient
+from exoboot_remote_control import ExobootRemoteClient
+
+from BertecMan import Bertec
 
 from constants import *
 from auction_schedules import *
@@ -40,6 +42,12 @@ def startbttn_CB(instance):
     sm = instance.parent.parent
     if sm.statemachine.auction_tally > 0:
         sm.statemachine.send_treadmill_msg(sm.statemachine.state)
+        
+        # Start treadmill and unpause exoboots
+        sm.bertec.write_command(BERTEC_SPEED_RIGHT, BERTEC_SPEED_LEFT, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+        sm.exoboot_remote.set_pause(mybool=False)
+        sm.exoboot_remote.set_torques(peak_torque_left=PEAK_TORQUE_LEFT, peak_torque_right=PEAK_TORQUE_RIGHT)
+
     sm.statemachine.next_screen()
 
 def enjoyment_cb(instance):
@@ -145,52 +153,39 @@ class CountDownTimer(Label):
     def on_dur(self, instance, value):
         self.text = '{:.2f}'.format(value)
 
-# GRPC object
-class CallerGRPC:
-    def __init__(self):
-        self.channel = grpc.insecure_channel(SERVER_IP)
-        self.stub = pb2_grpc.auctionStub(self.channel)
-        self.testconnection()
 
-    def testconnection(self):
-        # Send testmsg to AuctionHouse
-        msg = pb2.testmsg(msg="Hello there")
-        response = self.stub.testconnection(msg)
-        
-        # See response received
-        if response:
-            print("Connection Successful\n")
-        else:
-            raise ConnectionError("AuctionHouse connection unsuccessful.")
+class VickreyGUI(App):
+    """
+    Creates screen manager to run Vickrey Auction
 
-    def call(self, t, subject_bid, user_win_flag, current_payout, total_winnings):
-        resultmsg = pb2.result(t=t,
-                         subject_bid=subject_bid,
-                         user_win_flag=user_win_flag,
-                         current_payout=current_payout,
-                         total_winnings=total_winnings
-                         )
-        response = self.stub.call(resultmsg)
-        return response
-    
-    def question(self, t, enjoyment, rpe):
-        surveymsg = pb2.survey(t=t, enjoyment=enjoyment, rpe=rpe)
-        response = self.stub.question(surveymsg)
-        return response
-    
-    def treadmill_message(self, state):
-        treadmillmsg = pb2.treadmill(state=state)
-        response = self.stub.treadmill_message(treadmillmsg)
-        return response
-
-
-# Combines kivy screen manager, statemachine, and GRPC into app
-class CallerGUI(App):
+    logging_client  - communicates with auctionhouse server for logging of bids and surveys
+    exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
+    bertec          - Remote control of Bertec treadmill
+    """
     def build(self):
         sm = ScreenManager()
-        sm.statemachine = VA_StateMachine(sm)
-        sm.callergrpc = CallerGRPC()
+        self.sm = sm
 
+        # State machine
+        sm.statemachine = VA_StateMachine(sm)
+
+        # Client to LoggingServer
+        sm.logging_client = LoggingClient(guiname='VickreyGUI')
+        subjectID, trial_type, description = sm.logging_client.get_subject_info(trial_type='Vickrey')
+
+        # Connect to Exoboot
+        sm.exoboot_remote = ExobootRemoteClient()
+        sm.exoboot_remote.send_subject_info(subjectID, trial_type, description)
+
+        # # Pause Exos and set torques
+        sm.exoboot_remote.set_pause(mybool=True)
+        sm.exoboot_remote.set_torques(peak_torque_left=PEAK_TORQUE_LEFT, peak_torque_right=PEAK_TORQUE_RIGHT)
+
+        # Bertec over network thread
+        sm.bertec = Bertec()
+        sm.bertec.start()
+
+        # Vickrey bids
         sm.previous_bid = ''
         sm.bid = ''
 
@@ -211,12 +206,6 @@ class CallerGUI(App):
         numpad = buildNumPadScreen(sm)
 
         survey = buildsurveyscreen(sm)
-
-        # waitingscreen = Screen(name="waitingscreen")
-        # waitingscreen.label = Label(text="", color =(1, 1, 1, 1))
-        # waitingscreen.add_widget(waitingscreen.label)
-        # waitingscreen.on_pre_enter = partial(waitingscreen_pre_enter, waitingscreen, sm)
-        # waitingscreen.on_enter = partial(waitingscreen_schedule, sm)
 
         # Result screens: 4 cases
         sm.continuewalkingscreen = Screen(name="continuewalkingscreen")
@@ -244,7 +233,6 @@ class CallerGUI(App):
         sm.add_widget(pushtostartscreen)
         sm.add_widget(numpad)
         sm.add_widget(survey)
-        # sm.add_widget(waitingscreen)
         sm.add_widget(sm.continuewalkingscreen)
         sm.add_widget(sm.startwalkingscreen)
         sm.add_widget(sm.stopwalkingscreen)
@@ -252,9 +240,27 @@ class CallerGUI(App):
 
         # Switch from dummy to startscreen to run on_enter
         sm.current = "pushtostartscreen"
-        # sm.current = "survey"
+
+        # Run on_request_close before exiting window
+        def on_request_close(self, *args):
+            """
+            Stop Bertec treadmill and close Bertec
+            Shutdown exoboots remotely
+            """
+            print("Closing Bertec")
+            sm.bertec.write_command(0, 0, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+            sm.bertec.stop()
+
+            print("Exiting Logging Server")
+            sm.logging_client.chop()
+
+            print("Shutting down exoboots")
+            sm.exoboot_remote.set_quit(mybool=True)
+            print("Goodbye")
+        Window.bind(on_request_close=partial(on_request_close, sm))
 
         return sm
 
+
 if __name__ == "__main__":
-    CallerGUI().run()
+    VickreyGUI().run()

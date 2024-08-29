@@ -1,12 +1,25 @@
+# Bertec speed
+BERTEC_SPEED_STOP = 0.0
+
+BERTEC_SPEED_LEFT = 1.0
+BERTEC_SPEED_RIGHT = 1.0    
+
+BERTEC_ACC_LEFT = 0.5
+BERTEC_ACC_RIGHT = 0.5
+
+# Exoboot Peak torques
+PEAK_TORQUE_LEFT = 25
+PEAK_TORQUE_RIGHT = 25
+
 # Bid settings
 MAX_BID = 100
 
 # Speed up auction time by squeeze factor FOR TESTING
-squeeze = 1
+squeeze = 20
 
-# SERVER_IP = f"{'67.194.47.115'}:" f"{'50051'}"   # IP address of the Controller (rPi)
-SERVER_IP = "localhost:50051"    # for local testing
-
+SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
+# SERVER_IP = "localhost:50051"    # IP address of local machine
+PI_IP = f"{'35.3.134.250'}:" f"{'50051'}"
 CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
 # Auction timings in seconds

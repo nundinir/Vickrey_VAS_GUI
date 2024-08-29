@@ -37,11 +37,11 @@ class LoggingClient:
         else:
             raise ConnectionError("AuctionServer connection unsuccessful.")
     
-    def get_subject_info(self):
+    def get_subject_info(self, trial_type):
         """
         Sends null message to LoggingServer to get subject details
         """
-        subject_info = self.stub.get_subject_info(pb2.testmsg(msg='TOREMOVE'))
+        subject_info = self.stub.get_subject_info(pb2.testmsg(msg=trial_type))
         return subject_info.subjectID, subject_info.trial_type, subject_info.description
 
     def chop(self):
@@ -128,10 +128,12 @@ class LoggingServer(pb2_grpc.logServicer):
         
         # Get subject info to use for logging filenames across GUI/Exoboot_Wrapper
         self.subjectID = input("Enter subject ID: ")
-        # TODO add trial type verification loop
-        self.trial_type = input('Enter trial type (Vickrey, VAS, JND): ')
+        self.trial_type = 'from_gui'
         self.description = input("Additional Information: ")
 
+        self.set_file_prefix()
+
+    def set_file_prefix(self):
         self.file_prefix = '{}_{}_{}'.format(self.subjectID, self.trial_type, self.description)
 
     def testconnection(self, request, context):
@@ -140,7 +142,8 @@ class LoggingServer(pb2_grpc.logServicer):
         return pb2.receipt(received=True)
     
     def get_subject_info(self, msg, context):
-        # TODO remove msg
+        self.trial_type = msg.msg
+        self.set_file_prefix()
         return pb2.subject_info(subjectID=self.subjectID, trial_type=self.trial_type, description=self.description)
 
     def treadmill_state(self, treadmillmsg, context):

@@ -4,12 +4,12 @@ BERTEC_SPEED_STOP = 0.0
 BERTEC_SPEED_LEFT = 1.0
 BERTEC_SPEED_RIGHT = 1.0    
 
-BERTEC_ACC_LEFT = 0.5
-BERTEC_ACC_RIGHT = 0.5
+BERTEC_ACC_LEFT = 0.25
+BERTEC_ACC_RIGHT = 0.25
 
 # Exoboot Peak torques
-PEAK_TORQUE_LEFT = 25
-PEAK_TORQUE_RIGHT = 25
+PEAK_TORQUE_LEFT = 40
+PEAK_TORQUE_RIGHT = 40
 
 # Bid settings
 MAX_BID = 100
@@ -19,7 +19,7 @@ squeeze = 20
 
 SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
 # SERVER_IP = "localhost:50051"    # IP address of local machine
-PI_IP = f"{'35.3.134.250'}:" f"{'50051'}"
+PI_IP = f"{'35.3.206.241'}:" f"{'50051'}"
 CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
 # Auction timings in seconds
@@ -33,6 +33,11 @@ RESULT_SHOW = 100/squeeze
 k_RB = 0.4395073979128712
 b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
 ROBOWALK_DUR = 2 # minutes
+
+# VAS Trial/Presentation Dicts
+BTN_NUMS = [4, 12]
+MAX_TRIALS_DICT = {4: 3, 12: 2}
+MAX_PRESENTATIONS_DICT = {4: 3, 12: 1}
 
 # Other Functions
 def decimal_format(str):
