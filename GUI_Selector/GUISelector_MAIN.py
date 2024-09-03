@@ -22,8 +22,7 @@ if __name__ == "__main__":
     match trial_type.upper():
         case 'VICKREY':
             print("VICKREY")
-            vg = VickreyGUI(exoboot_remote, bertec)
-            vg.run()
+            VickreyGUI(exoboot_remote, bertec).run()
         case 'VAS':
             # VASGUI(exoboot_remote, exoboot_remote, bertec).run()
             pass

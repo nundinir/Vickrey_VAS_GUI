@@ -18,6 +18,7 @@ class ExobootRemoteClient:
     def __init__(self, server_IP):
         self.channel = grpc.insecure_channel(server_IP)
         self.stub = pb2_grpc.exoboot_over_networkStub(self.channel)
+        self.startstamp = 0
 
     def set_pause(self, mybool=False):
         pause_msg = pb2.pause(mybool=mybool)
@@ -47,6 +48,13 @@ class ExobootRemoteClient:
         else:
             raise ConnectionError("AuctionServer connection unsuccessful.")
     
+    def set_startstamp(self):
+        """
+        Synchronize logging using startstamp reference from rpi
+        """
+        startstampmsg = self.stub.set_startstamp(pb2.null)
+        self.startstamp = startstampmsg.time 
+
     def get_subject_info(self):
         """
         Sends null message to LoggingServer to get subject details
@@ -59,15 +67,6 @@ class ExobootRemoteClient:
         Kill LoggingServer from client(GUI)
         """
         response = self.stub.chop(pb2.beaver())
-        return response
-
-    def treadmill_state(self, state):
-        """
-        Sends treadmill state
-        TODO redo message to include data from Bertec class
-        """
-        treadmillmsg = pb2.treadmillstate(state=state)
-        response = self.stub.treadmill_state(treadmillmsg)
         return response
 
     def call(self, t, subject_bid, user_win_flag, current_payout, total_winnings):
@@ -129,10 +128,10 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
 
     This class is rpi side
     """
-    def __init__(self, mainwrapper, quit_event):
+    def __init__(self, mainwrapper, startstamp, quit_event):
         super().__init__()
         self.mainwrapper = mainwrapper
-
+        self.startstamp = startstamp
         self.quit_event = quit_event
         
         # Get subject info to use for logging filenames across GUI/Exoboot_Wrapper
@@ -147,6 +146,9 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         print("Testing Connection: {}".format(request.msg))
         self.subject_name = request.msg
         return pb2.receipt(received=True)
+    
+    def set_startstamp(self, nullmsg, context):
+        return pb2.startstamp(time=self.startstamp)
     
     def get_subject_info(self, msg, context):
         # TODO remove msg
@@ -279,13 +281,13 @@ class ExobootRemoteServerThread(BaseThread):
     Thread class for receiving remote commands
 
     Runs until quit_event is cleared
-     
+
     Does not pause
     """
-    def __init__(self, mainwrapper, name='exoboot_remote_thread', daemon=True, pause_event=Type[threading.Event], quit_event=Type[threading.Event]):
+    def __init__(self, mainwrapper, startstamp, name='exoboot_remote_thread', daemon=True, pause_event=Type[threading.Event], quit_event=Type[threading.Event]):
         super().__init__(name=name, daemon=daemon, pause_event=pause_event, quit_event=quit_event)
         self.mainwrapper = mainwrapper
-        self.exoboot_remote_servicer = ExobootCommServicer(self.mainwrapper, quit_event=self.quit_event)
+        self.exoboot_remote_servicer = ExobootCommServicer(self.mainwrapper, startstamp, quit_event=self.quit_event)
         self.target_IP = ''
     
     def set_target_IP(self, target_IP):

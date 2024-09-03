@@ -67,6 +67,7 @@ class DumbGSE:
 
 class DumbWrapper:
     def __init__(self):
+        self.startstamp = time.perf_counter()
         self.pause_event = threading.Event()
         self.quit_event = threading.Event()
         self.pause_event.set()
@@ -74,7 +75,7 @@ class DumbWrapper:
 
         self.gse_thread = DumbGSE()
 
-        self.remote_thread = ExobootRemoteServerThread(self, pause_event=self.pause_event, quit_event=self.quit_event)
+        self.remote_thread = ExobootRemoteServerThread(self, self.startstamp, pause_event=self.pause_event, quit_event=self.quit_event)
         self.remote_thread.set_target_IP("[::]:50051")
         self.remote_thread.start()
 

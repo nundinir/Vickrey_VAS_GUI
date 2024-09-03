@@ -60,6 +60,11 @@ class exoboot_over_networkStub(object):
                 request_serializer=exoboot__remote__pb2.testmsg.SerializeToString,
                 response_deserializer=exoboot__remote__pb2.receipt.FromString,
                 _registered_method=True)
+        self.set_startstamp = channel.unary_unary(
+                '/exoboot_over_network/set_startstamp',
+                request_serializer=exoboot__remote__pb2.null.SerializeToString,
+                response_deserializer=exoboot__remote__pb2.startstamp.FromString,
+                _registered_method=True)
         self.get_subject_info = channel.unary_unary(
                 '/exoboot_over_network/get_subject_info',
                 request_serializer=exoboot__remote__pb2.testmsg.SerializeToString,
@@ -133,6 +138,12 @@ class exoboot_over_networkServicer(object):
     def testconnection(self, request, context):
         """Logging Commands
         """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def set_startstamp(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -217,6 +228,11 @@ def add_exoboot_over_networkServicer_to_server(servicer, server):
                     servicer.testconnection,
                     request_deserializer=exoboot__remote__pb2.testmsg.FromString,
                     response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
+            ),
+            'set_startstamp': grpc.unary_unary_rpc_method_handler(
+                    servicer.set_startstamp,
+                    request_deserializer=exoboot__remote__pb2.null.FromString,
+                    response_serializer=exoboot__remote__pb2.startstamp.SerializeToString,
             ),
             'get_subject_info': grpc.unary_unary_rpc_method_handler(
                     servicer.get_subject_info,
@@ -373,6 +389,33 @@ class exoboot_over_network(object):
             '/exoboot_over_network/testconnection',
             exoboot__remote__pb2.testmsg.SerializeToString,
             exoboot__remote__pb2.receipt.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def set_startstamp(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/exoboot_over_network/set_startstamp',
+            exoboot__remote__pb2.null.SerializeToString,
+            exoboot__remote__pb2.startstamp.FromString,
             options,
             channel_credentials,
             insecure,
