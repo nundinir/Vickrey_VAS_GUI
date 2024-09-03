@@ -1,0 +1,93 @@
+syntax = "proto3";
+// build command: python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. logging.proto
+
+// General Messages
+message null {}
+
+message receipt {
+    bool received = 1;
+}
+
+message testmsg {
+    string msg = 1;
+}
+
+message subject_info {
+    string subjectID = 1;
+    string trial_type = 2;
+    string description = 3;
+}
+
+message treadmillstate {
+    bool state = 1;
+}
+
+message beaver {}
+
+// Vickrey Auction Messages
+message result {
+    float t = 1;
+    float subject_bid = 2;
+    bool user_win_flag = 3;
+    float current_payout = 4;
+    float total_winnings = 5;
+}
+
+message survey {
+    float t = 1;
+    float enjoyment = 2;
+    float rpe = 3;
+}
+
+// VAS Messages
+message slider {
+    float torque = 1;
+    float pos = 2;
+}
+
+message presentation {
+    float trial = 1;
+    float pres_num = 2;
+    repeated float torques = 3;
+    repeated float pos = 4; 
+}
+
+// JND Messages
+message comparison {
+    float t = 1;
+    repeated float torques = 2;
+    float higher = 3;
+}
+
+// Logging Messages
+message header {
+    repeated string names = 1;
+}
+
+message datastream {
+    repeated string data = 1;
+}
+
+
+service log {
+    // General
+    rpc testconnection (testmsg) returns (receipt) {};
+    rpc get_subject_info(testmsg) returns (subject_info);
+    rpc treadmill_state (treadmillstate) returns (receipt) {};
+    rpc chop (beaver) returns (receipt) {}; // LoggingServer kill message
+
+    // Vickrey Auction Specific
+    rpc call (result) returns (receipt) {};
+    rpc question (survey) returns (receipt) {};
+
+    //VAS Specific
+    rpc slider_update (slider) returns (receipt) {};
+    rpc presentation_result (presentation) returns (receipt) {};
+
+    //JND Specific
+    rpc comparison_result (comparison) returns (receipt) {};
+
+    // Logging General
+    rpc set_header (header) returns (receipt) {};
+    rpc log (datastream) returns (receipt) {};
+}
