@@ -8,16 +8,17 @@ BERTEC_ACC_LEFT = 0.25
 BERTEC_ACC_RIGHT = 0.25
 
 # Exoboot Peak torques
-PEAK_TORQUE_LEFT = 40
-PEAK_TORQUE_RIGHT = 40
+PEAK_TORQUE_LEFT = 0
+PEAK_TORQUE_RIGHT = 0
 
 # Bid settings
 MAX_BID = 100
 
 # Speed up auction time by squeeze factor FOR TESTING
-squeeze = 20
+squeeze = 1
 
-SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
+# SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
+SERVER_IP = f"{'35.3.80.31'}:" f"{'50051'}"    # IP address of local machine
 # SERVER_IP = "localhost:50051"    # IP address of local machine
 PI_IP = f"{'35.3.206.241'}:" f"{'50051'}"
 CLIENT_IP = "[::]:50051"   # IP address of the tablet
