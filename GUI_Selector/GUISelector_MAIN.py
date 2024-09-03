@@ -15,13 +15,13 @@ if __name__ == "__main__":
     subjectID, trial_type, description = exoboot_remote.get_subject_info()
 
     print(subjectID, trial_type, description)
-    time.sleep(1.0)
 
     # Start Bertec
     bertec = DumbBertec()#Bertec()
 
-    match trial_type:
-        case 'Vickrey':
+    match trial_type.upper():
+        case 'VICKREY':
+            print("VICKREY")
             vg = VickreyGUI(exoboot_remote, bertec)
             vg.run()
         case 'VAS':
