@@ -39,6 +39,11 @@ BTN_NUMS = [4, 12]
 MAX_TRIALS_DICT = {4: 3, 12: 2}
 MAX_PRESENTATIONS_DICT = {4: 3, 12: 1}
 
+# MV
+# TODO import from csv
+EPO_MV = 3.4
+NPO_MV = -18.60
+
 # Other Functions
 def decimal_format(str):
     withsigdigs = '0' * max(3 - len(str), 0) + str

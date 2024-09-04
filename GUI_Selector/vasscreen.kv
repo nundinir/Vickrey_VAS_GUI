@@ -1,6 +1,7 @@
 #this file is used to define the layout of the GUI
 #:import Factory kivy.factory.Factory
 #:import utils kivy.utils
+#:import partial collections
 
 #This describes the layout and the orientation of the VAS GUI
 <GuiVas>:
@@ -29,7 +30,7 @@
                 id: slider_layout
                 orientation: 'vertical'
                 size_hint_y: 0.8
-                on_kv_post: root.create_sliders()
+                on_kv_post: partial(root.create_sliders(), app.root.ids.screen_manager)
             
             BoxLayout:
                 id: right_label
@@ -64,3 +65,5 @@
                 background_color: utils.get_color_from_hex('#004B8D')
                 on_press: root.confirm_button_pressed()
 
+<MyScreenManager>:
+    id: screen_manager

@@ -17,7 +17,8 @@ from BertecMan import Bertec
 from constants import *
 from vickrey_schedules import *
 from vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen
-# from vas_screens import VAS_GUIApp
+from vas_screens import buildpushtostartscreenvas, buildvasscreen
+from vas_schedules import *
 from statemachine import VickreyStateMachine, VASStateMachine
 
 class BaseGui(App):
@@ -31,6 +32,7 @@ class BaseGui(App):
 
         # Pause Exos and set torques
         self.sm.exoboot_remote.set_pause(mybool=True)
+        # TODO adjust peak torques based on EPO/NPO
         self.sm.exoboot_remote.set_torques(peak_torque_left=PEAK_TORQUE_LEFT, peak_torque_right=PEAK_TORQUE_RIGHT)
 
         # Bertec over network thread
@@ -64,7 +66,7 @@ class VickreyGUI(BaseGui):
     bertec          - Remote control of Bertec treadmill
     """
     def __init__(self, exoboot_remote_client, bertec):
-        super().__init__(name='Vickrey', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+        super().__init__(name='VICKREY', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
 
     def build(self):
         self.sm.statemachine = VickreyStateMachine(self.sm)
@@ -124,40 +126,42 @@ class VickreyGUI(BaseGui):
 
         return self.sm
     
-# class VASGUI(BaseGui):
-#     """
-#     Creates screen manager to run Vickrey Auction
+class VASGUI(BaseGui):
+    """
+    Creates screen manager to run Vickrey Auction
 
-#     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
-#     bertec          - Remote control of Bertec treadmill
-#     """
-#     def __init__(self):
-#         super().__init__(self, 'VAS')
+    exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
+    bertec          - Remote control of Bertec treadmill
+    """
+    def __init__(self, exoboot_remote_client, bertec):
+        super().__init__(name='VAS', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
 
-#     def build(self):
-#         # State machine
-#         self.sm.statemachine = VASStateMachine(self.sm)
+    def build(self):
+        # State machine
+        self.sm.statemachine = VASStateMachine(self.sm)
 
-#         label_fontsize = '50'
+        label_fontsize = '50'
 
-#         # Create Screens
-#         dummyscreen = Screen(name="dummy")
+        # Create Screens
+        dummyscreen = Screen(name="dummy")
 
-#         # TODO VAS pushtostartscreen
-#         pushtostartscreen = buildpushtostartscreen(self.sm, label_fontsize)
+        # TODO VAS pushtostartscreen
+        pushtostartscreen = buildpushtostartscreenvas(self.sm, label_fontsize)
 
-#         vasscreen = VAS_GUIApp(self.sm).build()
+        self.sm.vasscreen = buildvasscreen(self.sm)#VAS_GUIApp(self.sm).build()
+        print(type(self.sm.vasscreen))
+        self.sm.vasscreen.on_enter = partial(vas_schedule, self.sm)
 
-#         finishscreen = Screen(name='finishscreen')
-#         # TODO add kill method
+        finishscreen = Screen(name='finishscreen')
+        # TODO add kill method
 
-#         # Add screens to ScreenManager
-#         self.sm.add_widget(dummyscreen)
-#         self.sm.add_widget(pushtostartscreen)
-#         self.sm.add_widget(vasscreen)
-#         self.sm.add_widget(finishscreen)
+        # Add screens to ScreenManager
+        self.sm.add_widget(dummyscreen)
+        self.sm.add_widget(pushtostartscreen)
+        self.sm.add_widget(self.sm.vasscreen)
+        self.sm.add_widget(finishscreen)
 
-#         # Switch from dummy to startscreen to run on_enter
-#         self.sm.current = "pushtostartscreen"
+        # Switch from dummy to startscreen to run on_enter
+        self.sm.current = "pushtostartscreen"
 
-#         return self.sm
+        return self.sm

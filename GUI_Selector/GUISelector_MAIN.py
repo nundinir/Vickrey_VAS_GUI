@@ -4,7 +4,7 @@ from test_server import DumbBertec
 from BertecMan import Bertec
 from exoboot_remote_control import ExobootRemoteClient
 
-from gui_apps import VickreyGUI
+from gui_apps import VickreyGUI, VASGUI
 from constants import SERVER_IP
 
 if __name__ == "__main__":
@@ -24,5 +24,5 @@ if __name__ == "__main__":
             print("VICKREY")
             VickreyGUI(exoboot_remote, bertec).run()
         case 'VAS':
-            # VASGUI(exoboot_remote, exoboot_remote, bertec).run()
+            VASGUI(exoboot_remote, bertec).run()
             pass
