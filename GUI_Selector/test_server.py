@@ -1,4 +1,4 @@
-import time, threading
+import sys, time, threading
 
 from exoboot_remote_control import ExobootRemoteServerThread
 
@@ -60,18 +60,25 @@ class DumbGSE:
         self.peak_torque_right = 0
 
     def set_peak_torque_left(self, T):
+        print("Set Peak Torque Left: {}".format(T))
         self.peak_torque_left = T
     
     def set_peak_torque_right(self, T):
+        print("Set Peak Torque Right: {}".format(T))
         self.peak_torque_right = T
 
 class DumbWrapper:
-    def __init__(self):
+    def __init__(self, trial_type):
         self.startstamp = time.perf_counter()
         self.pause_event = threading.Event()
         self.quit_event = threading.Event()
         self.pause_event.set()
         self.quit_event.set()
+
+        self.subjectID = 'dummy'
+        self.trial_type = trial_type
+        self.description = 'desc'
+        self.file_prefix = "{}_{}_{}".format(self.subjectID, self.trial_type, self.description)
 
         self.gse_thread = DumbGSE()
 
@@ -88,7 +95,8 @@ if __name__ == "__main__":
     Run auction server
     """
     try:
-        dumb_wrapper = DumbWrapper()
+        trial_type = sys.argv[1]
+        dumb_wrapper = DumbWrapper(trial_type)
         dumb_wrapper.run()
 
     except KeyboardInterrupt:

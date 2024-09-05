@@ -1,7 +1,9 @@
+import random
 import numpy as np
 
 from constants import *
 from Robobidders import *
+from jnd_utils import jnd_comparitor
 
 from constants import BTN_NUMS, MAX_TRIALS_DICT, MAX_PRESENTATIONS_DICT
 
@@ -179,6 +181,64 @@ class VASStateMachine:
             print("BTN_NUM/Trial/Presentation: {}/{}/{}".format(self.current_btn, self.current_trial, self.current_presentation))
         else:
             self.quit_flag = True
+
+    def next_screen(self, *vargs):
+        # Ignore vargs. exists so next can be called by Clock.schedule_once
+        if self.quit_flag:
+            self.sm.current = 'finishscreen'
+        else:
+            self.sm.current = self.next_screen_dict[self.sm.current]
+
+
+class JNDStateMachine:
+    def __init__(self, screenmanager, jnd_type='splitleg'):
+        self.sm = screenmanager
+        self.jnd_type = jnd_type
+        
+        self.pres_num = 0
+
+        # JND Comparitor
+        self.comparitor = jnd_comparitor(num_bins=21, prop_low=0.3, prop_high=2.0, ref_low=15, ref_high=35, torque_min=7.5, torque_max=40)
+
+        # State tracking
+        self.pres = 0
+        self.prop = 0
+        self.T_ref = 0
+        self.T_comp = 0
+        self.truth = 0
+
+        # Quit flag
+        self.quit_flag = False
+
+        # Screen states dictionary
+        self.next_screen_dict = {"dummy": "pushtostartscreenjnd"}
+
+        # Next screen based on jnd type
+        match jnd_type:
+            case 'splitleg':
+                self.next_screen_dict["pushtostartscreenjnd"] = "splitlegscreen"
+            case 'sameleg':
+                self.next_screen_dict["pushtostartscreenjnd"] = "samelegscreen"
+
+    def report_higher(self, signature):
+        self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature)
+        self.next_comparison()
+
+    def next_comparison(self):
+        self.prop, self.T_ref, self.T_comp, truth = self.comparitor.generate_comparison()
+
+        if random.getrandbits(1):
+            peak_torque_left = self.T_ref
+            peak_torque_right = self.T_comp
+            self.truth = int(truth)
+        else:
+            peak_torque_left = self.T_comp
+            peak_torque_right = self.T_ref
+            self.truth = int(not truth)
+
+        self.sm.exoboot_remote.set_torques(peak_torque_left=peak_torque_left, peak_torque_right=peak_torque_right)
+
+        self.pres += 1
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once

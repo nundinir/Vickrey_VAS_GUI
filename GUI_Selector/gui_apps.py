@@ -18,8 +18,10 @@ from constants import *
 from vickrey_schedules import *
 from vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen
 from vas_screens import buildpushtostartscreenvas, buildvasscreen
+from jnd_screens import buildpushtostartscreenjnd, buildsplitlegscreen
 from vas_schedules import *
-from statemachine import VickreyStateMachine, VASStateMachine
+from jnd_schedules import splitlegschedule
+from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine
 
 class BaseGui(App):
     def __init__(self, name, exoboot_remote_client, bertec):
@@ -163,5 +165,39 @@ class VASGUI(BaseGui):
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreen"
+
+        return self.sm
+
+class JNDGUI(BaseGui):
+    """
+    Creates screen manager to run Vickrey Auction
+
+    exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
+    bertec          - Remote control of Bertec treadmill
+    """
+    def __init__(self, exoboot_remote_client, bertec):
+        super().__init__(name='JND', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+
+    def build(self):
+        self.sm.statemachine = JNDStateMachine(self.sm)
+
+        # Create Screens
+        dummyscreen = Screen(name="dummy")
+
+        pushtostartscreenjnd = buildpushtostartscreenjnd(self.sm)
+
+        splitlegscreen = buildsplitlegscreen(self.sm)
+        splitlegscreen.on_enter = partial(splitlegschedule, self.sm)
+
+        finishscreen = Screen(name="finish")
+
+        # Add screens to ScreenManager
+        self.sm.add_widget(dummyscreen)
+        self.sm.add_widget(pushtostartscreenjnd)
+        self.sm.add_widget(splitlegscreen)
+        self.sm.add_widget(finishscreen)
+
+        # Switch from dummy to startscreen to run on_enter
+        self.sm.current = "pushtostartscreenjnd"
 
         return self.sm
