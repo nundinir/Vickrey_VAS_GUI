@@ -29,4 +29,4 @@ class jnd_comparitor:
             # Loop limit
             count += 1
 
-        return prop, T_ref, T_comp, math.floor(prop)
+        return prop, T_ref, T_comp, min(math.floor(prop), 1)

@@ -191,14 +191,12 @@ class VASStateMachine:
 
 
 class JNDStateMachine:
-    def __init__(self, screenmanager, jnd_type='splitleg'):
+    def __init__(self, screenmanager, jnd_type='SPLITLEG'):
         self.sm = screenmanager
-        self.jnd_type = jnd_type
-        
-        self.pres_num = 0
+        self.jnd_type = jnd_type.upper()
 
         # JND Comparitor
-        self.comparitor = jnd_comparitor(num_bins=21, prop_low=0.3, prop_high=2.0, ref_low=15, ref_high=35, torque_min=7.5, torque_max=40)
+        self.comparitor = jnd_comparitor(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_low=REF_LOW, ref_high=REF_HIGH, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
 
         # State tracking
         self.pres = 0
@@ -207,43 +205,93 @@ class JNDStateMachine:
         self.T_comp = 0
         self.truth = 0
 
+        # Time limit
+        self.subtrial_limit = False
+
         # Quit flag
         self.quit_flag = False
 
         # Screen states dictionary
-        self.next_screen_dict = {"dummy": "pushtostartscreenjnd"}
+        self.next_screen_dict = {"dummy": "pushtostartscreenjnd",
+                                 "waitingscreenjnd": "pushtostartscreenjnd"}
 
         # Next screen based on jnd type
         match jnd_type:
-            case 'splitleg':
+            case 'SPLITLEG':
+                # Set Split Leg Funcs
+                self.next_comparison = self.next_comparison_split
+                self.report_higher = self.report_higher_split
+
+                self.peak_torque_left = 0
+                self.peak_torque_right = 0
+
                 self.next_screen_dict["pushtostartscreenjnd"] = "splitlegscreen"
-            case 'sameleg':
+                self.next_screen_dict["splitlegscreen"] = "waitingscreenjnd"
+            case 'SAMELEG':
+                self.next_comparison = self.next_comparison_same
+                self.report_higher = self.report_higher_same
+
+                self.peak_torques = []
+                self.peak_torque_ind = 0
+
                 self.next_screen_dict["pushtostartscreenjnd"] = "samelegscreen"
+                self.next_screen_dict["samelegscreen"] = "waitingscreenjnd"
 
-    def report_higher(self, signature):
-        self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature)
-        self.next_comparison()
-
-    def next_comparison(self):
-        self.prop, self.T_ref, self.T_comp, truth = self.comparitor.generate_comparison()
-
-        if random.getrandbits(1):
-            peak_torque_left = self.T_ref
-            peak_torque_right = self.T_comp
-            self.truth = int(truth)
+    def next_comparison_split(self):
+        if self.pres >= MAX_QUERIES:
+            self.quit_flag = True
+            self.next_screen()
         else:
-            peak_torque_left = self.T_comp
-            peak_torque_right = self.T_ref
-            self.truth = int(not truth)
+            self.prop, self.T_ref, self.T_comp, truth = self.comparitor.generate_comparison()
+            self.pres += 1
 
-        self.sm.exoboot_remote.set_torques(peak_torque_left=peak_torque_left, peak_torque_right=peak_torque_right)
+            if random.getrandbits(1):
+                self.peak_torque_left = self.T_ref
+                self.peak_torque_right = self.T_comp
+                self.truth = int(truth)
+            else:
+                self.peak_torque_left = self.T_comp
+                self.peak_torque_right = self.T_ref
+                self.truth = int(not truth)
 
-        self.pres += 1
+            self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torque_left, peak_torque_right=self.peak_torque_right)
+
+    def next_comparison_same(self):
+        if self.pres >= MAX_QUERIES:
+            self.quit_flag = True
+            self.next_screen()
+        else:
+            self.prop, self.T_ref, self.T_comp, truth = self.comparitor.generate_comparison()
+            self.pres += 1
+
+            self.peak_torque_ind = 0
+            if random.getrandbits(1):
+                self.peak_torques = [self.T_ref, self.T_comp]
+                self.truth = int(truth)
+            else:
+                self.peak_torques = [self.T_comp, self.T_ref]
+                self.truth = int(not truth)
+
+            self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torques[self.peak_torque_ind], peak_torque_right=self.peak_torques[self.peak_torque_ind])
+
+    def report_higher_split(self, signature):
+        self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature)
+        if not self.subtrial_limit:
+            self.next_comparison()
+        else:
+            self.next_screen()
+
+    def report_higher_same(self):
+        self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind)
+        if not self.subtrial_limit:
+            self.next_comparison()
+        else:
+            self.next_screen()
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
         if self.quit_flag:
-            self.sm.current = 'finishscreen'
+            self.sm.current = 'finishscreenjnd'
         else:
             self.sm.current = self.next_screen_dict[self.sm.current]
 

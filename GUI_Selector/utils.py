@@ -81,3 +81,9 @@ class MovingAverageFilterPlus:
 
         # Step TrueAfter
         self.warm.step()
+
+# Other Functions
+def decimal_format(str):
+    withsigdigs = '0' * max(3 - len(str), 0) + str
+    withdecimal = withsigdigs[:-2] + '.' + withsigdigs[-2:]
+    return withdecimal

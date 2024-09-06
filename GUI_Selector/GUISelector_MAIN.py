@@ -12,9 +12,9 @@ if __name__ == "__main__":
 
     # Connect to Exoboot
     exoboot_remote = ExobootRemoteClient('localhost:50051')
-    subjectID, trial_type, description = exoboot_remote.get_subject_info()
+    subjectID, trial_type, trial_cond, description = exoboot_remote.get_subject_info()
 
-    print(subjectID, trial_type, description)
+    print("DETAILS: ", subjectID, trial_type, trial_cond, description)
 
     # Start Bertec
     bertec = DumbBertec()#Bertec()
@@ -26,4 +26,4 @@ if __name__ == "__main__":
         case 'VAS':
             VASGUI(exoboot_remote, bertec).run()
         case 'JND':
-            JNDGUI(exoboot_remote, bertec).run()
+            JNDGUI(exoboot_remote, bertec, trial_cond).run()

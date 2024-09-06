@@ -18,9 +18,8 @@ from constants import *
 from vickrey_schedules import *
 from vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen
 from vas_screens import buildpushtostartscreenvas, buildvasscreen
-from jnd_screens import buildpushtostartscreenjnd, buildsplitlegscreen
+from jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
 from vas_schedules import *
-from jnd_schedules import splitlegschedule
 from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine
 
 class BaseGui(App):
@@ -34,8 +33,6 @@ class BaseGui(App):
 
         # Pause Exos and set torques
         self.sm.exoboot_remote.set_pause(mybool=True)
-        # TODO adjust peak torques based on EPO/NPO
-        self.sm.exoboot_remote.set_torques(peak_torque_left=PEAK_TORQUE_LEFT, peak_torque_right=PEAK_TORQUE_RIGHT)
 
         # Bertec over network thread
         self.sm.bertec = bertec
@@ -175,27 +172,36 @@ class JNDGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote_client, bertec):
+    def __init__(self, exoboot_remote_client, bertec, jnd_type):
         super().__init__(name='JND', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+        self.jnd_type = jnd_type
 
     def build(self):
-        self.sm.statemachine = JNDStateMachine(self.sm)
+        self.sm.statemachine = JNDStateMachine(self.sm, jnd_type=self.jnd_type)
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
 
         pushtostartscreenjnd = buildpushtostartscreenjnd(self.sm)
 
-        splitlegscreen = buildsplitlegscreen(self.sm)
-        splitlegscreen.on_enter = partial(splitlegschedule, self.sm)
+        waitingscreenjnd = buildwaitingscreenjnd(self.sm)
 
-        finishscreen = Screen(name="finish")
+        finishscreen = buildfinishscreenjnd(self.sm)
 
         # Add screens to ScreenManager
         self.sm.add_widget(dummyscreen)
         self.sm.add_widget(pushtostartscreenjnd)
-        self.sm.add_widget(splitlegscreen)
+        self.sm.add_widget(waitingscreenjnd)
         self.sm.add_widget(finishscreen)
+
+        # Split or same trial cond
+        match self.jnd_type:
+            case "SPLITLEG":
+                splitlegscreen = buildsplitlegscreen(self.sm)
+                self.sm.add_widget(splitlegscreen)
+            case "SAMELEG":
+                samelegscreen = buildsamelegscreen(self.sm)
+                self.sm.add_widget(samelegscreen)
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenjnd"

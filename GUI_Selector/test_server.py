@@ -52,6 +52,7 @@ class DumbBertec:
         pass
 
     def write_command(self, speedR, speedL, incline = None, accR = 0.2, accL = 0.2, maxVel = 9001, minVel = -0):
+        print("BERTEC WRITE: ", speedR, speedL)
         pass
 
 class DumbGSE:
@@ -68,17 +69,24 @@ class DumbGSE:
         self.peak_torque_right = T
 
 class DumbWrapper:
-    def __init__(self, trial_type):
+    def __init__(self, subjectID, trial_type, trial_cond, description):
         self.startstamp = time.perf_counter()
         self.pause_event = threading.Event()
         self.quit_event = threading.Event()
         self.pause_event.set()
         self.quit_event.set()
 
-        self.subjectID = 'dummy'
-        self.trial_type = trial_type
-        self.description = 'desc'
-        self.file_prefix = "{}_{}_{}".format(self.subjectID, self.trial_type, self.description)
+        self.subjectID = subjectID
+        self.trial_type = trial_type.upper()
+        self.trial_cond = trial_cond.upper()
+        self.description = description
+
+        self.file_prefix = "{}_{}_{}_{}".format(self.subjectID, self.trial_type, self.trial_cond, self.description)
+        
+        print("Subject: {}".format(self.subjectID))
+        print("Trial Type: {}".format(self.trial_type))
+        print("Trial Cond: {}".format(self.trial_cond))
+        print("Description: {}".format(self.description))
 
         self.gse_thread = DumbGSE()
 
@@ -95,11 +103,13 @@ if __name__ == "__main__":
     Run auction server
     """
     try:
-        trial_type = sys.argv[1]
-        dumb_wrapper = DumbWrapper(trial_type)
+        subjectID = sys.argv[1]
+        trial_type = sys.argv[2]
+        trial_cond = sys.argv[3]
+        description = sys.argv[4]
+        dumb_wrapper = DumbWrapper(subjectID, trial_type, trial_cond, description)
         dumb_wrapper.run()
 
     except KeyboardInterrupt:
         dumb_wrapper.quit_event.clear()
         print('Goodbye')
-        time.sleep(0.5)
