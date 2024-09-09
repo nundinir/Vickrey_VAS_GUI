@@ -295,6 +295,63 @@ class JNDStateMachine:
         else:
             self.sm.current = self.next_screen_dict[self.sm.current]
 
+
+class PrefStateMachine:
+    def __init__(self, screenmanager, pref_type='SLIDER'):
+        self.sm = screenmanager
+        self.pref_type = pref_type.upper()
+
+        self.pres = 0
+
+        # Quit flag
+        self.quit_flag = False
+
+        # Screen states dictionary
+        self.next_screen_dict = {"dummy": "pushtostartscreenpref",
+                                 "waitingscreenpref": "pushtostartscreenpref"}
+
+        # Next screen based on pref type
+        print(self.pref_type)
+        match self.pref_type:
+            case 'SLIDER':
+                print('Starting Slider Preference')
+                self.initialize_pref = self.init_slider
+                self.report_pref = self.report_slider
+
+                self.next_screen_dict["pushtostartscreenpref"] = "sliderscreen"
+                self.next_screen_dict["sliderscreen"] = "waitingscreenpref"
+            case 'BTN':
+                print('Starting BTN Preference')
+                self.initialize_pref = self.init_btn
+                self.report_pref = self.report_btn
+
+                self.next_screen_dict["pushtostartscreenpref"] = "btnscreen"
+                self.next_screen_dict["btnscreen"] = "waitingscreenpref"
+
+    def init_slider(self):
+        # Nothing to do
+        pass
+
+    def report_slider(self, torque):
+        self.sm.exoboot_remote.pref_result(self.pres, torque)
+        self.quit_flag = True
+        self.next_screen()
+
+    def init_btn(self):
+        pass
+
+    def report_btn(self, torque):
+        self.sm.exoboot_remote.pref_result(self.pres, torque)
+        self.quit_flag = True
+        self.next_screen()
+
+    def next_screen(self, *vargs):
+        # Ignore vargs. exists so next can be called by Clock.schedule_once
+        if self.quit_flag:
+            self.sm.current = 'finishscreenpref'
+        else:
+            self.sm.current = self.next_screen_dict[self.sm.current]
+
 if __name__ == "__main__":
     testvas = VASStateMachine(None)
     testvas.generate_btn_trial_pres_list()

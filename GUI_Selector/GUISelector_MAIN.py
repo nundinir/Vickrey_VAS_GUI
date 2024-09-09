@@ -4,7 +4,7 @@ from test_server import DumbBertec
 from BertecMan import Bertec
 from exoboot_remote_control import ExobootRemoteClient
 
-from gui_apps import VickreyGUI, VASGUI, JNDGUI
+from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI
 from constants import SERVER_IP
 
 if __name__ == "__main__":
@@ -27,3 +27,5 @@ if __name__ == "__main__":
             VASGUI(exoboot_remote, bertec).run()
         case 'JND':
             JNDGUI(exoboot_remote, bertec, trial_cond).run()
+        case 'PREF':
+            PREFGUI(exoboot_remote, bertec, trial_cond).run()

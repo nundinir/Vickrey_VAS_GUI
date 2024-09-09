@@ -16,11 +16,14 @@ from BertecMan import Bertec
 
 from constants import *
 from vickrey_schedules import *
+
 from vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen
 from vas_screens import buildpushtostartscreenvas, buildvasscreen
 from jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
+from pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreen, buildbtnscreen, buildfinishscreenpref
+
 from vas_schedules import *
-from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine
+from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine
 
 class BaseGui(App):
     def __init__(self, name, exoboot_remote_client, bertec):
@@ -181,18 +184,15 @@ class JNDGUI(BaseGui):
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
-
         pushtostartscreenjnd = buildpushtostartscreenjnd(self.sm)
-
         waitingscreenjnd = buildwaitingscreenjnd(self.sm)
-
-        finishscreen = buildfinishscreenjnd(self.sm)
+        finishscreenjnd = buildfinishscreenjnd(self.sm)
 
         # Add screens to ScreenManager
         self.sm.add_widget(dummyscreen)
         self.sm.add_widget(pushtostartscreenjnd)
         self.sm.add_widget(waitingscreenjnd)
-        self.sm.add_widget(finishscreen)
+        self.sm.add_widget(finishscreenjnd)
 
         # Split or same trial cond
         match self.jnd_type:
@@ -205,5 +205,40 @@ class JNDGUI(BaseGui):
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenjnd"
+
+        return self.sm
+
+
+class PREFGUI(BaseGui):
+    def __init__(self, exoboot_remote_client, bertec, pref_type):
+        super().__init__(name='TorquePreference', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+        self.pref_type = pref_type
+
+    def build(self):
+        self.sm.statemachine = PrefStateMachine(self.sm, pref_type=self.pref_type)
+
+        # Create Screens
+        dummyscreen = Screen(name="dummy")
+        pushtostartscreenpref = buildpushtostartscreenpref(self.sm)
+        waitingscreenpref = buildwaitingscreenpref(self.sm)
+        finishscreenpref = buildfinishscreenpref(self.sm)
+
+        # Add screens to ScreenManager
+        self.sm.add_widget(dummyscreen)
+        self.sm.add_widget(pushtostartscreenpref)
+        self.sm.add_widget(waitingscreenpref)
+        self.sm.add_widget(finishscreenpref)
+
+        # Split or same trial cond
+        match self.pref_type:
+            case "SLIDER":
+                sliderscreenpref = buildsliderscreen(self.sm)
+                self.sm.add_widget(sliderscreenpref)
+            case "BTN":
+                btnscreenpref = buildbtnscreen(self.sm)
+                self.sm.add_widget(btnscreenpref)
+
+        # Switch from dummy to startscreen to run on_enter
+        self.sm.current = "pushtostartscreenpref"
 
         return self.sm

@@ -109,11 +109,14 @@ class ExobootRemoteClient:
 
 # JND Specific    
     def comparison_result(self, pres, prop, T_ref, T_comp, truth, answer):
-        print("asdf")
-        print(pres, prop, T_ref, T_comp, truth, answer)
         compmsg = pb2.comparison(pres=pres, prop=prop, T_ref=T_ref, T_comp=T_comp, truth=truth, answer=answer)
-        print("Hello", compmsg)
         response = self.stub.comparison_result(compmsg)
+        return response
+
+# PREF Specific
+    def pref_result(self, pres, torque):
+        prefmsg = pb2.preference(pres=pres, torque=torque)
+        response = self.stub.pref_result(prefmsg)
         return response
 
 
@@ -151,6 +154,11 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
                 with open(self.comparisonfilename, 'w', newline='') as f:
                     csv.writer(f).writerow(['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
             
+            case 'PREF':
+                self.preffilename = self.file_prefix + '_pref.csv'
+                with open(self.preffilename, 'w', newline='') as f:
+                    csv.writer(f).writerow(['pres', 'torque'])
+
             case 'THERMAL':
                 pass
 
@@ -286,6 +294,17 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         print("Received comparison results: {}, {}, {}, {}, {}, {}".format(pres, prop, T_ref, T_comp, truth, answer))
         datalist = [pres, prop, T_ref, T_comp, truth, answer]
         with open(self.comparisonfilename, 'a', newline='') as f:
+            csv.writer(f).writerow(datalist)
+        return pb2.receipt(received=True)
+    
+# Pref Specific
+    def pref_result(self, prefmsg, context):
+        pres = prefmsg.pres
+        torque = prefmsg.torque
+
+        print("Received preference results: {}, {}".format(pres, torque))
+        datalist = [pres, torque]
+        with open(self.preffilename, 'a', newline='') as f:
             csv.writer(f).writerow(datalist)
         return pb2.receipt(received=True)
 

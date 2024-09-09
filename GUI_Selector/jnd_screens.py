@@ -10,6 +10,7 @@ from constants import *
 from jnd_schedules import splitsameschedule, waitingscreenjndschedule, finishscreenjndschedule
 from kivy_utils import CountDownTimer
 
+
 def startbtn_CB(instance):
     sm = instance.parent.parent
     # Set bertec speed
@@ -34,7 +35,7 @@ def buildwaitingscreenjnd(sm):
     screen.sm = sm
     waitlabel = Label(text="Take a break!\nTrial resumes in 1 minute", font_size='50', color=(1, 1, 1, 1))
     screen.add_widget(waitlabel)
-
+    
     screen.on_enter = partial(waitingscreenjndschedule, sm)
 
     return screen
@@ -102,6 +103,7 @@ def buildsamelegscreen(sm):
     screen.on_enter = partial(splitsameschedule, sm)
 
     return screen
+
 
 def buildfinishscreenjnd(sm):
     screen = Screen(name="finishscreenjnd")

@@ -5,16 +5,11 @@ from kivy.clock import Clock
 from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBTRIAL_MAX, WAITING_MIN
 
 
-def initialize_comparison(sm, dt):
-    sm.statemachine.subtrial_limit = False
-    sm.statemachine.next_comparison()
+def initialize_pref(sm, dt):
+    sm.statemachine.initialize_pref()
 
-def subtrial_timelimit(sm, dt):
-    sm.statemachine.subtrial_limit = True
-
-def splitsameschedule(sm):
-    Clock.schedule_once(partial(initialize_comparison, sm), 0)
-    Clock.schedule_once(partial(subtrial_timelimit, sm), SUBTRIAL_MAX)
+def prefschedule(sm):
+    Clock.schedule_once(partial(initialize_pref, sm), 0)
 
 
 def pause_exo_bertec(sm, dt):
@@ -27,10 +22,11 @@ def pause_exo_bertec(sm, dt):
 def trial_ready(sm, dt):
     sm.statemachine.next_screen()
 
-def waitingscreenjndschedule(sm):
+def waitingscreenprefschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
     Clock.schedule_once(partial(trial_ready, sm), WAITING_MIN)
 
 
-def finishscreenjndschedule(sm):
+def finishscreenprefschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
+

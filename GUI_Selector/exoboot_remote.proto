@@ -80,6 +80,12 @@ message comparison {
     float answer = 6;
 }
 
+// PREF Messages
+message preference {
+    float pres = 1;
+    float torque = 2;
+}
+
 // Logging Messages 
 // TODO IMPLEMENT GENERAL DICT LOGGING
 message header {
@@ -118,4 +124,7 @@ service exoboot_over_network {
 
     //JND Specific
     rpc comparison_result (comparison) returns (receipt) {};
+
+    // Pref Specific
+    rpc pref_result (preference) returns (receipt) {};
 }
