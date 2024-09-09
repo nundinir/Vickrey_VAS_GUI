@@ -53,7 +53,7 @@ ROBOWALK_DUR = 2 # minutes
 
 """VAS SPECIFIC"""
 # VAS Trial/Presentation Dicts
-BTN_NUMS = [3]#[4, 12]
+BTN_NUMS = [4, 12] #[3] for quick testing
 MAX_TRIALS_DICT = {3: 1, 4: 3, 12: 2}
 MAX_PRESENTATIONS_DICT = {3: 1, 4: 3, 12: 1}
 
