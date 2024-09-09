@@ -99,11 +99,11 @@ class ExobootRemoteClient:
         response = self.stub.slider_update(msg)
         return response
 
-    def presentation_result(self, torque, pos):
+    def presentation_result(self, btn_option, trial, pres, torques, values):
         """
         Send updated slider info
         """
-        msg = pb2.presentation(torque=torque, pos = pos)
+        msg = pb2.presentation(btn_option=btn_option, trial=trial, pres=pres, torques=torques, values=values)
         response = self.stub.presentation_result(msg)
         return response
 
@@ -147,7 +147,14 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
                     csv.writer(f).writerow(['t', 'enjoyment', 'rpe'])
 
             case 'VAS':
-                pass
+                self.vasefilename = self.file_prefix + '_vas_results.csv'
+                with open(self.vasefilename, 'w', newline='') as f:
+                    header = ['btn_option', 'trial', 'pres']
+                    for i in range(12):
+                        header.append('torque{}'.format(i))
+                        header.append('mv{}'.format(i))
+                        
+                    csv.writer(f).writerow(header)
 
             case 'JND':
                 self.comparisonfilename = self.file_prefix + '_comparison.csv'
@@ -270,13 +277,18 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         """
         Send updated slider info
         """
+        btn_option = presmsg.btn_option
         trial = presmsg.trial
-        pres_num = presmsg.pres_num
+        pres = presmsg.pres
         torques = presmsg.torques
-        pos = presmsg.pos
+        values = presmsg.values
 
-        print("Received presentation results: {}, {}, {}, {}".format(trial, pres_num, torques, pos))
-        datalist = [trial, pres_num, torques, pos]
+        print("Received presentation results: {}, {}, {}, {}, {}".format(btn_option, trial, pres, torques, values))
+        datalist = [btn_option, trial, pres]
+        for t, mv in zip(torques, values):
+            datalist.append(t)
+            datalist.append(mv)
+
         vasfilename = self.file_prefix + '_vas_results.csv'
         with open(vasfilename, 'a', newline='') as f:
             csv.writer(f).writerow(datalist)

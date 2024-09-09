@@ -17,11 +17,14 @@ BIDDING_CLOSE = 60/squeeze
 RESULT_SHOW = 100/squeeze
 
 # VAS timing in seconds
-
+MIN_WAIT_VAS = 120/squeeze
 
 # JND timing in seconds
 SUBTRIAL_MAX = 240/squeeze
-WAITING_MIN = 60/squeeze
+MIN_WAIT_JND = 60/squeeze
+
+# PREF timing in seconds
+MIN_WAIT_PREF = 60/squeeze
 
 """BERTEC SETTINGS"""
 # Bertec speed
@@ -50,9 +53,9 @@ ROBOWALK_DUR = 2 # minutes
 
 """VAS SPECIFIC"""
 # VAS Trial/Presentation Dicts
-BTN_NUMS = [4, 12]
-MAX_TRIALS_DICT = {4: 3, 12: 2}
-MAX_PRESENTATIONS_DICT = {4: 3, 12: 1}
+BTN_NUMS = [3]#[4, 12]
+MAX_TRIALS_DICT = {3: 1, 4: 3, 12: 2}
+MAX_PRESENTATIONS_DICT = {3: 1, 4: 3, 12: 1}
 
 # TODO import from csv
 EPO_MV = 3.4

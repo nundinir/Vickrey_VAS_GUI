@@ -108,26 +108,13 @@ class VASStateMachine:
     def __init__(self, screenmanager):
         self.sm = screenmanager
 
-        self.bool_confirm_button_pressed: bool = False
-        self.starting_val:int = 0         # Initial value of the slider cursor
-
-        ##################################################
-        ###### MODIFY THESE VALUES FOR EACH SUBJECT ######
-        ##################################################
-
-        GUI_btn_setup:str = 'full'                              # Full 12 btn setup or 4 btn setup ('full' or '4btn')
-        curr_trial_num:int = 1                                  # Current trial number (out of 4 if '4btn' setup and 3 if 'full' setup)
-        current_presentation_num:int = 3                        # Only 1 presentation if 'full' setup and 3 presentations if '4btn' setup
-
         # Setting up Torque options
-        self.min_torque:float = 0.0                                  # Minimum torque value
-        self.max_torque:float = 40.0                                 # Maximum torque value
         self.num_of_tot_torque_settings:int = 12                     # Total number of torque settings (Maintain 12 for practicality)
-        self.torque_step:float = (self.max_torque - self.min_torque)/self.num_of_tot_torque_settings  # Step size for the torque buttons (maintain 12 btns)
-        self.torque_settings = np.arange(self.torque_step, self.max_torque + self.torque_step, self.torque_step)  # All Torque settings (np.arrange doesn't include stop value)
-        
+        self.torque_step:float = (TORQUE_MAX - TORQUE_MIN)/self.num_of_tot_torque_settings  # Step size for the torque buttons (maintain 12 btns)
+        self.torque_settings = np.arange(self.torque_step, TORQUE_MAX + self.torque_step, self.torque_step)  # All Torque settings (np.arrange doesn't include stop value)
+
         # Trial/Presentation States
-        self.current_btn = 0
+        self.current_btn_option = 0
         self.current_trial = 0
         self.current_presentation = 0
 
@@ -136,16 +123,15 @@ class VASStateMachine:
         self.generate_btn_trial_pres_list()
         self.generate_button_torque_mapping()
 
-        self.next_trial_pres()
-        
-        # Quit flag
-        self.quit_flag = False
-
         # Screen states
         self.next_screen_dict = {"dummy": "pushtostartscreen", 
-                                 "pushtostartscreen": "vas",
-                                 "vas": "pushtostartscreen"
+                                 "pushtostartscreen": "vasscreen",
+                                 "vasscreen": "waitingscreenvas",
+                                 "waitingscreenvas": "pushtostartscreen"
                                  }
+
+        # Quit flag
+        self.quit_flag = False
 
     def generate_btn_trial_pres_list(self):
         for btn in BTN_NUMS:
@@ -169,23 +155,30 @@ class VASStateMachine:
 
             self.button_mappings[btn_num] = trial_mappings
 
-        # torques = self.button_mappings[BTN_NUMS[self.current_btn_ind]][self.current_trial][self.current_presentation]
+        # torques = self.button_mappings[BTN_NUMS[self.current_btn_option_ind]][self.current_trial][self.current_presentation]
 
     def get_torque(self, ind):
-        return self.button_mappings[self.current_btn][self.current_trial][self.current_presentation][ind]
+        return self.button_mappings[self.current_btn_option][self.current_trial][self.current_presentation][ind]
 
     def next_trial_pres(self):
-        if len(self.vas_btn_trial_pres) > 0:
-            [self.current_btn, self.current_trial, self.current_presentation] = self.vas_btn_trial_pres.pop(0)
-            
-            print("BTN_NUM/Trial/Presentation: {}/{}/{}".format(self.current_btn, self.current_trial, self.current_presentation))
-        else:
-            self.quit_flag = True
+        [self.current_btn_option, self.current_trial, self.current_presentation] = self.vas_btn_trial_pres.pop(0)
+
+        if len(self.vas_btn_trial_pres) < 1:
+            self.quit_flag  = True
+        
+        print("BTN_NUM/Trial/Presentation: {}/{}/{} {}".format(self.current_btn_option, self.current_trial, self.current_presentation, 
+                                                                self.button_mappings[self.current_btn_option][self.current_trial][self.current_presentation]))
+
+    def presentation_result(self, torques, values):
+        self.sm.exoboot_remote.presentation_result(self.current_btn_option, self.current_trial, self.current_presentation, torques, values)
+
+    def regen_vasscreen(self):
+        pass
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
         if self.quit_flag:
-            self.sm.current = 'finishscreen'
+            self.sm.current = 'finishscreenvas'
         else:
             self.sm.current = self.next_screen_dict[self.sm.current]
 
@@ -352,11 +345,10 @@ class PrefStateMachine:
         else:
             self.sm.current = self.next_screen_dict[self.sm.current]
 
+
 if __name__ == "__main__":
     testvas = VASStateMachine(None)
-    testvas.generate_btn_trial_pres_list()
-    testvas.generate_button_torque_mapping()
-    print(testvas.button_mappings[4][1][3])
+    print(testvas.vas_btn_trial_pres)
     
     while not testvas.quit_flag:
         testvas.next_trial_pres()

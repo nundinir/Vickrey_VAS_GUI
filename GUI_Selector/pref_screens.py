@@ -114,11 +114,11 @@ def btnpress(instance):
     screen.prev_btn = instance
 
     # Activate confirm button if all btns visited
-    all_visited = True
-    for btn in screen.children:
-        if btn.signature and not btn.visited:
-            return
-    screen.confirm_btn.disabled = False
+    if screen.confirm_btn.disabled:
+        for btn in screen.children:
+            if btn.signature and not btn.visited:
+                return
+        screen.confirm_btn.disabled = False
 
 def confirm_btn_pref(instance):
     sm = instance.parent.parent

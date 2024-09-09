@@ -18,7 +18,7 @@ from constants import *
 from vickrey_schedules import *
 
 from vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen
-from vas_screens import buildpushtostartscreenvas, buildvasscreen
+from vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildfinishscreenvas
 from jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
 from pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreen, buildbtnscreen, buildfinishscreenpref
 
@@ -150,17 +150,20 @@ class VASGUI(BaseGui):
         # TODO VAS pushtostartscreen
         pushtostartscreen = buildpushtostartscreenvas(self.sm, label_fontsize)
 
-        self.sm.vasscreen = buildvasscreen(self.sm)#VAS_GUIApp(self.sm).build()
-        print(type(self.sm.vasscreen))
-        self.sm.vasscreen.on_enter = partial(vas_schedule, self.sm)
+        vasscreen = Screen(name='vasscreen')
+        vasscreen.sm = self.sm
+        vasscreen.on_enter = partial(buildvasscreen, self.sm, vasscreen)
 
-        finishscreen = Screen(name='finishscreen')
+        waitingscreen = buildwaitingscreenvas(self.sm)
+
+        finishscreen = buildfinishscreenvas(self.sm)
         # TODO add kill method
 
         # Add screens to ScreenManager
         self.sm.add_widget(dummyscreen)
         self.sm.add_widget(pushtostartscreen)
-        self.sm.add_widget(self.sm.vasscreen)
+        self.sm.add_widget(vasscreen)
+        self.sm.add_widget(waitingscreen)
         self.sm.add_widget(finishscreen)
 
         # Switch from dummy to startscreen to run on_enter

@@ -2,7 +2,7 @@ from functools import partial
 
 from kivy.clock import Clock
 
-from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBTRIAL_MAX, WAITING_MIN
+from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBTRIAL_MAX, MIN_WAIT_JND
 
 
 def initialize_comparison(sm, dt):

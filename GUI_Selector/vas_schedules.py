@@ -4,15 +4,19 @@ from kivy.clock import Clock
 
 from constants import *
 
-def vas_schedule(sm):
+
+def pause_exo_bertec(sm, dt):
+    # Stop bertec
+    sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
     
-    Clock.schedule_once(partial(map_torques_to_buttons, sm), 0)
+    # Pause exoboots
+    sm.exoboot_remote.set_pause(mybool=True)
 
 
-def map_torques_to_buttons(sm, dt):
-    # trial = sm.trial
-    # presentation = sm.presentation
-    # TODO implement
-    pass
+def waitingscreevasschedule(sm):
+    Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
+    Clock.schedule_once(sm.statemachine.next_screen, MIN_WAIT_VAS)
 
-    
+
+def finishscreenvasschedule(sm):
+    Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
