@@ -61,7 +61,6 @@ MAX_PRESENTATIONS_DICT = {3: 1, 4: 3, 12: 1}
 EPO_MV = 3.4
 NPO_MV = -18.60
 
-
 """JND SPECIFIC"""
 # comparitor settings
 NUM_BINS = 21
@@ -82,3 +81,6 @@ PREF_STEP = 1.0
 # Buttons
 PREF_ROWS = 4
 PREF_COLS = 5
+
+# Max Trials
+MAX_PRES_VAS = 3

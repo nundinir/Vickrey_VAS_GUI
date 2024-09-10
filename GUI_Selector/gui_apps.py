@@ -152,7 +152,7 @@ class VASGUI(BaseGui):
 
         vasscreen = Screen(name='vasscreen')
         vasscreen.sm = self.sm
-        vasscreen.on_enter = partial(buildvasscreen, self.sm, vasscreen)
+        vasscreen.on_enter = partial(buildvasscreen, self.sm, vasscreen, False, None)
 
         waitingscreen = buildwaitingscreenvas(self.sm)
 
@@ -237,9 +237,13 @@ class PREFGUI(BaseGui):
             case "SLIDER":
                 sliderscreenpref = buildsliderscreen(self.sm)
                 self.sm.add_widget(sliderscreenpref)
+                self.sm.prefscreen = sliderscreenpref
             case "BTN":
-                btnscreenpref = buildbtnscreen(self.sm)
+                btnscreenpref = Screen(name="btnscreen")
+                btnscreenpref.sm = self.sm
+                buildbtnscreen(self.sm, btnscreenpref)
                 self.sm.add_widget(btnscreenpref)
+                self.sm.prefscreen = btnscreenpref
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenpref"

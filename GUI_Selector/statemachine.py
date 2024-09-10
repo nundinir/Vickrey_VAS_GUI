@@ -308,34 +308,29 @@ class PrefStateMachine:
         match self.pref_type:
             case 'SLIDER':
                 print('Starting Slider Preference')
-                self.initialize_pref = self.init_slider
                 self.report_pref = self.report_slider
 
                 self.next_screen_dict["pushtostartscreenpref"] = "sliderscreen"
                 self.next_screen_dict["sliderscreen"] = "waitingscreenpref"
             case 'BTN':
                 print('Starting BTN Preference')
-                self.initialize_pref = self.init_btn
                 self.report_pref = self.report_btn
 
                 self.next_screen_dict["pushtostartscreenpref"] = "btnscreen"
                 self.next_screen_dict["btnscreen"] = "waitingscreenpref"
 
-    def init_slider(self):
-        # Nothing to do
-        pass
-
     def report_slider(self, torque):
         self.sm.exoboot_remote.pref_result(self.pres, torque)
-        self.quit_flag = True
+        self.pres += 1
+        if self.pres > MAX_PRES_VAS - 1:
+            self.quit_flag = True
         self.next_screen()
-
-    def init_btn(self):
-        pass
 
     def report_btn(self, torque):
         self.sm.exoboot_remote.pref_result(self.pres, torque)
-        self.quit_flag = True
+        self.pres += 1
+        if self.pres > MAX_PRES_VAS - 1:
+            self.quit_flag = True
         self.next_screen()
 
     def next_screen(self, *vargs):

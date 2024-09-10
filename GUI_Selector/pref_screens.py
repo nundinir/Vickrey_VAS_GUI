@@ -133,11 +133,8 @@ def confirm_btn_pref(instance):
         disable_btn(screen, True, 0)
         Clock.schedule_once(partial(disable_btn, screen, False), 0.1)
 
-def buildbtnscreen(sm):
-    screen = Screen(name="btnscreen")
-    screen.sm = sm
-
-    screen.torque = 0
+def buildbtnscreen(sm, screen):
+    screen.clear_widgets()
 
     confirm_btn = Button(text="Confirm", font_size='70', color = (1,1,1), background_normal='', background_color= (0.75,0,0), size_hint=(1, 1/5), pos_hint={'x':0, 'y':0})
     confirm_btn.bind(on_press=confirm_btn_pref)
@@ -166,9 +163,7 @@ def buildbtnscreen(sm):
 
     screen.prev_btn = 0
 
-    screen.on_enter = partial(prefschedule, sm)
-
-    return screen
+    screen.on_pre_enter = partial(buildbtnscreen, sm, screen)
 
 
 def buildfinishscreenpref(sm):

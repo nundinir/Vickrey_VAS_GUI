@@ -60,39 +60,6 @@ def buildwaitingscreenvas(sm):
 
     return screen
 
-# class MyScreenManager(ScreenManager):
-#     pass
-
-# # Define the GUI class
-# class GuiVas(BoxLayout):
-#     """Actual Class for the GUI"""
-
-#     # Initializing the torque mapping button order
-#     button_order = {4: ['D', 'C', 'B', 'A'], 12: ['L', 'K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A']}
-#     button_slider_values = {}
-#     for btn in BTN_NUMS:
-#         temp_slider = {}
-#         for i in button_order[btn]:
-#             temp_slider[i] = 0
-#         button_slider_values[btn] = temp_slider
-    
-#     npo_mv_text = StringProperty(f"${NPO_MV}")
-#     epo_mv_text = StringProperty(f"${EPO_MV}")
-    
-#     def __init__(self, sm, **kwargs):
-#         """Initialize the GUI"""
-#         super(GuiVas, self).__init__(**kwargs)
-
-#         # ScreenManager
-#         self.sm = sm
-
-#         self.prev_btn_instance =  None
-#         self.last_pressed_button = None
-        
-#         # Random colors and counter for confirm button background color changes
-#         self.rand_colors = ['#34308F','#590f2c']
-#         self.current_color_index = 0
-
 def onslidermotion(instance, mvalue):
     sm = instance.parent.parent
     print(instance, mvalue)
@@ -100,27 +67,38 @@ def onslidermotion(instance, mvalue):
     min = instance.min
     max = instance.max
 
-    size_x, size_y = instance.size_hint
+    size_x, _ = instance.size_hint
 
     x_pos = (mvalue - min) / (max - min) * size_x + instance.pos_hint['x']
     y_pos = instance.label.pos_hint['y']
     instance.label.pos_hint = {'x': x_pos, 'y':y_pos}
     instance.label.text = f"${round(mvalue, 2)}"
 
-def buildsliders(sm, screen, sliders_origin={'x':0, 'y':0}, sliders_size=(0, 0)):
+def buildsliders(sm, screen, sliders_origin={'x':0, 'y':0}, sliders_size=(0, 0), ranked=None):
     num_sliders = sm.statemachine.current_btn_option
 
+    if ranked:
+        ranked_ = ranked.copy()
+
     for i in range(num_sliders):
+        # Slider position
         origin_x = sliders_origin[0]
         origin_y = i / num_sliders * sliders_size[1] + sliders_origin[1]
         size_x = sliders_size[0]
         size_y = 1/num_sliders * sliders_size[1]
-        print(size_x, size_y)
 
-        torque = sm.statemachine.get_torque(i)
+        # Load existing slider attributes
+        if ranked:
+            torque, mv, btntext = ranked_.pop()
+        else:
+            torque = sm.statemachine.get_torque(i)
+            mv = 0
+            btntext = chr(65 + num_sliders - i - 1)
 
-        slider = Slider(min=-50, max=100, value=0, size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y':origin_y}, cursor_size=(65, 65), padding=0)
-        slider.torque = torque
+        print(mv)
+        slider = Slider(min=-50, max=100, value=float(mv), size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y':origin_y}, cursor_size=(65, 65), padding=0)
+        slider.btntext = btntext
+        slider.torque = float(torque)
         slider.bind(value=onslidermotion)
 
         # Create the cursor label and initially set the opacity to 0
@@ -158,24 +136,33 @@ def btnpress(instance):
                     return
         screen.confirm_btn.disabled = False
 
-def buildbtns(sm, screen, buttons_origin, buttons_size):
+def buildbtns(sm, screen, buttons_origin, buttons_size, ranked=None):
     num_buttons = sm.statemachine.current_btn_option
 
+    if ranked:
+        ranked_ = ranked.copy()
+
     for i in range(num_buttons):
+        # Button Position
         origin_x = buttons_origin[0]
         origin_y = i / num_buttons * buttons_size[1] + buttons_origin[1]
-
         size_x = buttons_size[0]
         size_y = 1/num_buttons * buttons_size[1]
 
-        torque = sm.statemachine.get_torque(i)
+        # Load existing button attributes
+        if ranked:
+            torque, _, btntext = ranked_.pop()
+        else:
+            torque = sm.statemachine.get_torque(i)
+            btntext = chr(65 + num_buttons - i - 1)
 
-        btn = Button(text=chr(65 + num_buttons - i - 1), font_size='50', color=(1,1,1), background_normal='', background_color= (0,0.5,0), size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y': origin_y})
+        btn = Button(text='', font_size='50', color=(1,1,1), background_normal='', background_color= (0,0.5,0), size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y': origin_y})
+        btn.text = btntext
         btn.bind(on_press=btnpress)
         btn.torque = torque
         btn.signature = 0 # Is a torque button
         btn.visited = False
-        screen.add_widget(btn)
+        screen.add_widget(btn) 
 
 def confirmranking(instance):
     sm = instance.parent.parent
@@ -194,32 +181,49 @@ def confirmranking(instance):
     else:
         instance.confirmed = True
 
-def buildvasscreen(sm, screen):
+        unranked_torques = []
+        unranked_mvs = []
+        unranked_text = []
+        for slider in screen.children:
+            if isinstance(slider, Slider):
+                unranked_torques.append(slider.torque)
+                unranked_mvs.append(slider.value)
+                unranked_text.append(slider.btntext)
+
+        ranked = [[t, mv, txt] for mv, t, txt in sorted(zip(unranked_mvs, unranked_torques, unranked_text))]
+        ranked = ranked[::-1]
+
+        buildvasscreen(sm, screen, confirmed=True, ranked=ranked)
+
+
+def buildvasscreen(sm, screen, confirmed=False, ranked=None):
     screen.clear_widgets()
     screen.sm = sm
-    sm.statemachine.next_trial_pres()
+    if not confirmed:
+        sm.statemachine.next_trial_pres()
 
     # Layout params
-    sliders_origin = (1/10, 1/10)
-    sliders_size = (6/10, 9/10)
+    screen.sliders_origin = (1/10, 1/10)
+    screen.sliders_size = (6/10, 9/10)
 
-    buttons_origin = (8/10, 1/10)
-    buttons_size = (2/10, 9/10)
+    screen.buttons_origin = (8/10, 1/10)
+    screen.buttons_size = (2/10, 9/10)
 
     confirm_btn_origin = {'x': 0, 'y': 0}
     confirm_btn_size = (1, 1/10)
 
-
-    confirm_btn = Button(text="Confirm", font_size='50', color = (1,1,1), background_normal='', background_color=get_color_from_hex('#004B8D'), size_hint=confirm_btn_size, pos_hint=confirm_btn_origin)
+    # Confirm Button
+    confirm_btn = Button(text='', font_size='50', color = (1,1,1), background_normal='', background_color=get_color_from_hex('#004B8D'), size_hint=confirm_btn_size, pos_hint=confirm_btn_origin)
+    confirm_btn.text = "Confirm" if not confirmed else "Finish"
     confirm_btn.signature = 1
-    confirm_btn.confirmed = False
+    confirm_btn.confirmed = confirmed
     confirm_btn.disabled = True
     confirm_btn.bind(on_press=confirmranking)
     screen.confirm_btn = confirm_btn
 
-    buildsliders(sm, screen, sliders_origin=sliders_origin, sliders_size=sliders_size)
+    buildsliders(sm, screen, sliders_origin=screen.sliders_origin, sliders_size=screen.sliders_size, ranked=ranked)
 
-    buildbtns(sm, screen, buttons_origin, buttons_size)
+    buildbtns(sm, screen, screen.buttons_origin, screen.buttons_size, ranked=ranked)
     screen.prev_btn = 0
 
     screen.add_widget(confirm_btn)
