@@ -1,7 +1,7 @@
 """IP ADDRESSES"""
 SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
 # SERVER_IP = "localhost:50051"    # IP address of local machine
-PI_IP = f"{'35.3.206.241'}:" f"{'50051'}"
+PI_IP = f"{'35.3.216.132'}:" f"{'50051'}"
 CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
 
@@ -31,8 +31,8 @@ MIN_WAIT_PREF = 60/squeeze
 BERTEC_SPEED_STOP = 0.0
 
 # TODO get from treadmill speed csv
-BERTEC_SPEED_LEFT = 1.0
-BERTEC_SPEED_RIGHT = 1.0    
+BERTEC_SPEED_LEFT = 1.26
+BERTEC_SPEED_RIGHT = 1.26    
 
 BERTEC_ACC_LEFT = 0.25
 BERTEC_ACC_RIGHT = 0.25
@@ -64,15 +64,15 @@ NPO_MV = -18.60
 """JND SPECIFIC"""
 # comparitor settings
 NUM_BINS = 21
-PROP_LOW = 0.5
-PROP_HIGH = 1.5
+PROP_LOW = 0.8
+PROP_HIGH = 1.2
 REF_LOW = 15
 REF_HIGH = 35
 TORQUE_MIN = 7
 TORQUE_MAX = 40
 
 # Query number
-MAX_QUERIES = 10
+MAX_QUERIES = 150
 
 """PREF SPECIFIC"""
 # Slider

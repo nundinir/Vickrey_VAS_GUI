@@ -5,19 +5,21 @@ from BertecMan import Bertec
 from exoboot_remote_control import ExobootRemoteClient
 
 from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI
-from constants import SERVER_IP
+from constants import PI_IP
 
 if __name__ == "__main__":
     print("Stuff")
 
     # Connect to Exoboot
-    exoboot_remote = ExobootRemoteClient('localhost:50051')
+    # localhost = ('localhost:50051')
+    exoboot_remote = ExobootRemoteClient(PI_IP)
     subjectID, trial_type, trial_cond, description = exoboot_remote.get_subject_info()
 
     print("DETAILS: ", subjectID, trial_type, trial_cond, description)
 
     # Start Bertec
-    bertec = DumbBertec()#Bertec()
+    # bertec = DumbBertec()
+    bertec = Bertec()
 
     match trial_type.upper():
         case 'VICKREY':

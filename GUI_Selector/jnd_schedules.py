@@ -29,7 +29,7 @@ def trial_ready(sm, dt):
 
 def waitingscreenjndschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
-    Clock.schedule_once(partial(trial_ready, sm), WAITING_MIN)
+    Clock.schedule_once(partial(trial_ready, sm), MIN_WAIT_JND)
 
 
 def finishscreenjndschedule(sm):
