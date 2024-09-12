@@ -84,13 +84,11 @@ def buildsliderscreen(sm):
     screen.add_widget(confirm_btn)
     screen.confirm_btn = confirm_btn
 
-    screen.on_enter = partial(prefschedule, sm)
-
     return screen
 
 
 def map_btnnum_to_torque(btnnum, max_btn, t_min=TORQUE_MIN, t_max=TORQUE_MAX):
-    return (t_max - t_min) / (max_btn - 0) * (btnnum - 0) + t_min
+    return (t_max - t_min) / (max_btn - 1) * btnnum + t_min
 
 def btnpress(instance):
     sm = instance.parent.parent
@@ -170,7 +168,7 @@ def buildfinishscreenpref(sm):
     screen = Screen(name="finishscreenpref")
     screen.sm = sm
 
-    finishlabel = Label(text="Trial Finished\n Please step off the treadmill", font_size='50', color=(1, 1, 1, 1))
+    finishlabel = Label(text="Experiment Finished\n Please step off the treadmill", font_size='70', color=(1, 0, 0, 1))
     screen.add_widget(finishlabel)
 
     screen.on_enter = partial(finishscreenprefschedule, sm)
