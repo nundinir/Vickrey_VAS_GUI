@@ -90,7 +90,8 @@ class VickreyStateMachine:
         # Increment auction tally
         self.auction_tally += 1
 
-    def close_survey(self):
+    def close_survey(self,  *vargs):
+        # Ignore vargs. exists so next can be called by Clock.schedule_once
         t = self.auction_tally * ROBOWALK_DUR
         self.sm.exoboot_remote.question(t, self.sm.enjoyment, self.sm.rpe)
 

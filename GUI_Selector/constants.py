@@ -7,7 +7,7 @@ CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
 """SCHEDULE TIMINGS"""
 # Speed up auction time by squeeze factor FOR TESTING
-squeeze = 1
+squeeze = 20
 
 # Vickrey timings in seconds
 AUCTION_START = 0/squeeze

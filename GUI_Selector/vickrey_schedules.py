@@ -47,8 +47,11 @@ def update_resultscreen(sm, dt):
         resultscreen.label.text = "You have lost. Continue Sitting. Winning Bid:\n{:.2f}\nPayout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
         resultscreen.label.color =(1, 0, 0, 1)
 
+    
+
 def survey_schedule(sm):
     Clock.schedule_once(partial(update_resultscreen, sm), 0)
+    Clock.schedule_once(sm.statemachine.close_survey, RESULT_SHOW-BIDDING_CLOSE)
     Clock.schedule_once(sm.statemachine.next_screen, RESULT_SHOW-BIDDING_CLOSE)
 
 
