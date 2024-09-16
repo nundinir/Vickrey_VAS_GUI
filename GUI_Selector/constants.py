@@ -1,13 +1,13 @@
 """IP ADDRESSES"""
 SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
 LOCALHOST = "localhost:50051"    # IP address of local machine
-PI_IP = f"{'35.3.216.132'}:" f"{'50051'}"
+PI_IP = f"{'35.3.87.217'}:" f"{'50051'}"
 CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
 
 """SCHEDULE TIMINGS"""
 # Speed up auction time by squeeze factor FOR TESTING
-squeeze = 100
+squeeze = 1
 
 # Vickrey timings in seconds
 AUCTION_START = 0/squeeze
@@ -32,11 +32,11 @@ MIN_WAIT_PREF = 60/squeeze
 BERTEC_SPEED_STOP = 0.0
 
 # TODO get from treadmill speed csv
-BERTEC_SPEED_LEFT = 1.26
-BERTEC_SPEED_RIGHT = 1.26    
+BERTEC_SPEED_LEFT = 1.16
+BERTEC_SPEED_RIGHT = 1.16    
 
-BERTEC_ACC_LEFT = 0.25
-BERTEC_ACC_RIGHT = 0.25
+BERTEC_ACC_LEFT = 0.33
+BERTEC_ACC_RIGHT = 0.33
 
 """VICKREY SPECIFIC"""
 # Exoboot Peak torques
