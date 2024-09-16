@@ -7,7 +7,7 @@ CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
 """SCHEDULE TIMINGS"""
 # Speed up auction time by squeeze factor FOR TESTING
-squeeze = 20
+squeeze = 1
 
 # Vickrey timings in seconds
 AUCTION_START = 0/squeeze
@@ -59,8 +59,8 @@ MAX_TRIALS_DICT = {3: 1, 4: 3, 12: 2}
 MAX_PRESENTATIONS_DICT = {3: 1, 4: 3, 12: 1}
 
 # TODO import from csv
-EPO_MV = 3.4
-NPO_MV = -18.60
+EPO_MV = -9.57
+NPO_MV = -12.00
 
 """JND SPECIFIC"""
 # comparitor settings

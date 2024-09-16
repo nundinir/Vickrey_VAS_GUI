@@ -33,20 +33,12 @@ class VickreyStateMachine:
                                  }
 
     def determine_auction(self):
-        # Get bid as float
-        # no_bid = not self.sm.bid
-        # no_prev_bid = not self.sm.previous_bid
-        # if not self.sm.bid:
-        #     # If no bid, default to previous bid
-        #     subject_bid = float(self.sm.previous_bid) * 0.01
-        # else:
-        #     subject_bid = float(self.sm.bid) * 0.01
-
         no_bid = not self.sm.bid
         no_prev_bid = not self.sm.previous_bid
         # Convert bid from string to float
         if not no_bid:
             subject_bid = float(self.sm.bid) * 0.01
+            self.sm.previous_bid = self.sm.bid
         elif not no_prev_bid:
             subject_bid = float(self.sm.previous_bid) * 0.01
             self.sm.bid = self.sm.previous_bid
@@ -150,8 +142,6 @@ class VASStateMachine:
                 trial_mappings[trial] = presentation_mappings
 
             self.button_mappings[btn_num] = trial_mappings
-
-        # torques = self.button_mappings[BTN_NUMS[self.current_btn_option_ind]][self.current_trial][self.current_presentation]
 
     def get_torque(self, ind):
         return self.button_mappings[self.current_btn_option][self.current_trial][self.current_presentation][ind]

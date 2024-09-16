@@ -34,3 +34,5 @@ if __name__ == "__main__":
             PREFGUI(exoboot_remote, bertec, trial_cond).run()
         case 'ACCLIMATION':
             AcclimationGUI(exoboot_remote, bertec, trial_cond).run()
+        case _:
+            print("NO CASE")
