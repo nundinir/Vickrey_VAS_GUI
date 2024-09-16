@@ -64,7 +64,6 @@ def buildwaitingscreenvas(sm):
 
 def onslidermotion(instance, mvalue):
     sm = instance.parent.parent
-    print(instance, mvalue)
 
     min = instance.min
     max = instance.max
@@ -76,7 +75,7 @@ def onslidermotion(instance, mvalue):
     instance.label.pos_hint = {'x': x_pos, 'y':y_pos}
     instance.label.text = f"${round(mvalue, 2)}"
 
-def buildsliders(sm, screen, sliders_origin={'x':0, 'y':0}, sliders_size=(0, 0), ranked=None):
+def buildsliders(sm, screen, sliders_origin={'x':0, 'y':0}, sliders_size=(0, 0), ranked=None, slider_min=NPO_MV, slider_max=EPO_MV):
     num_sliders = sm.statemachine.current_btn_option
 
     if ranked:
@@ -97,8 +96,7 @@ def buildsliders(sm, screen, sliders_origin={'x':0, 'y':0}, sliders_size=(0, 0),
             mv = 0
             btntext = chr(65 + num_sliders - i - 1)
 
-        print(mv)
-        slider = Slider(min=-50, max=100, value=float(mv), size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y':origin_y}, cursor_size=(65, 65), padding=0)
+        slider = Slider(min=slider_min, max=slider_max, value=float(mv), size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y':origin_y}, cursor_size=(65, 65), padding=0)
         slider.btntext = btntext
         slider.torque = float(torque)
         slider.bind(value=onslidermotion)
@@ -214,8 +212,10 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
     confirm_btn_origin = {'x': 0, 'y': 0}
     confirm_btn_size = (1, 1/10)
 
+    mv_label_size = (1/10, 9/10)
+
     # Confirm Button
-    confirm_btn = Button(text='', font_size='50', color = (1,1,1), background_normal='', background_color=get_color_from_hex('#004B8D'), size_hint=confirm_btn_size, pos_hint=confirm_btn_origin)
+    confirm_btn = Button(text='', font_size='50', color=(1,1,1), background_normal='', background_color=get_color_from_hex('#004B8D'), size_hint=confirm_btn_size, pos_hint=confirm_btn_origin)
     confirm_btn.text = "Confirm" if not confirmed else "Finish"
     confirm_btn.signature = 1
     confirm_btn.confirmed = confirmed
@@ -223,12 +223,19 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
     confirm_btn.bind(on_press=confirmranking)
     screen.confirm_btn = confirm_btn
 
-    buildsliders(sm, screen, sliders_origin=screen.sliders_origin, sliders_size=screen.sliders_size, ranked=ranked)
+    # NPO/EPO Text
+    # Label(text=f"${round(slider.value, 2)}", size_hint=(0.1, 0.1), pos_hint={'x': origin_x, 'y':origin_y}, color=(1.0,0,0))
+    npo_label = Label(text="${}".format(NPO_MV), font_size='30', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 0, 'y': 1/10})
+    epo_label = Label(text="${}".format(EPO_MV), font_size='30', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 7/10, 'y': 1/10})
+
+    buildsliders(sm, screen, sliders_origin=screen.sliders_origin, sliders_size=screen.sliders_size, ranked=ranked, slider_min=NPO_MV, slider_max=EPO_MV)
 
     buildbtns(sm, screen, screen.buttons_origin, screen.buttons_size, ranked=ranked)
     screen.prev_btn = 0
 
     screen.add_widget(confirm_btn)
+    screen.add_widget(npo_label)
+    screen.add_widget(epo_label)
 
 
 def buildfinishscreenvas(sm):
