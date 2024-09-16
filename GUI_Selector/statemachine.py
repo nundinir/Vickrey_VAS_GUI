@@ -29,10 +29,7 @@ class VickreyStateMachine:
         self.next_screen_dict = {"dummy": "pushtostartscreen", 
                                  "pushtostartscreen": "numpad", 
                                  "numpad": "survey",
-                                 "continuewalkingscreen": "numpad",
-                                 "startwalkingscreen": "pushtostartscreen",
-                                 "stopwalkingscreen": "numpad",
-                                 "continuesittingscreen": "numpad"
+                                 "survey": "resultscreen"
                                  }
 
     def determine_auction(self):
@@ -63,7 +60,6 @@ class VickreyStateMachine:
         all_bids = [subject_bid]
         all_bids.extend(self.robomodel.get_bids())
 
-        print("asdf", all_bids)
         # Get winner
         ordered_bids = sorted(all_bids)
         self.winning_bid = ordered_bids[0]
@@ -96,7 +92,6 @@ class VickreyStateMachine:
 
     def close_survey(self):
         t = self.auction_tally * ROBOWALK_DUR
-        print("Closing survey", t, self.sm.enjoyment, self.sm.rpe)
         self.sm.exoboot_remote.question(t, self.sm.enjoyment, self.sm.rpe)
 
     def next_screen(self, *vargs):
@@ -162,13 +157,9 @@ class VASStateMachine:
 
     def next_trial_pres(self):
         [self.current_btn_option, self.current_trial, self.current_presentation] = self.vas_btn_trial_pres.pop(0)
-
         if len(self.vas_btn_trial_pres) < 1:
             self.quit_flag  = True
         
-        print("BTN_NUM/Trial/Presentation: {}/{}/{} {}".format(self.current_btn_option, self.current_trial, self.current_presentation, 
-                                                                self.button_mappings[self.current_btn_option][self.current_trial][self.current_presentation]))
-
     def presentation_result(self, torques, values):
         self.sm.exoboot_remote.presentation_result(self.current_btn_option, self.current_trial, self.current_presentation, torques, values)
 
@@ -304,32 +295,18 @@ class PrefStateMachine:
                                  "waitingscreenpref": "pushtostartscreenpref"}
 
         # Next screen based on pref type
-        print(self.pref_type)
         match self.pref_type:
             case 'SLIDER':
-                print('Starting Slider Preference')
-                self.report_pref = self.report_slider
-
                 self.next_screen_dict["pushtostartscreenpref"] = "sliderscreen"
                 self.next_screen_dict["sliderscreen"] = "waitingscreenpref"
             case 'BTN':
-                print('Starting BTN Preference')
-                self.report_pref = self.report_btn
-
                 self.next_screen_dict["pushtostartscreenpref"] = "btnscreen"
                 self.next_screen_dict["btnscreen"] = "waitingscreenpref"
 
-    def report_slider(self, torque):
+    def report_pref(self, torque):
         self.sm.exoboot_remote.pref_result(self.pres, torque)
         self.pres += 1
-        if self.pres > MAX_PRES_VAS - 1:
-            self.quit_flag = True
-        self.next_screen()
-
-    def report_btn(self, torque):
-        self.sm.exoboot_remote.pref_result(self.pres, torque)
-        self.pres += 1
-        if self.pres > MAX_PRES_VAS - 1:
+        if self.pres > MAX_PRES_PREF - 1:
             self.quit_flag = True
         self.next_screen()
 
@@ -341,9 +318,15 @@ class PrefStateMachine:
             self.sm.current = self.next_screen_dict[self.sm.current]
 
 
-if __name__ == "__main__":
-    testvas = VASStateMachine(None)
-    print(testvas.vas_btn_trial_pres)
-    
-    while not testvas.quit_flag:
-        testvas.next_trial_pres()
+class AcclimationStateMachine:
+    def __init__(self, screenmanager):
+        self.sm = screenmanager
+
+        # Screen states dictionary
+        self.next_screen_dict = {"dummy": "pushtostartscreenaccl",
+                                 "pushtostartscreenaccl": "sliderscreen",
+                                 "sliderscreen": "finishscreenaccl"}
+
+    def next_screen(self, *vargs):
+        # Ignore vargs. exists so next can be called by Clock.schedule_once
+        self.sm.current = self.next_screen_dict[self.sm.current]

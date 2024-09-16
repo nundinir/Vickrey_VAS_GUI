@@ -12,17 +12,5 @@ def pause_exo_bertec(sm, dt):
     sm.exoboot_remote.set_torques(peak_torque_left=0, peak_torque_right=0)
     sm.exoboot_remote.set_pause(mybool=True)
 
-def trial_ready(sm, dt):
-    sm.statemachine.next_screen()
-
-def waitingscreenprefschedule(sm):
-    Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
-    Clock.schedule_once(partial(trial_ready, sm), MIN_WAIT_PREF)
-
-
-def reset_sliderscreen(sm, screen):
-    screen.confirm_btn.confirmed = False
-    screen.confirm_btn.text = "Confirm"
-
-def finishscreenprefschedule(sm):
+def finishscreenacclschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)

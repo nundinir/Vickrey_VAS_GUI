@@ -17,13 +17,14 @@ from BertecMan import Bertec
 from constants import *
 from vickrey_schedules import *
 
-from vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen
+from vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen
 from vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildfinishscreenvas
 from jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
-from pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreen, buildbtnscreen, buildfinishscreenpref
+from pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref
+from acclimation_screens import buildpushtostartscreenaccl, buildsliderscreenaccl, buildfinishscreenaccl
 
 from vas_schedules import *
-from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine
+from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine, AcclimationStateMachine
 
 class BaseGui(App):
     def __init__(self, name, exoboot_remote_client, bertec):
@@ -81,47 +82,19 @@ class VickreyGUI(BaseGui):
         self.sm.enjoyment = 0
         self.sm.rpe = 0
 
-        label_fontsize = '50'
-
         # Create Screens
         dummyscreen = Screen(name="dummy")
-
-        pushtostartscreen = buildpushtostartscreen(self.sm, label_fontsize)
-
-        numpad = buildNumPadScreen(self.sm)
-
-        survey = buildsurveyscreen(self.sm)
-
-        # Result screens: 4 cases
-        self.sm.continuewalkingscreen = Screen(name="continuewalkingscreen")
-        self.sm.continuewalkingscreen.label = Label(text='', font_size=label_fontsize)
-        self.sm.continuewalkingscreen.add_widget(self.sm.continuewalkingscreen.label)
-        self.sm.continuewalkingscreen.on_enter = partial(result_screens_schedule, self.sm)
-
-        self.sm.startwalkingscreen = Screen(name="startwalkingscreen")
-        self.sm.startwalkingscreen.label = Label(text='', font_size=label_fontsize)
-        self.sm.startwalkingscreen.add_widget(self.sm.startwalkingscreen.label)
-        self.sm.startwalkingscreen.on_enter = partial(result_screens_schedule, self.sm)
-
-        self.sm.stopwalkingscreen = Screen(name="stopwalkingscreen")
-        self.sm.stopwalkingscreen.label = Label(text='', font_size=label_fontsize)
-        self.sm.stopwalkingscreen.add_widget(self.sm.stopwalkingscreen.label)
-        self.sm.stopwalkingscreen.on_enter = partial(result_screens_schedule, self.sm)
-
-        self.sm.continuesittingscreen = Screen(name="continuesittingscreen")
-        self.sm.continuesittingscreen.label = Label(text='', font_size=label_fontsize)
-        self.sm.continuesittingscreen.add_widget(self.sm.continuesittingscreen.label)
-        self.sm.continuesittingscreen.on_enter = partial(result_screens_schedule, self.sm)
+        pushtostartscreen = buildpushtostartscreen()
+        numpadscreen = buildNumPadScreen(self.sm)
+        surveyscreen = buildsurveyscreen(self.sm)
+        self.sm.resultscreen = buildresultscreen(self.sm)
 
         # Add screens to ScreenManager
         self.sm.add_widget(dummyscreen)
         self.sm.add_widget(pushtostartscreen)
-        self.sm.add_widget(numpad)
-        self.sm.add_widget(survey)
-        self.sm.add_widget(self.sm.continuewalkingscreen)
-        self.sm.add_widget(self.sm.startwalkingscreen)
-        self.sm.add_widget(self.sm.stopwalkingscreen)
-        self.sm.add_widget(self.sm.continuesittingscreen)
+        self.sm.add_widget(numpadscreen)
+        self.sm.add_widget(surveyscreen)
+        self.sm.add_widget(self.sm.resultscreen)
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreen"
@@ -142,22 +115,15 @@ class VASGUI(BaseGui):
         # State machine
         self.sm.statemachine = VASStateMachine(self.sm)
 
-        label_fontsize = '50'
-
         # Create Screens
         dummyscreen = Screen(name="dummy")
-
-        # TODO VAS pushtostartscreen
-        pushtostartscreen = buildpushtostartscreenvas(self.sm, label_fontsize)
+        pushtostartscreen = buildpushtostartscreenvas()
+        waitingscreen = buildwaitingscreenvas(self.sm)
+        finishscreen = buildfinishscreenvas(self.sm)
 
         vasscreen = Screen(name='vasscreen')
         vasscreen.sm = self.sm
-        vasscreen.on_enter = partial(buildvasscreen, self.sm, vasscreen, False, None)
-
-        waitingscreen = buildwaitingscreenvas(self.sm)
-
-        finishscreen = buildfinishscreenvas(self.sm)
-        # TODO add kill method
+        vasscreen.on_pre_enter = partial(buildvasscreen, self.sm, vasscreen, False, None)
 
         # Add screens to ScreenManager
         self.sm.add_widget(dummyscreen)
@@ -187,7 +153,7 @@ class JNDGUI(BaseGui):
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
-        pushtostartscreenjnd = buildpushtostartscreenjnd(self.sm)
+        pushtostartscreenjnd = buildpushtostartscreenjnd()
         waitingscreenjnd = buildwaitingscreenjnd(self.sm)
         finishscreenjnd = buildfinishscreenjnd(self.sm)
 
@@ -235,17 +201,44 @@ class PREFGUI(BaseGui):
         # Split or same trial cond
         match self.pref_type:
             case "SLIDER":
-                sliderscreenpref = buildsliderscreen(self.sm)
+                sliderscreenpref = buildsliderscreenpref(self.sm)
                 self.sm.add_widget(sliderscreenpref)
                 self.sm.prefscreen = sliderscreenpref
             case "BTN":
                 btnscreenpref = Screen(name="btnscreen")
                 btnscreenpref.sm = self.sm
-                buildbtnscreen(self.sm, btnscreenpref)
+                buildbtnscreenpref(self.sm, btnscreenpref)
                 self.sm.add_widget(btnscreenpref)
                 self.sm.prefscreen = btnscreenpref
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenpref"
+
+        return self.sm
+    
+
+class AcclimationGUI(BaseGui):
+    def __init__(self, exoboot_remote_client, bertec, pref_type):
+        super().__init__(name='ACCLIMATION', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+        self.pref_type = pref_type
+
+    def build(self):
+        self.sm.statemachine = AcclimationStateMachine(self.sm)
+
+        # Create Screens
+        dummyscreen = Screen(name="dummy")
+        pushtostartscreenaccl = buildpushtostartscreenaccl()
+        sliderscreen = buildsliderscreenaccl(self.sm)
+        self.sm.sliderscreen = sliderscreen
+        finishscreenaccl = buildfinishscreenaccl(self.sm)
+
+        # Add screens to ScreenManager
+        self.sm.add_widget(dummyscreen)
+        self.sm.add_widget(pushtostartscreenaccl)
+        self.sm.add_widget(sliderscreen)
+        self.sm.add_widget(finishscreenaccl)
+
+        # Switch from dummy to startscreen to run on_enter
+        self.sm.current = "pushtostartscreenaccl"
 
         return self.sm

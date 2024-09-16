@@ -1,6 +1,6 @@
 """IP ADDRESSES"""
 SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
-# SERVER_IP = "localhost:50051"    # IP address of local machine
+LOCALHOST = "localhost:50051"    # IP address of local machine
 PI_IP = f"{'35.3.216.132'}:" f"{'50051'}"
 CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
@@ -14,6 +14,7 @@ AUCTION_START = 0/squeeze
 AUCTION_CLOSE = 120/squeeze
 BIDDING_OPEN = 0/squeeze
 BIDDING_CLOSE = 60/squeeze
+INITIAL_BIDDING_CLOSE = 30/squeeze
 RESULT_SHOW = 100/squeeze
 
 # VAS timing in seconds
@@ -53,7 +54,7 @@ ROBOWALK_DUR = 2 # minutes
 
 """VAS SPECIFIC"""
 # VAS Trial/Presentation Dicts
-BTN_NUMS = [4, 12] #[3] for quick testing
+BTN_NUMS = [4, 12]
 MAX_TRIALS_DICT = {3: 1, 4: 3, 12: 2}
 MAX_PRESENTATIONS_DICT = {3: 1, 4: 3, 12: 1}
 
@@ -72,15 +73,19 @@ TORQUE_MIN = 7
 TORQUE_MAX = 40
 
 # Query number
-MAX_QUERIES = 150
+MAX_QUERIES = 10
+
+"""ACCLIMATION SPECIFIC"""
+ACCL_STEP = 1.0
 
 """PREF SPECIFIC"""
+# Buttons
+# TODO FIX UNEVEN BUTTON SIZES
+PREF_ROWS = 2
+PREF_COLS = 2
+
 # Slider
 PREF_STEP = 1.0
 
-# Buttons
-PREF_ROWS = 4
-PREF_COLS = 5
-
 # Max Trials
-MAX_PRES_VAS = 3
+MAX_PRES_PREF = 3

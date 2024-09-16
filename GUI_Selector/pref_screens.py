@@ -9,8 +9,8 @@ from kivy.uix.button import Button
 from kivy.uix.screenmanager import Screen
 
 from constants import *
-from pref_schedules import *
-from kivy_utils import CountDownTimer
+from pref_schedules import waitingscreenprefschedule, reset_sliderscreen, finishscreenprefschedule
+
 
 def startbtn_CB(instance):
     sm = instance.parent.parent
@@ -59,7 +59,7 @@ def confirm_slider_pref(instance):
     if instance.confirmed:
         sm = instance.parent.parent
         torque = instance.parent.tslider.value
-        sm.statemachine.report_slider(torque)
+        sm.statemachine.report_pref(torque)
     else:
         instance.confirmed = True
         instance.background_color = (1,0,0)
@@ -69,7 +69,7 @@ def confirm_slider_pref(instance):
         disable_btn(screen, True, 0)
         Clock.schedule_once(partial(disable_btn, screen, False), 0.2)
 
-def buildsliderscreen(sm):
+def buildsliderscreenpref(sm):
     screen = Screen(name="sliderscreen")
     screen.sm = sm
 
@@ -83,6 +83,8 @@ def buildsliderscreen(sm):
     confirm_btn.bind(on_press=confirm_slider_pref)
     screen.add_widget(confirm_btn)
     screen.confirm_btn = confirm_btn
+
+    screen.on_enter = partial(reset_sliderscreen, sm, screen)
 
     return screen
 
@@ -122,7 +124,7 @@ def confirm_btn_pref(instance):
     sm = instance.parent.parent
     screen = instance.parent
     if instance.confirmed:
-        sm.statemachine.report_btn(screen.prev_btn.torque)
+        sm.statemachine.report_pref(screen.prev_btn.torque)
     else:
         instance.confirmed = True
         instance.background_color = (1,0,0)
@@ -131,7 +133,7 @@ def confirm_btn_pref(instance):
         disable_btn(screen, True, 0)
         Clock.schedule_once(partial(disable_btn, screen, False), 0.1)
 
-def buildbtnscreen(sm, screen):
+def buildbtnscreenpref(sm, screen):
     screen.clear_widgets()
 
     confirm_btn = Button(text="Confirm", font_size='70', color = (1,1,1), background_normal='', background_color= (0.75,0,0), size_hint=(1, 1/5), pos_hint={'x':0, 'y':0})
@@ -161,14 +163,14 @@ def buildbtnscreen(sm, screen):
 
     screen.prev_btn = 0
 
-    screen.on_pre_enter = partial(buildbtnscreen, sm, screen)
+    screen.on_pre_enter = partial(buildbtnscreenpref, sm, screen)
 
 
 def buildfinishscreenpref(sm):
     screen = Screen(name="finishscreenpref")
     screen.sm = sm
 
-    finishlabel = Label(text="Experiment Finished\n Please step off the treadmill", font_size='70', color=(1, 0, 0, 1))
+    finishlabel = Label(text="Experiment Finished\nPlease step off the treadmill", font_size='70', color=(1, 0, 0, 1))
     screen.add_widget(finishlabel)
 
     screen.on_enter = partial(finishscreenprefschedule, sm)

@@ -20,9 +20,8 @@ def startbtn_CB(instance):
     # Next screen
     sm.statemachine.next_screen()
 
-def buildpushtostartscreenjnd(sm):
+def buildpushtostartscreenjnd():
     screen = Screen(name="pushtostartscreenjnd")
-    screen.sm = sm
     startbttn = Button(text="Touch to begin", font_size='50', color=(1, 1, 1, 1))
     startbttn.bind(on_press=startbtn_CB)
     screen.add_widget(startbttn)
@@ -36,7 +35,7 @@ def buildwaitingscreenjnd(sm):
     waitlabel = Label(text="Take a break!\nTrial resumes in 1 minute", font_size='50', color=(1, 1, 1, 1))
     screen.add_widget(waitlabel)
     
-    screen.on_enter = partial(waitingscreenjndschedule, sm)
+    screen.on_enter = partial(waitingscreenjndschedule, screen.sm)
 
     return screen
 
@@ -108,7 +107,7 @@ def buildsamelegscreen(sm):
 def buildfinishscreenjnd(sm):
     screen = Screen(name="finishscreenjnd")
     screen.sm = sm
-    finishlabel = Label(text="Trial Finished\n Please step off the treadmill", font_size='50', color=(1, 1, 1, 1))
+    finishlabel = Label(text="Trial Finished\nPlease step off the treadmill", font_size='50', color=(1, 0, 0, 1))
     screen.add_widget(finishlabel)
 
     screen.on_enter = partial(finishscreenjndschedule, sm)
