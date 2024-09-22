@@ -108,12 +108,13 @@ class VASGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote_client, bertec):
+    def __init__(self, startstamp, exoboot_remote_client, bertec):
         super().__init__(name='VAS', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+        self.startstamp = startstamp
 
     def build(self):
         # State machine
-        self.sm.statemachine = VASStateMachine(self.sm)
+        self.sm.statemachine = VASStateMachine(self.sm, self.startstamp)
 
         # Create Screens
         dummyscreen = Screen(name="dummy")

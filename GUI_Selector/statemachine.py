@@ -1,4 +1,4 @@
-import random
+import time, random
 import numpy as np
 
 from constants import *
@@ -93,11 +93,13 @@ class VickreyStateMachine:
 
 
 class VASStateMachine:
-    def __init__(self, screenmanager):
+    def __init__(self, screenmanager, startstamp):
         self.sm = screenmanager
+        self.startstamp = startstamp
 
         # Setting up Torque options
-        self.num_of_tot_torque_settings:int = 12                     # Total number of torque settings (Maintain 12 for practicality)
+        self.num_of_tot_torque_settings = BTN_NUM_TOTAL # Total number of torque settings (Maintain 12 for practicality)
+        # TODO verify torque range doesn't go beyond 40 n-m
         self.torque_step:float = (TORQUE_MAX - TORQUE_MIN)/self.num_of_tot_torque_settings  # Step size for the torque buttons (maintain 12 btns)
         self.torque_settings = np.arange(self.torque_step, TORQUE_MAX + self.torque_step, self.torque_step)  # All Torque settings (np.arrange doesn't include stop value)
 
@@ -148,14 +150,22 @@ class VASStateMachine:
 
     def next_trial_pres(self):
         [self.current_btn_option, self.current_trial, self.current_presentation] = self.vas_btn_trial_pres.pop(0)
+        self.overtime_dict = {self.get_torque(i):0 for i in range(self.current_btn_option)}
+
+        # Send overtime info
+        self.sm.exoboot_remote.update_vas_info(self.current_btn_option, self.current_trial, self.current_presentation)
+
+        # Quit after next screen if no more trial/pres left
         if len(self.vas_btn_trial_pres) < 1:
             self.quit_flag  = True
         
+    def log_overtime(self, torque, mv):
+        pitime = time.perf_counter() - self.startstamp
+        self.overtime_dict[torque] = mv
+        self.sm.exoboot_remote.slider_update(pitime, self.overtime_dict)
+
     def presentation_result(self, torques, values):
         self.sm.exoboot_remote.presentation_result(self.current_btn_option, self.current_trial, self.current_presentation, torques, values)
-
-    def regen_vasscreen(self):
-        pass
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once

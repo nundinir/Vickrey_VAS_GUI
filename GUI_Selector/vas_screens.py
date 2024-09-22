@@ -75,6 +75,8 @@ def onslidermotion(instance, mvalue):
     instance.label.pos_hint = {'x': x_pos, 'y':y_pos}
     instance.label.text = f"${round(mvalue, 2)}"
 
+    sm.statemachine.log_overtime(instance.torque, mvalue)
+
 def buildsliders(sm, screen, sliders_origin={'x':0, 'y':0}, sliders_size=(0, 0), ranked=None, slider_min=NPO_MV, slider_max=EPO_MV):
     num_sliders = sm.statemachine.current_btn_option
 

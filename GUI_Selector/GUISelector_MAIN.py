@@ -7,14 +7,15 @@ from exoboot_remote_control import ExobootRemoteClient
 from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI, AcclimationGUI
 from constants import PI_IP, LOCALHOST
 
+
 if __name__ == "__main__":
     # Connect to Exoboot
     exoboot_remote = ExobootRemoteClient(LOCALHOST)
 
     # Get subject info
-    subjectID, trial_type, trial_cond, description = exoboot_remote.get_subject_info()
+    startstamp, subjectID, trial_type, trial_cond, description = exoboot_remote.get_subject_info()
 
-    print("DETAILS: ", subjectID, trial_type, trial_cond, description)
+    print("DETAILS: ", startstamp, subjectID, trial_type, trial_cond, description)
 
     # Start Bertec
     if subjectID == 'DUMMY' or trial_cond == 'DUMMY':
@@ -27,7 +28,7 @@ if __name__ == "__main__":
             # TODO fix survey reporting
             VickreyGUI(exoboot_remote, bertec).run()
         case 'VAS':
-            VASGUI(exoboot_remote, bertec).run()
+            VASGUI(startstamp, exoboot_remote, bertec).run()
         case 'JND':
             JNDGUI(exoboot_remote, bertec, trial_cond).run()
         case 'PREF':
@@ -35,4 +36,4 @@ if __name__ == "__main__":
         case 'ACCLIMATION':
             AcclimationGUI(exoboot_remote, bertec, trial_cond).run()
         case _:
-            print("NO CASE")
+            print("INVALID CASE")

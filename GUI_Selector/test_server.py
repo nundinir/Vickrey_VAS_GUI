@@ -1,4 +1,4 @@
-import sys, time, threading
+import sys, time, socket, threading
 
 from exoboot_remote_control import ExobootRemoteServerThread
 
@@ -98,15 +98,14 @@ class DumbWrapper:
         while self.quit_event.is_set():
             time.sleep(0.1)
 
+
 if __name__ == "__main__":
     """
-    Run auction server
+    Run test server
     """
     try:
-        subjectID = sys.argv[1]
-        trial_type = sys.argv[2]
-        trial_cond = sys.argv[3]
-        description = sys.argv[4]
+        assert len(sys.argv) == 4 + 1
+        _, subjectID, trial_type, trial_cond, description = sys.argv
         dumb_wrapper = DumbWrapper(subjectID, trial_type, trial_cond, description)
         dumb_wrapper.run()
 

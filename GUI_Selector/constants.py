@@ -7,7 +7,7 @@ CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
 """SCHEDULE TIMINGS"""
 # Speed up auction time by squeeze factor FOR TESTING
-squeeze = 1
+squeeze = 100
 
 # Vickrey timings in seconds
 AUCTION_START = 0/squeeze
@@ -54,9 +54,10 @@ ROBOWALK_DUR = 2 # minutes
 
 """VAS SPECIFIC"""
 # VAS Trial/Presentation Dicts
-BTN_NUMS = [4, 12]
-MAX_TRIALS_DICT = {3: 1, 4: 3, 12: 2}
-MAX_PRESENTATIONS_DICT = {3: 1, 4: 3, 12: 1}
+BTN_NUMS = [4]
+BTN_NUM_TOTAL = 20
+MAX_TRIALS_DICT = {4: 6}
+MAX_PRESENTATIONS_DICT = {4: 5}
 
 # TODO import from csv
 EPO_MV = -9.57
