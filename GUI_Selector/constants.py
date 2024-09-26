@@ -55,9 +55,8 @@ ROBOWALK_DUR = 2 # minutes
 """VAS SPECIFIC"""
 # VAS Trial/Presentation Dicts
 BTN_NUMS = [4]
-BTN_NUM_TOTAL = 20
-MAX_TRIALS_DICT = {4: 6}
-MAX_PRESENTATIONS_DICT = {4: 5}
+MAX_TRIALS_DICT = {1: 1, 4: 6}
+MAX_PRESENTATIONS_DICT = {1: 1, 4: 5} # without replacement
 
 # TODO import from csv
 EPO_MV = -9.57

@@ -96,10 +96,6 @@ class VASStateMachine:
     def __init__(self, screenmanager, startstamp):
         self.sm = screenmanager
         self.startstamp = startstamp
-
-        # Setting up Torque options
-        self.num_of_tot_torque_settings = BTN_NUM_TOTAL # Total number of torque settings (Maintain 12 for practicality)
-        self.torque_settings = np.linspace(TORQUE_MIN, TORQUE_MAX, self.num_of_tot_torque_settings)
         
         # Trial/Presentation States
         self.current_btn_option = 0
@@ -129,15 +125,23 @@ class VASStateMachine:
 
     def generate_button_torque_mapping(self):
         for btn_num in BTN_NUMS:
+            # Setting up Torque options
+            num_torques = btn_num * MAX_PRESENTATIONS_DICT[btn_num]
+            torques = list(np.linspace(TORQUE_MIN, TORQUE_MAX, num_torques))
+
             trial_mappings = {}
             for trial in range(1, MAX_TRIALS_DICT[btn_num] + 1):
-                np.random.seed(trial)
+                random.seed(trial)
+                available_torques = torques[:]
+                random.shuffle(available_torques)
+                print(available_torques)
 
-                pseudo_random_presentation_torques = np.random.choice(self.torque_settings, size = self.num_of_tot_torque_settings, replace=False)
-
-                presentation_mappings = {1: pseudo_random_presentation_torques[0:btn_num],
-                                         2: pseudo_random_presentation_torques[btn_num:btn_num*2],
-                                         3: pseudo_random_presentation_torques[btn_num*2:self.num_of_tot_torque_settings]}
+                presentation_mappings = {}
+                for p in range(1, MAX_PRESENTATIONS_DICT[btn_num] + 1):
+                    pres_torques = []
+                    for _ in range(btn_num):
+                        pres_torques.append(available_torques.pop(0))
+                    presentation_mappings[p] = pres_torques
 
                 trial_mappings[trial] = presentation_mappings
 
@@ -329,3 +333,16 @@ class AcclimationStateMachine:
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
         self.sm.current = self.next_screen_dict[self.sm.current]
+
+
+if __name__ == "__main__":
+    testvas = VASStateMachine(None, time.perf_counter())
+    testvas.generate_button_torque_mapping()
+
+    print("B T P Torques")
+    for btn, trials in testvas.button_mappings.items():
+        trial_torques = []
+        for t, trial in trials.items():
+            for p, pres in trial.items():
+                print(btn, t, p, pres)
+            print()
