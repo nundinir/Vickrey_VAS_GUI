@@ -99,10 +99,8 @@ class VASStateMachine:
 
         # Setting up Torque options
         self.num_of_tot_torque_settings = BTN_NUM_TOTAL # Total number of torque settings (Maintain 12 for practicality)
-        # TODO verify torque range doesn't go beyond 40 n-m
-        self.torque_step:float = (TORQUE_MAX - TORQUE_MIN)/self.num_of_tot_torque_settings  # Step size for the torque buttons (maintain 12 btns)
-        self.torque_settings = np.arange(self.torque_step, TORQUE_MAX + self.torque_step, self.torque_step)  # All Torque settings (np.arrange doesn't include stop value)
-
+        self.torque_settings = np.linspace(TORQUE_MIN, TORQUE_MAX, self.num_of_tot_torque_settings)
+        
         # Trial/Presentation States
         self.current_btn_option = 0
         self.current_trial = 0
