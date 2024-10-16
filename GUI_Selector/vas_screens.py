@@ -95,7 +95,7 @@ def buildsliders(sm, screen, sliders_origin={'x':0, 'y':0}, sliders_size=(0, 0),
             torque, mv, btntext = ranked_.pop()
         else:
             torque = sm.statemachine.get_torque(i)
-            mv = 0
+            mv = (slider_max + slider_min) / 2
             btntext = chr(65 + num_sliders - i - 1)
 
         slider = Slider(min=slider_min, max=slider_max, value=float(mv), size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y':origin_y}, cursor_size=(65, 65), padding=0)
