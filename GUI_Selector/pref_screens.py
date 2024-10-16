@@ -136,7 +136,8 @@ def confirm_btn_pref(instance):
 def buildbtnscreenpref(sm, screen):
     screen.clear_widgets()
 
-    confirm_btn = Button(text="Confirm", font_size='70', color = (1,1,1), background_normal='', background_color= (0.75,0,0), size_hint=(1, 1/5), pos_hint={'x':0, 'y':0})
+    confirm_btn_height = 1/5
+    confirm_btn = Button(text="Confirm", font_size='70', color = (1,1,1), background_normal='', background_color= (0.75,0,0), size_hint=(1, confirm_btn_height), pos_hint={'x':0, 'y':0})
     confirm_btn.bind(on_press=confirm_btn_pref)
     confirm_btn.confirmed = False
     confirm_btn.disabled = True
@@ -154,7 +155,7 @@ def buildbtnscreenpref(sm, screen):
             ypos = 4/5 * (PREF_ROWS - row - 1)/PREF_ROWS + 1/5
 
             torque = map_btnnum_to_torque(btnnums.pop(), PREF_ROWS * PREF_COLS)
-            btn_temp = Button(text = chr(65 + row * PREF_COLS + col), font_size='50', color=(1,1,1), background_normal='', background_color= (0,0.5,0), size_hint=(1/PREF_COLS, 1/PREF_ROWS), pos_hint={'x':xpos, 'y':ypos})
+            btn_temp = Button(text = chr(65 + row * PREF_COLS + col), font_size='50', color=(1,1,1), background_normal='', background_color= (0,0.5,0), size_hint=(1/PREF_COLS, (1 - confirm_btn_height) * 1/PREF_ROWS), pos_hint={'x':xpos, 'y':ypos})
             btn_temp.signature = 1 # Is a preference button
             btn_temp.torque = torque
             btn_temp.visited = False

@@ -12,19 +12,16 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import StringProperty, NumericProperty
 from kivy.core.window import Window
 
-from BertecMan import Bertec
-
 from constants import *
-from vickrey_schedules import *
 
 from vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen
 from vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildfinishscreenvas
 from jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
 from pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref
 from acclimation_screens import buildpushtostartscreenaccl, buildsliderscreenaccl, buildfinishscreenaccl
+from speedfinder_screens import buildpushtostartscreensf, buildspeedfinderscreen, buildfinishscreensf
 
-from vas_schedules import *
-from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine, AcclimationStateMachine
+from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine, AcclimationStateMachine, SpeedFinderStateMachine
 
 class BaseGui(App):
     def __init__(self, name, exoboot_remote_client, bertec):
@@ -205,7 +202,7 @@ class PREFGUI(BaseGui):
                 sliderscreenpref = buildsliderscreenpref(self.sm)
                 self.sm.add_widget(sliderscreenpref)
                 self.sm.prefscreen = sliderscreenpref
-            case "BTN":
+            case "BUTTON":
                 btnscreenpref = Screen(name="btnscreen")
                 btnscreenpref.sm = self.sm
                 buildbtnscreenpref(self.sm, btnscreenpref)
@@ -219,9 +216,8 @@ class PREFGUI(BaseGui):
     
 
 class AcclimationGUI(BaseGui):
-    def __init__(self, exoboot_remote_client, bertec, pref_type):
+    def __init__(self, exoboot_remote_client, bertec):
         super().__init__(name='ACCLIMATION', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
-        self.pref_type = pref_type
 
     def build(self):
         self.sm.statemachine = AcclimationStateMachine(self.sm)
@@ -241,5 +237,29 @@ class AcclimationGUI(BaseGui):
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenaccl"
+
+        return self.sm
+    
+class SpeedFinderGUI(BaseGui):
+    def __init__(self, exoboot_remote_client, bertec):
+        super().__init__(name='SPEEDFINDER', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+
+    def build(self):
+        self.sm.statemachine = SpeedFinderStateMachine(self.sm)
+
+        # Create Screens
+        dummyscreen = Screen(name="dummy")
+        pushtostartscreensf = buildpushtostartscreensf()
+        speedfinderscreen = buildspeedfinderscreen(self.sm)
+        finishscreensf = buildfinishscreensf(self.sm)
+
+        # Add screens to ScreenManager
+        self.sm.add_widget(dummyscreen)
+        self.sm.add_widget(pushtostartscreensf)
+        self.sm.add_widget(speedfinderscreen)
+        self.sm.add_widget(finishscreensf)
+
+        # Switch from dummy to startscreen to run on_enter
+        self.sm.current = "pushtostartscreensf"
 
         return self.sm

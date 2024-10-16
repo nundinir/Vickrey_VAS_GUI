@@ -4,6 +4,7 @@ import numpy as np
 from constants import *
 from Robobidders import *
 from jnd_utils import jnd_comparitor
+from SoftRTloop import FlexibleSleeper
 
 from constants import BTN_NUMS, MAX_TRIALS_DICT, MAX_PRESENTATIONS_DICT
 
@@ -302,7 +303,7 @@ class PrefStateMachine:
             case 'SLIDER':
                 self.next_screen_dict["pushtostartscreenpref"] = "sliderscreen"
                 self.next_screen_dict["sliderscreen"] = "waitingscreenpref"
-            case 'BTN':
+            case 'BUTTON':
                 self.next_screen_dict["pushtostartscreenpref"] = "btnscreen"
                 self.next_screen_dict["btnscreen"] = "waitingscreenpref"
 
@@ -329,6 +330,57 @@ class AcclimationStateMachine:
         self.next_screen_dict = {"dummy": "pushtostartscreenaccl",
                                  "pushtostartscreenaccl": "sliderscreen",
                                  "sliderscreen": "finishscreenaccl"}
+
+    def next_screen(self, *vargs):
+        # Ignore vargs. exists so next can be called by Clock.schedule_once
+        self.sm.current = self.next_screen_dict[self.sm.current]
+
+class SpeedFinderStateMachine:
+    # TODO implement way to get steps from exoboot_remote???
+    # TODO
+    def __init__(self, screenmanager):
+        self.sm = screenmanager
+
+        # Screen states dictionary
+        self.next_screen_dict = {"dummy": "pushtostartscreensf",
+                                 "pushtostartscreensf": "speedfinderscreen",
+                                 "speedfinderscreen": "finishscreensf"}
+
+        self.IsOptimized = False
+
+    @staticmethod
+    def clamp_v(v, vmin=VMIN, vmax=VMAX):
+        return min(max(v, vmin), vmax)
+
+    def estimate_new_v(self, v1, f1, f2):
+        """
+        Walk Ratio invariance formula
+        """
+        v2 = f2**2/f1**2 * v1
+        return self.clamp_v(v2)
+
+    def runoptimizer(self, f_target=F_TARGET, v_init=V_INITIAL, sleeptime=SLEEPTIME):
+        v_set = self.clamp_v(v_init)
+
+        # while not self.IsOptimized:
+        #     self.bertec.write_command(v_set, v_set, incline=None, accR=0.5, accL=0.5)
+
+        #     # Wait for walking to occur
+        #     time.sleep(sleeptime)
+
+        #     # Get cadence/speed
+        #     f = self.sm.exoboot_remote.getspm()
+        #     v = self.bertec.speed # m/s
+
+        #     # Predict new v to reach spm criteria
+        #     v_set = self.estimate_new_v(v, f, f_target)
+
+        #     # Finish if target is v_set is close to target cadence
+        #     self.IsOptimized = abs((f - f_target)/f_target) < ERROR_THRESHOLD
+
+        # # Report when done
+        # self.sm.exoboot_remote.foundspeed(v_set)
+        self.next_screen()
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once

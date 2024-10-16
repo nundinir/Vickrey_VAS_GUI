@@ -4,7 +4,7 @@ from test_server import DumbBertec
 from BertecMan import Bertec
 from exoboot_remote_control import ExobootRemoteClient
 
-from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI, AcclimationGUI
+from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI, AcclimationGUI, SpeedFinderGUI
 from constants import PI_IP, LOCALHOST
 
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     print("DETAILS: ", startstamp, subjectID, trial_type, trial_cond, description)
 
     # Start Bertec
-    if subjectID == 'DUMMY' or trial_cond == 'DUMMY':
+    if subjectID == 'DUMMY':
         bertec = DumbBertec()
     else:
         bertec = Bertec()
@@ -34,6 +34,10 @@ if __name__ == "__main__":
         case 'PREF':
             PREFGUI(exoboot_remote, bertec, trial_cond).run()
         case 'ACCLIMATION':
-            AcclimationGUI(exoboot_remote, bertec, trial_cond).run()
+            AcclimationGUI(exoboot_remote, bertec).run()
+        case'SPEEDFINDER':
+            # TODO finish speedfindergui or remove
+            # Is a WIP
+            SpeedFinderGUI(exoboot_remote, bertec).run()
         case _:
             print("INVALID CASE")

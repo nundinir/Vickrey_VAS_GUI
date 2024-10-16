@@ -22,7 +22,7 @@ def startbtn_CB(instance):
 
 def buildpushtostartscreenjnd():
     screen = Screen(name="pushtostartscreenjnd")
-    startbttn = Button(text="Touch to begin", font_size='50', color=(1, 1, 1, 1))
+    startbttn = Button(text="Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbtn_CB)
     screen.add_widget(startbttn)
 
