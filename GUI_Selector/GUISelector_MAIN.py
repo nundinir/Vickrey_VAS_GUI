@@ -1,7 +1,8 @@
 import time
 
-from test_server import DumbBertec
+from test_server import DumbBertec, DumbVicon
 from BertecMan import Bertec
+from ViconMan import Vicon
 from exoboot_remote_control import ExobootRemoteClient
 
 from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI, AcclimationGUI, SpeedFinderGUI
@@ -20,17 +21,19 @@ if __name__ == "__main__":
     # Start Bertec
     if subjectID == 'DUMMY':
         bertec = DumbBertec()
+        vicon = DumbVicon()
     else:
         bertec = Bertec()
+        vicon = Vicon()
 
     match trial_type.upper():
         case 'VICKREY':
             # TODO fix survey reporting
-            VickreyGUI(exoboot_remote, bertec).run()
+            VickreyGUI(exoboot_remote, bertec, vicon).run()
         case 'VAS':
-            VASGUI(startstamp, exoboot_remote, bertec).run()
+            VASGUI(startstamp, exoboot_remote, bertec, vicon).run()
         case 'JND':
-            JNDGUI(exoboot_remote, bertec, trial_cond).run()
+            JNDGUI(exoboot_remote, bertec, vicon, trial_cond).run()
         case 'PREF':
             PREFGUI(exoboot_remote, bertec, trial_cond).run()
         case 'ACCLIMATION':

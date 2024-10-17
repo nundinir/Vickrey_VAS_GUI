@@ -24,7 +24,7 @@ from speedfinder_screens import buildpushtostartscreensf, buildspeedfinderscreen
 from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine, AcclimationStateMachine, SpeedFinderStateMachine
 
 class BaseGui(App):
-    def __init__(self, name, exoboot_remote_client, bertec):
+    def __init__(self, name, exoboot_remote_client, bertec, vicon):
         super().__init__()
         self.sm = ScreenManager()
         self.sm.name = name
@@ -39,6 +39,10 @@ class BaseGui(App):
         self.sm.bertec = bertec
         self.sm.bertec.start()
 
+        # Vicon over network thread
+        self.sm.vicon = vicon
+        self.sm.vicon.start()
+
         def on_request_close(self, *args):
             """
             Stop Bertec treadmill and close Bertec
@@ -47,6 +51,9 @@ class BaseGui(App):
             print("Closing Bertec")
             self.bertec.write_command(0, 0, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
             self.bertec.stop()
+
+            print("Stopping Vicon")
+            self.vicon.stop_recording()
 
             print("Exiting Logging Server")
             self.exoboot_remote.chop()
@@ -65,8 +72,8 @@ class VickreyGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote_client, bertec):
-        super().__init__(name='VICKREY', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+    def __init__(self, exoboot_remote_client, bertec, vicon):
+        super().__init__(name='VICKREY', exoboot_remote_client=exoboot_remote_client, bertec=bertec, vicon=vicon)
 
     def build(self):
         self.sm.statemachine = VickreyStateMachine(self.sm)
@@ -105,8 +112,8 @@ class VASGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, startstamp, exoboot_remote_client, bertec):
-        super().__init__(name='VAS', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+    def __init__(self, startstamp, exoboot_remote_client, bertec, vicon):
+        super().__init__(name='VAS', exoboot_remote_client=exoboot_remote_client, bertec=bertec, vicon=vicon)
         self.startstamp = startstamp
 
     def build(self):
@@ -142,8 +149,8 @@ class JNDGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote_client, bertec, jnd_type):
-        super().__init__(name='JND', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+    def __init__(self, exoboot_remote_client, bertec, vicon, jnd_type):
+        super().__init__(name='JND', exoboot_remote_client=exoboot_remote_client, bertec=bertec, vicon=vicon)
         self.jnd_type = jnd_type
 
     def build(self):
@@ -177,8 +184,8 @@ class JNDGUI(BaseGui):
 
 
 class PREFGUI(BaseGui):
-    def __init__(self, exoboot_remote_client, bertec, pref_type):
-        super().__init__(name='TorquePreference', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+    def __init__(self, exoboot_remote_client, pref_type):
+        super().__init__(name='TorquePreference', exoboot_remote_client=exoboot_remote_client)
         self.pref_type = pref_type
 
     def build(self):
