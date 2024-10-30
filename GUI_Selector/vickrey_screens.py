@@ -106,7 +106,7 @@ def buildsurveyscreen(sm):
     screen = Screen(name="survey")
     screen.sm = sm
 
-    enjoyment_label = Label(text="Rate your enjoyment", font_size='50', size_hint=(1/3, 1/6), pos_hint={'x':1/3, 'y':8.5/10}, halign='center')
+    enjoyment_label = Label(text="Rate your enjoyment", font_size='70', size_hint=(1/3, 1/6), pos_hint={'x':1/3, 'y':8.5/10}, halign='center')
     screen.add_widget(enjoyment_label)
 
     enjoyment_levels = ['skull', 'frown', 'neutral', 'smile', 'sunglasses']
@@ -116,7 +116,7 @@ def buildsurveyscreen(sm):
         btn_.bind(on_press=enjoyment_cb)
         screen.add_widget(btn_)
 
-    rpe_label = Label(text="Rate your exertion (RPE)", font_size='50', size_hint=(1/3, 1/6), pos_hint={'x':1/3, 'y':1/3}, halign='center')
+    rpe_label = Label(text="Rate your exertion (RPE)", font_size='70', size_hint=(1/3, 1/6), pos_hint={'x':1/3, 'y':1/3}, halign='center')
     screen.add_widget(rpe_label)
 
     for i in range(6, 21):

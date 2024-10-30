@@ -54,7 +54,14 @@ def buildpushtostartscreenvas():
 def buildwaitingscreenvas(sm):
     screen = Screen(name="waitingscreenvas")
     screen.sm = sm
-    waitlabel = Label(text="Take a break!\nTrial resumes in 2 minute", font_size='50', color=(1, 1, 1, 1))
+
+    vas_wait_mins = MIN_WAIT_VAS/60
+    if vas_wait_mins < 60:
+        waittext = "Take a break!\nTrial resumes in {} seconds".format(int(MIN_WAIT_VAS))
+    else:
+        waittext = "Take a break!\nTrial resumes in {:0.1f} minutes".format(vas_wait_mins)
+
+    waitlabel = Label(text=waittext, font_size='50', color=(1, 1, 1, 1))
     screen.add_widget(waitlabel)
 
     screen.on_enter = partial(waitingscreevasschedule, sm)
@@ -127,7 +134,7 @@ def btnpress(instance):
     instance.visited = True
     instance.background_color = (0,0,0.75)
 
-    if screen.prev_btn:
+    if screen.prev_btn and instance != screen.prev_btn:
         screen.prev_btn.background_color = (0, 0.75, 0)
     screen.prev_btn = instance
 

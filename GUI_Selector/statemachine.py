@@ -1,4 +1,4 @@
-import time, random
+import csv, time, random
 import numpy as np
 
 from constants import *
@@ -10,11 +10,12 @@ from constants import BTN_NUMS, MAX_TRIALS_DICT, MAX_PRESENTATIONS_DICT
 
 # Statemachine class
 class VickreyStateMachine:
-    def __init__(self, screenmanager):
+    def __init__(self, screenmanager, num_robobidders=NUM_ROBOBIDDERS):
         self.sm = screenmanager
 
         # Init RoboBidders
-        self.robomodel = roboModel(k_RB, b_RB, 2)
+        self.num_robobidders = num_robobidders
+        self.robomodel = roboModel(k_RB, b_RB, self.num_robobidders)
         self.auction_tally = 0 # Starts from 0th auction
 
         # Auction state
@@ -32,6 +33,13 @@ class VickreyStateMachine:
                                  "numpad": "survey",
                                  "survey": "resultscreen"
                                  }
+
+    def loadstate(self, states_dict: dict):
+        self.auction_tally = int((states_dict["t"])/ 2) + 1
+        self.state = states_dict["state"]
+        self.prev_state = states_dict["prev_state"]
+        self.total_winnings = states_dict["total_winnings"]
+        self.robomodel.loadstate(states_dict["robostates"])
 
     def determine_auction(self):
         no_bid = not self.sm.bid
@@ -75,10 +83,17 @@ class VickreyStateMachine:
         self.state = state
 
         # Auction logging values
-        t = (self.auction_tally + 1) * ROBOWALK_DUR
+        t = self.auction_tally * ROBOWALK_DUR
 
         # Send auction results to auctionhouse
-        self.sm.exoboot_remote.call(t, subject_bid, self.state, self.payout, self.total_winnings) #, winning_bid)
+        self.sm.exoboot_remote.call(t, subject_bid, self.state, self.payout, self.total_winnings)
+
+        # Save to backup
+        auctionpath = self.sm.filingcabinet.getpath("auction")
+        with open(auctionpath, 'a', newline='') as f:
+            auction_backup = [t, subject_bid, self.state, self.payout, self.total_winnings]
+            auction_backup.extend(self.robomodel.getstate())
+            csv.writer(f).writerow(auction_backup)
 
         # Increment auction tally
         self.auction_tally += 1
@@ -119,12 +134,19 @@ class VASStateMachine:
         self.quit_flag = False
 
     def generate_btn_trial_pres_list(self):
+        """
+        Create list of button, trial, presentation combos
+        """
         for btn in BTN_NUMS:
             for trial in range(1, MAX_TRIALS_DICT[btn] + 1):
                 for presentation in range(1, MAX_PRESENTATIONS_DICT[btn] + 1):
                     self.vas_btn_trial_pres.append([btn, trial, presentation])
 
     def generate_button_torque_mapping(self):
+        """
+        Generate presentations (groups of buttons) for each trial
+        Generates the same mapping every time (intended)
+        """
         for btn_num in BTN_NUMS:
             # Setting up Torque options
             num_torques = btn_num * MAX_PRESENTATIONS_DICT[btn_num]
@@ -135,7 +157,6 @@ class VASStateMachine:
                 random.seed(trial)
                 available_torques = torques[:]
                 random.shuffle(available_torques)
-                print(available_torques)
 
                 presentation_mappings = {}
                 for p in range(1, MAX_PRESENTATIONS_DICT[btn_num] + 1):
@@ -148,10 +169,26 @@ class VASStateMachine:
 
             self.button_mappings[btn_num] = trial_mappings
 
+    def loadstate(self, btpcompleted):
+        """
+        Remove completed btp from vas_btn_trial_pres list
+        """
+        for btp in btpcompleted:
+            try:
+                self.vas_btn_trial_pres.remove(btp)
+            except:
+                pass
+
     def get_torque(self, ind):
+        """
+        Return torque (Nm) for a given btp
+        """
         return self.button_mappings[self.current_btn_option][self.current_trial][self.current_presentation][ind]
 
     def next_trial_pres(self):
+        """
+        Returns next btp to query
+        """
         [self.current_btn_option, self.current_trial, self.current_presentation] = self.vas_btn_trial_pres.pop(0)
         self.overtime_dict = {self.get_torque(i):0 for i in range(self.current_btn_option)}
 
@@ -163,12 +200,29 @@ class VASStateMachine:
             self.quit_flag  = True
         
     def log_overtime(self, torque, mv):
+        """
+        Log slider movements when moving
+        """
         pitime = time.perf_counter() - self.startstamp
         self.overtime_dict[torque] = mv
         self.sm.exoboot_remote.slider_update(pitime, self.overtime_dict)
 
     def presentation_result(self, torques, values):
+        """
+        Send presentation results to pi
+        Save backup
+        """
         self.sm.exoboot_remote.presentation_result(self.current_btn_option, self.current_trial, self.current_presentation, torques, values)
+
+        # Save backup
+        datalist = [self.current_btn_option, self.current_trial, self.current_presentation]
+        for t, mv in zip(torques, values):
+            datalist.append(t)
+            datalist.append(mv)
+
+        vasresultspath = self.sm.filingcabinet.getpath("vasresults")
+        with open(vasresultspath, 'a', newline='') as f:
+            csv.writer(f).writerow(datalist)
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
@@ -225,7 +279,16 @@ class JNDStateMachine:
                 self.next_screen_dict["pushtostartscreenjnd"] = "samelegscreen"
                 self.next_screen_dict["samelegscreen"] = "waitingscreenjnd"
 
+    def loadstate(self, pres):
+        """
+        Start from previous pres number
+        """
+        self.pres = pres
+
     def next_comparison_split(self):
+        """
+        Assigns torque pair to randomly selected sides
+        """
         if self.pres >= MAX_QUERIES:
             self.quit_flag = True
             self.next_screen()
@@ -245,6 +308,9 @@ class JNDStateMachine:
             self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torque_left, peak_torque_right=self.peak_torque_right)
 
     def next_comparison_same(self):
+        """
+        Assigns torque pair to randomly selected swap button state
+        """
         if self.pres >= MAX_QUERIES:
             self.quit_flag = True
             self.next_screen()
@@ -263,14 +329,32 @@ class JNDStateMachine:
             self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torques[self.peak_torque_ind], peak_torque_right=self.peak_torques[self.peak_torque_ind])
 
     def report_higher_split(self, signature):
+        """
+        Reports result of comparison
+        """
         self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature)
+
+        # Log backup
+        comparisonpath = self.sm.filingcabinet.getpath("comparison")
+        with open(comparisonpath, 'a', newline='') as f:
+            csv.writer(f).writerow([self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature])
+
         if not self.subtrial_limit:
             self.next_comparison()
         else:
             self.next_screen()
 
     def report_higher_same(self):
+        """
+        Reports result of comparison
+        """
         self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind)
+
+        # Log backup
+        comparisonpath = self.sm.filingcabinet.getpath("comparison")
+        with open(comparisonpath, 'a', newline='') as f:
+            csv.writer(f).writerow([self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind])
+
         if not self.subtrial_limit:
             self.next_comparison()
         else:
@@ -308,6 +392,9 @@ class PrefStateMachine:
                 self.next_screen_dict["btnscreen"] = "waitingscreenpref"
 
     def report_pref(self, torque):
+        """
+        Sends preferred torque to pi
+        """
         self.sm.exoboot_remote.pref_result(self.pres, torque)
         self.pres += 1
         if self.pres > MAX_PRES_PREF - 1:
@@ -388,6 +475,9 @@ class SpeedFinderStateMachine:
 
 
 if __name__ == "__main__":
+    """
+    Display VAS Trial/Presentation Torques
+    """
     testvas = VASStateMachine(None, time.perf_counter())
     testvas.generate_button_torque_mapping()
 

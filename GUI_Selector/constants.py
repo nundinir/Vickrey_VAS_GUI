@@ -7,7 +7,7 @@ CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
 """SCHEDULE TIMINGS"""
 # Speed up auction time by squeeze factor FOR TESTING
-squeeze = 100
+squeeze = 10
 
 # Vickrey timings in seconds
 AUCTION_START = 0/squeeze
@@ -18,7 +18,7 @@ INITIAL_BIDDING_CLOSE = 30/squeeze
 RESULT_SHOW = 100/squeeze
 
 # VAS timing in seconds
-MIN_WAIT_VAS = 120/squeeze
+MIN_WAIT_VAS = 60/squeeze
 
 # JND timing in seconds
 SUBTRIAL_MAX = 240/squeeze
@@ -47,6 +47,7 @@ PEAK_TORQUE_RIGHT = 40
 MAX_BID = 100
 
 # Robobidder constants
+NUM_ROBOBIDDERS = 2
 k_RB = 0.4395073979128712
 b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
 ROBOWALK_DUR = 2 # minutes
@@ -64,9 +65,9 @@ NPO_MV = -12.00
 
 """JND SPECIFIC"""
 # comparitor settings
-NUM_BINS = 21
-PROP_LOW = 0.8
-PROP_HIGH = 1.2
+NUM_BINS = 41
+PROP_LOW = 0.2
+PROP_HIGH = 1.8
 REF_LOW = 15
 REF_HIGH = 35
 TORQUE_MIN = 7

@@ -1,8 +1,10 @@
-import time
+import os
 
 from test_server import DumbBertec, DumbVicon
 from BertecMan import Bertec
 from ViconMan import Vicon
+
+from LoggingClass import FilingCabinet
 from exoboot_remote_control import ExobootRemoteClient
 
 from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI, AcclimationGUI, SpeedFinderGUI
@@ -14,11 +16,18 @@ if __name__ == "__main__":
     exoboot_remote = ExobootRemoteClient(LOCALHOST)
 
     # Get subject info
-    startstamp, subjectID, trial_type, trial_cond, description = exoboot_remote.get_subject_info()
-
+    startstamp, subjectID, trial_type, trial_cond, description, resume = exoboot_remote.get_subject_info()
+    file_prefix = "{}_{}_{}_{}".format(subjectID, trial_type, trial_cond, description)
     print("DETAILS: ", startstamp, subjectID, trial_type, trial_cond, description)
 
-    # Start Bertec
+    # FilingCabinet for backups
+    filingcabinet = FilingCabinet("trial_backups", subjectID)
+
+    if resume:
+        loadstatus = filingcabinet.loadbackup(file_prefix, rule="newest")
+        print("Backup load status: {}".format("SUCCESS" if loadstatus else "FAILURE"))
+
+    # DUMMY Check
     if subjectID == 'DUMMY':
         bertec = DumbBertec()
         vicon = DumbVicon()
@@ -28,12 +37,11 @@ if __name__ == "__main__":
 
     match trial_type.upper():
         case 'VICKREY':
-            # TODO fix survey reporting
-            VickreyGUI(exoboot_remote, bertec, vicon).run()
+            VickreyGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, usebackup=resume).run()
         case 'VAS':
-            VASGUI(startstamp, exoboot_remote, bertec, vicon).run()
+            VASGUI(startstamp, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, usebackup=resume).run()
         case 'JND':
-            JNDGUI(exoboot_remote, bertec, vicon, trial_cond).run()
+            JNDGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond, usebackup=resume).run()
         case 'PREF':
             PREFGUI(exoboot_remote, bertec, trial_cond).run()
         case 'ACCLIMATION':

@@ -1,5 +1,8 @@
 import sys, time, socket, threading
 
+from random import randint
+
+from LoggingClass import FilingCabinet
 from exoboot_remote_control import ExobootRemoteServerThread
 
 class DumbBertec:
@@ -54,10 +57,6 @@ class DumbBertec:
     def write_command(self, speedR, speedL, incline = None, accR = 0.2, accL = 0.2, maxVel = 9001, minVel = -0):
         print("BERTEC WRITE: ", speedR, speedL)
         pass
-
-import socket
-from random import randint
-from time import sleep
 
 class DumbVicon:
     """
@@ -146,7 +145,6 @@ class DumbVicon:
         # Convert string to utf-8 bytes string to send over network. 
         return bytes(fullPayloadString, "utf-8")
 
-
 class DumbGSE:
     def __init__(self):
         self.peak_torque_left = 0
@@ -161,7 +159,7 @@ class DumbGSE:
         self.peak_torque_right = T
 
 class DumbWrapper:
-    def __init__(self, subjectID, trial_type, trial_cond, description):
+    def __init__(self, subjectID, trial_type, trial_cond, description, resume):
         self.startstamp = time.perf_counter()
         self.pause_event = threading.Event()
         self.quit_event = threading.Event()
@@ -172,6 +170,7 @@ class DumbWrapper:
         self.trial_type = trial_type.upper()
         self.trial_cond = trial_cond.upper()
         self.description = description
+        self.resume = resume in ["true", "True", "1", "yes", "Yes"]
 
         self.file_prefix = "{}_{}_{}_{}".format(self.subjectID, self.trial_type, self.trial_cond, self.description)
         
@@ -179,16 +178,21 @@ class DumbWrapper:
         print("Trial Type: {}".format(self.trial_type))
         print("Trial Cond: {}".format(self.trial_cond))
         print("Description: {}".format(self.description))
+        print("Resume: {}".format(self.resume))
+
+        # Filing Cabinet
+        behavior = "add" if self.resume else "new"
+        self.filingcabinet = FilingCabinet("subject_data", self.subjectID, defaultbehavior=behavior)
 
         self.gse_thread = DumbGSE()
 
-        self.remote_thread = ExobootRemoteServerThread(self, self.startstamp, pause_event=self.pause_event, quit_event=self.quit_event)
+        self.remote_thread = ExobootRemoteServerThread(self, self.startstamp, self.filingcabinet, resume=self.resume, pause_event=self.pause_event, quit_event=self.quit_event)
         self.remote_thread.set_target_IP("[::]:50051")
         self.remote_thread.start()
 
     def run(self):
         while self.quit_event.is_set():
-            time.sleep(0.1)
+            time.sleep(0.5)
 
 
 if __name__ == "__main__":
@@ -196,9 +200,9 @@ if __name__ == "__main__":
     Run test server
     """
     try:
-        assert len(sys.argv) == 4 + 1
-        _, subjectID, trial_type, trial_cond, description = sys.argv
-        dumb_wrapper = DumbWrapper(subjectID, trial_type, trial_cond, description)
+        assert len(sys.argv) - 1 == 5
+        _, subjectID, trial_type, trial_cond, description, resume = sys.argv
+        dumb_wrapper = DumbWrapper(subjectID, trial_type, trial_cond, description, resume)
         dumb_wrapper.run()
 
     except KeyboardInterrupt:
