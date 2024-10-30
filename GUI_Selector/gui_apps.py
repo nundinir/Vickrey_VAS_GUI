@@ -108,12 +108,14 @@ class VickreyGUI(BaseGui):
                 # Load in most recent auction
                 states = {"t": 0, "state": False, "prev_state": False, "total_winnings": 0, "robostates": []}
                 for auction in reader:
+                    print("asdf", auction)
                     states["t"] = int(auction[0])
                     states["prev_state"] = states["state"]
-                    states["state"] = bool(auction[2])
+                    states["state"] = auction[2] in ["True"]
                     states["total_winnings"] = float(auction[4])
                     states["robostates"] = auction[5::]
                 
+                print("wer", states)
                 self.sm.statemachine.loadstate(states)
         except:
             usebackup = False
@@ -131,8 +133,7 @@ class VickreyGUI(BaseGui):
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
-        pushtostartscreen = buildpushtostartscreen()
-        # pushtostartscreenbackup = buildpushtostartscreenbackup()
+        pushtostartscreen, self.sm.startbtn = buildpushtostartscreen(self.sm)
         numpadscreen = buildNumPadScreen(self.sm)
         surveyscreen = buildsurveyscreen(self.sm)
         self.sm.resultscreen = buildresultscreen(self.sm)

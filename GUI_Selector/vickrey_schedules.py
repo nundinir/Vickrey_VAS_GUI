@@ -47,6 +47,8 @@ def update_resultscreen(sm, dt):
         resultscreen.label.text = "You have lost. Continue Sitting. Winning Bid:\n{:.2f}\nPayout: {:.2f}".format(sm.statemachine.winning_bid, sm.statemachine.payout)
         resultscreen.label.color =(1, 0, 0, 1)
 
+    # Reset startbtntext after backup load
+    sm.startbtn.text = "Return to treadmill\n Touch to begin"
     
 
 def survey_schedule(sm):

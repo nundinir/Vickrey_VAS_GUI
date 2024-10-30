@@ -21,13 +21,30 @@ def startbttn_CB(instance):
 
     sm.statemachine.next_screen()
 
-def buildpushtostartscreen():
-    screen= Screen(name="pushtostartscreen")
-    startbttn = Button(text="Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
+def buildpushtostartscreen(sm):
+    screen = Screen(name="pushtostartscreen")
+
+    backupflag = sm.statemachine.backupflag
+
+    if backupflag:
+        state = sm.statemachine.state
+        auction_tally = sm.statemachine.auction_tally
+        if auction_tally == 0:
+            text = "Touch to begin"
+        elif state:
+            text = "Return to treadmill\n Touch to resume"
+        else:
+            text = "Remain seated\nTouch to resume"
+    else:
+        text = "Touch to begin"
+
+    sm.statemachine.backupflag = False
+
+    startbttn = Button(text=text, font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbttn_CB)
     screen.add_widget(startbttn)
 
-    return screen
+    return screen, startbttn
 
 
 # numpad screen
