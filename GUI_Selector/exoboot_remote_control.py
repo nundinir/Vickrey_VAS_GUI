@@ -149,29 +149,31 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         # file prefix from mainwrapper
         self.file_prefix = self.mainwrapper.file_prefix
 
-        # Write file headers depending on trial type
+        # Load backup or...
+        loadstatus = False
+        if self.usebackup:
+            loadstatus = self.filingcabinet.loadbackup(self.file_prefix, rule="newest")
 
-        # TODO fix interaction with usebackup
-        match self.mainwrapper.trial_type.upper():
-            case 'VICKREY':
-                auctionname = "{}_{}".format(self.file_prefix, "auction")
-                auctionpath = self.filingcabinet.newfile(auctionname, "csv", dictkey="auction")
-                
-                surveyname = "{}_{}".format(self.file_prefix, "survey")
-                surveypath = self.filingcabinet.newfile(surveyname, "csv", dictkey="survey")
+        # ... create new files
+        if not loadstatus:
+            match self.mainwrapper.trial_type.upper():
+                case 'VICKREY':
+                    auctionname = "{}_{}".format(self.file_prefix, "auction")
+                    auctionpath = self.filingcabinet.newfile(auctionname, "csv", dictkey="auction")
+                    
+                    surveyname = "{}_{}".format(self.file_prefix, "survey")
+                    surveypath = self.filingcabinet.newfile(surveyname, "csv", dictkey="survey")
 
-                if not self.usebackup:
                     with open(auctionpath, 'a', newline='') as f:
                         csv.writer(f).writerow(['t', 'subject_bid', 'user_win_flag', 'current_payout', 'total_winnings'])
                     with open(surveypath, 'a', newline='') as f:
                         csv.writer(f).writerow(['t', 'enjoyment', 'rpe'])
 
-            case 'VAS':
-                overtimepath = ""
-                vasresultsname = "{}_{}".format(self.file_prefix, "vasresults")
-                vasresultspath = self.filingcabinet.newfile(vasresultsname, "csv", dictkey="vasresults")
+                case 'VAS':
+                    overtimepath = ""
+                    vasresultsname = "{}_{}".format(self.file_prefix, "vasresults")
+                    vasresultspath = self.filingcabinet.newfile(vasresultsname, "csv", dictkey="vasresults")
 
-                if not self.usebackup:
                     with open(vasresultspath, 'a', newline='') as f:
                         header = ['btn_option', 'trial', 'pres']
                         for i in range(20): # TODO remove constant 20
@@ -179,22 +181,22 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
                             header.append('mv{}'.format(i))
                         csv.writer(f).writerow(header)
 
-            case 'JND':
-                comparisonname = "{}_{}".format(self.file_prefix, "comparison")
-                comparisonpath = self.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison")
-                if not self.usebackup:
+                case 'JND':
+                    comparisonname = "{}_{}".format(self.file_prefix, "comparison")
+                    comparisonpath = self.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison")
+
                     with open(comparisonpath, 'a', newline='') as f:
                         csv.writer(f).writerow(['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
-            
-            case 'PREF':
-                prefname = "{}_{}".format(self.file_prefix, "pref")
-                prefpath = self.filingcabinet.newfile(prefname, "csv", dictkey="pref")
-                if not self.usebackup:
+                
+                case 'PREF':
+                    prefname = "{}_{}".format(self.file_prefix, "pref")
+                    prefpath = self.filingcabinet.newfile(prefname, "csv", dictkey="pref")
+
                     with open(prefpath, 'a', newline='') as f:
                         csv.writer(f).writerow(['pres', 'torque'])
 
-            case 'THERMAL':
-                pass
+                case 'THERMAL':
+                    pass
 
 # General Methods
     def testconnection(self, request, context):

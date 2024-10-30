@@ -106,26 +106,41 @@ class FilingCabinet:
             if file_prefix in file:
                 backupfiles.append(os.path.join(pfolderpath, file))
 
-        if backupfiles:
-            match rule:
-                case "newest":
-                    backup = max(backupfiles, key=os.path.getctime)
-                case "oldest":
-                    backup = max(backupfiles, key=os.path.getctime)
-                case _:
-                    print("No rule implemented for case {}".format(rule))
-
-            for snippet in backup.split(os.sep):
-                if snippet.endswith(self.validfiletypes):
-                    subject_info = snippet.split('.')[0]
-                    subject_info = subject_info.split('_')
-                    dictkey = subject_info[4]
-
-                    self.load(backup, dictkey)
-            return True
-        else:
+        if not backupfiles:
             return False
 
+        # find unique dictkeys
+        dictkeys = []
+        for file in backupfiles:
+            if file.endswith(self.validfiletypes):
+                dictkey = file.split('.')[0]
+                dictkey = dictkey.replace(os.path.join(self.getpfolderpath(), file_prefix), "")
+                dictkey = dictkey.replace("_new", "").strip('_')
+                dictkeys.append(dictkey)
+        dictkeys = set(dictkeys)
+
+        # Find path to each unique dictkey
+        for dictkey in dictkeys:
+            subbackupfiles = [f for f in backupfiles if dictkey in f]
+
+            if subbackupfiles:
+                match rule:
+                    case "newest":
+                        subbackup = max(subbackupfiles, key=os.path.getctime)
+                    case "oldest":
+                        subbackup = max(subbackupfiles, key=os.path.getctime)
+                    case _:
+                        print("No rule implemented for case {}".format(rule))
+
+                for snippet in subbackup.split(os.sep):
+                    if snippet.endswith(self.validfiletypes):
+                        subject_info = snippet.split('.')[0]
+                        subject_info = subject_info.split('_')
+                        dictkey = subject_info[4]
+
+                        self.load(subbackup, dictkey)
+
+        return True
 
 class LoggingNexus:
     def __init__(self, subjectID, file_prefix, filingcabinet, *threads, pause_event=Type[threading.Event]):
