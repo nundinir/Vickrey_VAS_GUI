@@ -159,7 +159,7 @@ class DumbGSE:
         self.peak_torque_right = T
 
 class DumbWrapper:
-    def __init__(self, subjectID, trial_type, trial_cond, description, resume):
+    def __init__(self, subjectID, trial_type, trial_cond, description, usebackup):
         self.startstamp = time.perf_counter()
         self.pause_event = threading.Event()
         self.quit_event = threading.Event()
@@ -170,7 +170,7 @@ class DumbWrapper:
         self.trial_type = trial_type.upper()
         self.trial_cond = trial_cond.upper()
         self.description = description
-        self.resume = resume in ["true", "True", "1", "yes", "Yes"]
+        self.usebackup = usebackup in ["true", "True", "1", "yes", "Yes"]
 
         self.file_prefix = "{}_{}_{}_{}".format(self.subjectID, self.trial_type, self.trial_cond, self.description)
         
@@ -178,15 +178,14 @@ class DumbWrapper:
         print("Trial Type: {}".format(self.trial_type))
         print("Trial Cond: {}".format(self.trial_cond))
         print("Description: {}".format(self.description))
-        print("Resume: {}".format(self.resume))
+        print("Usebackup: {}".format(self.usebackup))
 
         # Filing Cabinet
-        behavior = "add" if self.resume else "new"
-        self.filingcabinet = FilingCabinet("subject_data", self.subjectID, defaultbehavior=behavior)
+        self.filingcabinet = FilingCabinet("subject_data", self.subjectID)
 
         self.gse_thread = DumbGSE()
 
-        self.remote_thread = ExobootRemoteServerThread(self, self.startstamp, self.filingcabinet, resume=self.resume, pause_event=self.pause_event, quit_event=self.quit_event)
+        self.remote_thread = ExobootRemoteServerThread(self, self.startstamp, self.filingcabinet, usebackup=self.usebackup, pause_event=self.pause_event, quit_event=self.quit_event)
         self.remote_thread.set_target_IP("[::]:50051")
         self.remote_thread.start()
 
@@ -201,8 +200,8 @@ if __name__ == "__main__":
     """
     try:
         assert len(sys.argv) - 1 == 5
-        _, subjectID, trial_type, trial_cond, description, resume = sys.argv
-        dumb_wrapper = DumbWrapper(subjectID, trial_type, trial_cond, description, resume)
+        _, subjectID, trial_type, trial_cond, description, usebackup = sys.argv
+        dumb_wrapper = DumbWrapper(subjectID, trial_type, trial_cond, description, usebackup)
         dumb_wrapper.run()
 
     except KeyboardInterrupt:

@@ -16,14 +16,14 @@ if __name__ == "__main__":
     exoboot_remote = ExobootRemoteClient(LOCALHOST)
 
     # Get subject info
-    startstamp, subjectID, trial_type, trial_cond, description, resume = exoboot_remote.get_subject_info()
+    startstamp, subjectID, trial_type, trial_cond, description, usebackup = exoboot_remote.get_subject_info()
     file_prefix = "{}_{}_{}_{}".format(subjectID, trial_type, trial_cond, description)
     print("DETAILS: ", startstamp, subjectID, trial_type, trial_cond, description)
 
     # FilingCabinet for backups
     filingcabinet = FilingCabinet("trial_backups", subjectID)
 
-    if resume:
+    if usebackup:
         loadstatus = filingcabinet.loadbackup(file_prefix, rule="newest")
         print("Backup load status: {}".format("SUCCESS" if loadstatus else "FAILURE"))
 
@@ -37,11 +37,11 @@ if __name__ == "__main__":
 
     match trial_type.upper():
         case 'VICKREY':
-            VickreyGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, usebackup=resume).run()
+            VickreyGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, usebackup=usebackup).run()
         case 'VAS':
-            VASGUI(startstamp, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, usebackup=resume).run()
+            VASGUI(startstamp, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, usebackup=usebackup).run()
         case 'JND':
-            JNDGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond, usebackup=resume).run()
+            JNDGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond, usebackup=usebackup).run()
         case 'PREF':
             PREFGUI(exoboot_remote, bertec, trial_cond).run()
         case 'ACCLIMATION':

@@ -45,7 +45,7 @@ class ExobootRemoteClient:
         Sends null message to LoggingServer to get subject details
         """
         subject_info = self.stub.get_subject_info(pb2.null())
-        return subject_info.startstamp, subject_info.subjectID, subject_info.trial_type, subject_info.trial_cond, subject_info.description, subject_info.resume
+        return subject_info.startstamp, subject_info.subjectID, subject_info.trial_type, subject_info.trial_cond, subject_info.description, subject_info.usebackup
 
     def chop(self):
         """
@@ -138,12 +138,12 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
 
     This class is rpi side
     """
-    def __init__(self, mainwrapper, startstamp, filingcabinet, resume, quit_event):
+    def __init__(self, mainwrapper, startstamp, filingcabinet, usebackup, quit_event):
         super().__init__()
         self.mainwrapper = mainwrapper
         self.startstamp = startstamp
         self.filingcabinet = filingcabinet
-        self.resume = resume
+        self.usebackup = usebackup
         self.quit_event = quit_event
     
         # file prefix from mainwrapper
@@ -151,7 +151,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
 
         # Write file headers depending on trial type
 
-        # TODO fix interaction with resume
+        # TODO fix interaction with usebackup
         match self.mainwrapper.trial_type.upper():
             case 'VICKREY':
                 auctionname = "{}_{}".format(self.file_prefix, "auction")
@@ -160,7 +160,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
                 surveyname = "{}_{}".format(self.file_prefix, "survey")
                 surveypath = self.filingcabinet.newfile(surveyname, "csv", dictkey="survey")
 
-                if not self.resume:
+                if not self.usebackup:
                     with open(auctionpath, 'a', newline='') as f:
                         csv.writer(f).writerow(['t', 'subject_bid', 'user_win_flag', 'current_payout', 'total_winnings'])
                     with open(surveypath, 'a', newline='') as f:
@@ -171,7 +171,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
                 vasresultsname = "{}_{}".format(self.file_prefix, "vasresults")
                 vasresultspath = self.filingcabinet.newfile(vasresultsname, "csv", dictkey="vasresults")
 
-                if not self.resume:
+                if not self.usebackup:
                     with open(vasresultspath, 'a', newline='') as f:
                         header = ['btn_option', 'trial', 'pres']
                         for i in range(20): # TODO remove constant 20
@@ -182,14 +182,14 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
             case 'JND':
                 comparisonname = "{}_{}".format(self.file_prefix, "comparison")
                 comparisonpath = self.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison")
-                if not self.resume:
+                if not self.usebackup:
                     with open(comparisonpath, 'a', newline='') as f:
                         csv.writer(f).writerow(['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
             
             case 'PREF':
                 prefname = "{}_{}".format(self.file_prefix, "pref")
                 prefpath = self.filingcabinet.newfile(prefname, "csv", dictkey="pref")
-                if not self.resume:
+                if not self.usebackup:
                     with open(prefpath, 'a', newline='') as f:
                         csv.writer(f).writerow(['pres', 'torque'])
 
@@ -208,7 +208,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
                                 trial_type=self.mainwrapper.trial_type,
                                 trial_cond=self.mainwrapper.trial_cond,
                                 description=self.mainwrapper.description,
-                                resume=self.mainwrapper.resume)
+                                usebackup=self.mainwrapper.usebackup)
 
     def chop(self, beaver, context):
         """
@@ -390,10 +390,10 @@ class ExobootRemoteServerThread(BaseThread):
 
     Does not pause
     """
-    def __init__(self, mainwrapper, startstamp, filingcabinet, resume=False, name='exoboot_remote_thread', daemon=True, pause_event=Type[threading.Event], quit_event=Type[threading.Event]):
+    def __init__(self, mainwrapper, startstamp, filingcabinet, usebackup=False, name='exoboot_remote_thread', daemon=True, pause_event=Type[threading.Event], quit_event=Type[threading.Event]):
         super().__init__(name=name, daemon=daemon, pause_event=pause_event, quit_event=quit_event)
         self.mainwrapper = mainwrapper
-        self.exoboot_remote_servicer = ExobootCommServicer(self.mainwrapper, startstamp, filingcabinet, resume=resume, quit_event=self.quit_event)
+        self.exoboot_remote_servicer = ExobootCommServicer(self.mainwrapper, startstamp, filingcabinet, usebackup=usebackup, quit_event=self.quit_event)
         self.target_IP = ''
     
     def set_target_IP(self, target_IP):
