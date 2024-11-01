@@ -23,7 +23,6 @@ def buildpushtostartscreenaccl():
     startbttn = Button(text="Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbtn_CB)
     screen.add_widget(startbttn)
-
     return screen
 
 
@@ -58,12 +57,12 @@ def buildsliderscreenaccl(sm):
     screen = Screen(name="sliderscreen")
     screen.sm = sm
 
-    tslider = Slider(min = TORQUE_MIN, max=TORQUE_MAX, value = 0, step = ACCL_STEP, value_track=True, size_hint=(4/5, 2/3), pos_hint={'x':1/10, 'y':1/3})
-    tslider.bind(value = onslidermotion)
+    tslider = Slider(min=0, max=TORQUE_MAX, value=0, step=ACCL_STEP, value_track=True, size_hint=(4/5, 2/3), pos_hint={'x':1/10, 'y':1/3})
+    tslider.bind(value=onslidermotion)
     screen.add_widget(tslider)
     screen.tslider = tslider
 
-    finish_btn = Button(text="Finish", font_size='70', color = (1,1,1), background_normal='', background_color= (0.75,0,0), size_hint=(1, 1/3), pos_hint={'x':0, 'y':0})
+    finish_btn = Button(text="Finish", font_size='70', color=(1,1,1), background_normal='', background_color=(0.75,0,0), size_hint=(1, 1/3), pos_hint={'x':0, 'y':0})
     finish_btn.confirmed = False
     finish_btn.bind(on_press=confirm_slider_accl)
     screen.add_widget(finish_btn)

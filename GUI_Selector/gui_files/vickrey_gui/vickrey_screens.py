@@ -1,3 +1,4 @@
+import os
 from functools import partial
 
 from kivy.uix.label import Label
@@ -127,7 +128,7 @@ def buildsurveyscreen(sm):
 
     enjoyment_levels = ['skull', 'frown', 'neutral', 'smile', 'sunglasses']
     for i, level in enumerate(enjoyment_levels):
-        btn_ = Button(background_normal='images/{}.png'.format(level), size_hint=(1/6, 1/6), pos_hint={'x':i/5, 'y':2/3})
+        btn_ = Button(background_normal=os.path.join("gui_files", "vickrey_gui", "images", "{}.png").format(level), size_hint=(1/6, 1/6), pos_hint={'x':i/5, 'y':2/3})
         btn_.val = i - 2
         btn_.bind(on_press=enjoyment_cb)
         screen.add_widget(btn_)

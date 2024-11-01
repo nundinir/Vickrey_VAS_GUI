@@ -72,7 +72,7 @@ def buildsliderscreenpref(sm):
     screen = Screen(name="sliderscreen")
     screen.sm = sm
 
-    tslider = Slider(min = TORQUE_MIN, max=TORQUE_MAX, value = 20, step = PREF_STEP, value_track=True, size_hint=(4/5, 2/3), pos_hint={'x':1/10, 'y':1/3})
+    tslider = Slider(min = 0, max=TORQUE_MAX, value = 0, step = PREF_STEP, value_track=True, size_hint=(4/5, 2/3), pos_hint={'x':1/10, 'y':1/3})
     tslider.bind(value = onslidermotion)
     screen.add_widget(tslider)
     screen.tslider = tslider
