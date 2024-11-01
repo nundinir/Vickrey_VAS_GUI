@@ -1,13 +1,12 @@
-import os
-
 from test_server import DumbBertec, DumbVicon
-from BertecMan import Bertec
-from ViconMan import Vicon
+from external_devices.BertecMan import Bertec
+from external_devices.ViconMan import Vicon
 
-from LoggingClass import FilingCabinet
-from exoboot_remote_control import ExobootRemoteClient
+from shared_files.LoggingClass import FilingCabinet
+from exoboot_remote.exoboot_remote_control import ExobootRemoteClient
 
 from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI, AcclimationGUI, SpeedFinderGUI
+
 from constants import PI_IP, LOCALHOST
 
 
@@ -43,12 +42,13 @@ if __name__ == "__main__":
         case 'JND':
             JNDGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond, usebackup=usebackup).run()
         case 'PREF':
-            PREFGUI(exoboot_remote, bertec, trial_cond).run()
+            PREFGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond).run()
         case 'ACCLIMATION':
-            AcclimationGUI(exoboot_remote, bertec).run()
+            AcclimationGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond).run()
         case'SPEEDFINDER':
             # TODO finish speedfindergui or remove
             # Is a WIP
-            SpeedFinderGUI(exoboot_remote, bertec).run()
+            # SpeedFinderGUI(exoboot_remote, bertec).run()
+            pass
         case _:
             print("INVALID CASE")

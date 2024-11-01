@@ -2,8 +2,8 @@ import sys, time, socket, threading
 
 from random import randint
 
-from LoggingClass import FilingCabinet
-from exoboot_remote_control import ExobootRemoteServerThread
+from shared_files.LoggingClass import FilingCabinet
+from exoboot_remote.exoboot_remote_control import ExobootRemoteServerThread
 
 class DumbBertec:
     """
@@ -163,8 +163,10 @@ class DumbWrapper:
         self.startstamp = time.perf_counter()
         self.pause_event = threading.Event()
         self.quit_event = threading.Event()
+        self.log_event = threading.Event()
         self.pause_event.set()
         self.quit_event.set()
+        self.log_event.set()
 
         self.subjectID = subjectID
         self.trial_type = trial_type.upper()
@@ -185,7 +187,7 @@ class DumbWrapper:
 
         self.gse_thread = DumbGSE()
 
-        self.remote_thread = ExobootRemoteServerThread(self, self.startstamp, self.filingcabinet, usebackup=self.usebackup, pause_event=self.pause_event, quit_event=self.quit_event)
+        self.remote_thread = ExobootRemoteServerThread(self, self.startstamp, self.filingcabinet, usebackup=self.usebackup, pause_event=self.pause_event, quit_event=self.quit_event, log_event=self.log_event)
         self.remote_thread.set_target_IP("[::]:50051")
         self.remote_thread.start()
 

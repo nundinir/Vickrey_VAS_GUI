@@ -1,26 +1,18 @@
 import csv
-import numpy as np
 from functools import partial
 
-import kivy
 from kivy.app import App
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.animation import Animation
-from kivy.uix.image import Image, AsyncImage
-from kivy.clock import Clock
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.properties import StringProperty, NumericProperty
 from kivy.core.window import Window
 
 from constants import *
 
-from vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen
-from vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildfinishscreenvas
-from jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
-from pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref
-from acclimation_screens import buildpushtostartscreenaccl, buildsliderscreenaccl, buildfinishscreenaccl
-from speedfinder_screens import buildpushtostartscreensf, buildspeedfinderscreen, buildfinishscreensf
+from gui_files.vickrey_gui.vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen
+from gui_files.vas_gui.vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildfinishscreenvas
+from gui_files.jnd_gui.jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
+from gui_files.pref_gui.pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref
+from gui_files.acclimation_gui.acclimation_screens import buildpushtostartscreenaccl, buildsliderscreenaccl, buildfinishscreenaccl
+from gui_files.speedfinder_gui.speedfinder_screens import buildpushtostartscreensf, buildspeedfinderscreen, buildfinishscreensf
 
 from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine, AcclimationStateMachine, SpeedFinderStateMachine
 
@@ -108,28 +100,24 @@ class VickreyGUI(BaseGui):
                 # Load in most recent auction
                 states = {"t": 0, "state": False, "prev_state": False, "total_winnings": 0, "robostates": []}
                 for auction in reader:
-                    print("asdf", auction)
                     states["t"] = int(auction[0])
                     states["prev_state"] = states["state"]
                     states["state"] = auction[2] in ["True"]
                     states["total_winnings"] = float(auction[4])
                     states["robostates"] = auction[5::]
                 
-                print("wer", states)
                 self.sm.statemachine.loadstate(states)
         except:
             usebackup = False
 
         if not usebackup:
             # Create new file
-            auctionname = "{}_{}".format(self.sm.file_prefix, "auction")
-            auctionpath = self.sm.filingcabinet.newfile(auctionname, "csv", dictkey="auction")
+            header = ['t', 'subject_bid', 'user_win_flag', 'current_payout', 'total_winnings']
+            for i in range(NUM_ROBOBIDDERS):
+                header.extend(["robo{}_state_end".format(i), "robo{}_state_begin".format(i)])
 
-            with open(auctionpath, 'a', newline='') as f:
-                header = ['t', 'subject_bid', 'user_win_flag', 'current_payout', 'total_winnings']
-                for i in range(NUM_ROBOBIDDERS):
-                    header.extend(["robo{}_state_end".format(i), "robo{}_state_begin".format(i)])
-                csv.writer(f).writerow(header)
+            auctionname = "{}_{}".format(self.sm.file_prefix, "auction")
+            self.sm.filingcabinet.newfile(auctionname, "csv", dictkey="auction", header=header)
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
@@ -188,15 +176,13 @@ class VASGUI(BaseGui):
             
         if not usebackup:
             # Create new file
-            vasresultsname = "{}_{}".format(self.sm.file_prefix, "vasresults")
-            vasresultspath = self.sm.filingcabinet.newfile(vasresultsname, "csv", dictkey="vasresults")
+            header = ['btn_option', 'trial', 'pres']
+            for i in range(20): # TODO remove constant 20
+                header.append('torque{}'.format(i))
+                header.append('mv{}'.format(i))
 
-            with open(vasresultspath, 'a', newline='') as f:
-                header = ['btn_option', 'trial', 'pres']
-                for i in range(20): # TODO remove constant 20
-                    header.append('torque{}'.format(i))
-                    header.append('mv{}'.format(i))
-                csv.writer(f).writerow(header)
+            vasresultsname = "{}_{}".format(self.sm.file_prefix, "vasresults")
+            self.sm.filingcabinet.newfile(vasresultsname, "csv", dictkey="vasresults", header=header)
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
@@ -258,10 +244,7 @@ class JNDGUI(BaseGui):
         if not usebackup:
             # Create new file
             comparisonname = "{}_{}".format(self.sm.file_prefix, "comparison")
-            comparisonpath = self.sm.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison")
-
-            with open(comparisonpath, 'a', newline='') as f:
-                csv.writer(f).writerow(['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
+            self.sm.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison", header=['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
@@ -291,9 +274,9 @@ class JNDGUI(BaseGui):
 
 
 class PREFGUI(BaseGui):
-    def __init__(self, exoboot_remote_client, pref_type):
-        super().__init__(name='TorquePreference', exoboot_remote_client=exoboot_remote_client)
-        self.pref_type = pref_type
+    def __init__(self, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond):
+        super().__init__('PREF', exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
+        self.pref_type = trial_cond
 
     def build(self):
         self.sm.statemachine = PrefStateMachine(self.sm, pref_type=self.pref_type)
@@ -330,8 +313,8 @@ class PREFGUI(BaseGui):
     
 
 class AcclimationGUI(BaseGui):
-    def __init__(self, exoboot_remote_client, bertec):
-        super().__init__(name='ACCLIMATION', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+    def __init__(self, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond):
+        super().__init__('PREF', exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
 
     def build(self):
         self.sm.statemachine = AcclimationStateMachine(self.sm)

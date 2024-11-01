@@ -1,14 +1,13 @@
-import csv, time, random
+import time, random
 import numpy as np
 
 from constants import *
-from Robobidders import *
-from jnd_utils import jnd_comparitor
-from SoftRTloop import FlexibleSleeper
+from gui_files.vickrey_gui.Robobidders import *
+from gui_files.jnd_gui.jnd_utils import jnd_comparitor
 
 from constants import BTN_NUMS, MAX_TRIALS_DICT, MAX_PRESENTATIONS_DICT
 
-# Statemachine class
+
 class VickreyStateMachine:
     def __init__(self, screenmanager, num_robobidders=NUM_ROBOBIDDERS):
         self.sm = screenmanager
@@ -81,7 +80,7 @@ class VickreyStateMachine:
         else:
             state = False
             robo_walk_time = ROBOWALK_DUR * (self.auction_tally + 1)
-            self.robomodel.robobidderlist[winning_bid_idx-1].walk(robo_walk_time, 0)
+            self.robomodel.robobidderlist[winning_bid_idx - 1].walk(robo_walk_time, 0)
 
         # Update auction states
         self.prev_state = self.state
@@ -93,12 +92,10 @@ class VickreyStateMachine:
         # Send auction results to auctionhouse
         self.sm.exoboot_remote.call(t, subject_bid, self.state, self.payout, self.total_winnings)
 
-        # Save to backup
-        auctionpath = self.sm.filingcabinet.getpath("auction")
-        with open(auctionpath, 'a', newline='') as f:
-            auction_backup = [t, subject_bid, self.state, self.payout, self.total_winnings]
-            auction_backup.extend(self.robomodel.getstate())
-            csv.writer(f).writerow(auction_backup)
+        # Save backup
+        auction_backup = [t, subject_bid, self.state, self.payout, self.total_winnings]
+        auction_backup.extend(self.robomodel.getstate())
+        self.sm.filingcabinet.writerow("auction", auction_backup)
 
         # Increment auction tally
         self.auction_tally += 1
@@ -220,14 +217,11 @@ class VASStateMachine:
         self.sm.exoboot_remote.presentation_result(self.current_btn_option, self.current_trial, self.current_presentation, torques, values)
 
         # Save backup
-        datalist = [self.current_btn_option, self.current_trial, self.current_presentation]
+        resultsbackup = [self.current_btn_option, self.current_trial, self.current_presentation]
         for t, mv in zip(torques, values):
-            datalist.append(t)
-            datalist.append(mv)
-
-        vasresultspath = self.sm.filingcabinet.getpath("vasresults")
-        with open(vasresultspath, 'a', newline='') as f:
-            csv.writer(f).writerow(datalist)
+            resultsbackup.append(t)
+            resultsbackup.append(mv)
+        self.sm.filingcabinet.writerow("vasresults", resultsbackup)
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
@@ -339,10 +333,9 @@ class JNDStateMachine:
         """
         self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature)
 
-        # Log backup
-        comparisonpath = self.sm.filingcabinet.getpath("comparison")
-        with open(comparisonpath, 'a', newline='') as f:
-            csv.writer(f).writerow([self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature])
+        # Save backup
+        comparisonbackup = [self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature]
+        self.sm.filingcabinet.writerow("comparison", comparisonbackup)
 
         if not self.subtrial_limit:
             self.next_comparison()
@@ -355,10 +348,9 @@ class JNDStateMachine:
         """
         self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind)
 
-        # Log backup
-        comparisonpath = self.sm.filingcabinet.getpath("comparison")
-        with open(comparisonpath, 'a', newline='') as f:
-            csv.writer(f).writerow([self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind])
+        # Save backup
+        comparisonbackup = [self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind]
+        self.sm.filingcabinet.writerow("comparison", comparisonbackup)
 
         if not self.subtrial_limit:
             self.next_comparison()
@@ -374,7 +366,7 @@ class JNDStateMachine:
 
 
 class PrefStateMachine:
-    def __init__(self, screenmanager, pref_type='SLIDER'):
+    def __init__(self, screenmanager, pref_type='BUTTON'):
         self.sm = screenmanager
         self.pref_type = pref_type.upper()
 
