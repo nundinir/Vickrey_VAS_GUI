@@ -70,9 +70,8 @@ class VickreyGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, usebackup=False):
+    def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon):
         super().__init__("VICKREY", exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
-        self.usebackup = usebackup
 
     def build(self):
         # Vickrey bids
@@ -86,41 +85,28 @@ class VickreyGUI(BaseGui):
         # Statemachine
         self.sm.statemachine = VickreyStateMachine(self.sm, num_robobidders=NUM_ROBOBIDDERS)
 
-        # Load existing or create new backup
-        usebackup = self.usebackup
-        try:
-            if self.usebackup:
-                # Get backup from filingcabinet
-                auctionbackup = self.sm.filingcabinet.getpath("auction")
+        # Load backup into statemachine if backup was successful
+        if self.sm.filingcabinet.loadstatus:
+            # Get backup from filingcabinet
+            auctionbackup = self.sm.filingcabinet.getpath("auction")
 
-                # csv reader
-                reader = csv.reader(open(auctionbackup), delimiter=',')
-                next(reader) # Skip header
+            # csv reader
+            reader = csv.reader(open(auctionbackup), delimiter=',')
+            next(reader) # Skip header
 
-                # Load in most recent auction
-                states = {"t": 0, "state": False, "prev_state": False, "total_winnings": 0, "robostates": []}
-                for auction in reader:
-                    states["t"] = int(auction[0])
-                    states["prev_state"] = states["state"]
-                    states["state"] = auction[2] in ["True"]
-                    states["total_winnings"] = float(auction[4])
-                    states["robostates"] = auction[5::]
-                self.sm.statemachine.loadstate(states)
+            # Load in most recent auction
+            states = {"t": 0, "state": False, "prev_state": False, "total_winnings": 0, "robostates": [0, 0, 0, 0]}
+            for auction in reader:
+                states["t"] = int(auction[0])
+                states["prev_state"] = states["state"]
+                states["state"] = auction[2] in ["True"]
+                states["total_winnings"] = float(auction[4])
+                states["robostates"] = auction[5::]
+            self.sm.statemachine.loadstate(states)
 
-                if states["state"]:
-                    self.sm.exoboot_remote.set_log(mybool=False)
-                    self.sm.exoboot_remote.newwalk(int(states["t"]/2))
-        except:
-            usebackup = False
-
-        if not usebackup:
-            # Create new file
-            header = ['t', 'subject_bid', 'user_win_flag', 'current_payout', 'total_winnings']
-            for i in range(NUM_ROBOBIDDERS):
-                header.extend(["robo{}_state_end".format(i), "robo{}_state_begin".format(i)])
-
-            auctionname = "{}_{}".format(self.sm.file_prefix, "auction")
-            self.sm.filingcabinet.newfile(auctionname, "csv", dictkey="auction", header=header)
+            if states["state"]:
+                self.sm.exoboot_remote.set_log(mybool=False)
+                self.sm.exoboot_remote.newwalk(int(states["t"]/2))
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
@@ -148,44 +134,29 @@ class VASGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, startstamp, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, usebackup=None):
+    def __init__(self, startstamp, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon):
         super().__init__("VAS", exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
         self.startstamp = startstamp
-        self.usebackup = usebackup
 
     def build(self):
         # State machine
         self.sm.statemachine = VASStateMachine(self.sm, self.startstamp)
 
         # Load existing or create new backup
-        usebackup = self.usebackup
-        try:
-            if self.usebackup:
-                # Load backup into filingcabinet
-                vasresultsbackup = self.sm.filingcabinet.getpath("vasresults")
-                
-                # Load backup into statemachine
-                reader = csv.reader(open(vasresultsbackup), delimiter=',')
-                next(reader) # Skip header
-
-                btpcompleted = []
-                for btpline in reader:
-                    btp = [int(val) for val in btpline[0:3]]
-                    btpcompleted.append(btp)
-
-                self.sm.statemachine.loadstate(btpcompleted)
-        except:
-            usebackup = False
+        if self.sm.filingcabinet.loadstatus:
+            vasresultsbackup = self.sm.filingcabinet.getpath("vasresults")
             
-        if not usebackup:
-            # Create new file
-            header = ['btn_option', 'trial', 'pres']
-            for i in range(20): # TODO remove constant 20
-                header.append('torque{}'.format(i))
-                header.append('mv{}'.format(i))
+            reader = csv.reader(open(vasresultsbackup), delimiter=',')
+            next(reader) # Skip header
+            btpcompleted = []
+            for btpline in reader:
+                btp = [int(val) for val in btpline[0:3]]
+                btpcompleted.append(btp)
+            self.sm.statemachine.loadstate(btpcompleted)
 
-            vasresultsname = "{}_{}".format(self.sm.file_prefix, "vasresults")
-            self.sm.filingcabinet.newfile(vasresultsname, "csv", dictkey="vasresults", header=header)
+        # Load logging
+        b, t, p = self.sm.statemachine.peak_btp()        
+        self.sm.exoboot_remote.newpres(b, t, p)
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
@@ -226,28 +197,23 @@ class JNDGUI(BaseGui):
         self.sm.statemachine = JNDStateMachine(self.sm, jnd_type=self.jnd_type)
 
         # Load existing or create new backup
-        usebackup = self.usebackup
-        try:
-            if self.usebackup:
-                # Load backup into filingcabinet
-                comparisonbackup = self.sm.filingcabinet.getpath("comparison")
+        if self.sm.filingcabinet.loadstatus:
+            # Load backup into filingcabinet
+            comparisonbackup = self.sm.filingcabinet.getpath("comparison")
 
-                # Load backup into statemachine
-                reader = csv.reader(open(comparisonbackup), delimiter=',')
-                next(reader) # Skip Header
+            # Load backup into statemachine
+            reader = csv.reader(open(comparisonbackup), delimiter=',')
+            next(reader) # Skip Header
+            rep = 0
+            pres = 0
+            for comp in reader:
+                rep = int(comp[0])
+                pres = int(comp[1])
+            self.sm.statemachine.loadstate(rep, pres)
 
-                pres = 0
-                for comp in reader:
-                    pres = int(comp[0])
-
-                self.sm.statemachine.loadstate(pres)
-        except:
-            usebackup = False
-
-        if not usebackup:
-            # Create new file
-            comparisonname = "{}_{}".format(self.sm.file_prefix, "comparison")
-            self.sm.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison", header=['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
+        # Load logging
+        rep = self.sm.statemachine.rep
+        self.sm.exoboot_remote.newrep(rep)
 
         # Create Screens
         dummyscreen = Screen(name="dummy")

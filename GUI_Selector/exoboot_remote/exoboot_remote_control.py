@@ -140,8 +140,8 @@ class ExobootRemoteClient:
         return response
 
 # JND Specific    
-    def comparison_result(self, pres, prop, T_ref, T_comp, truth, answer):
-        compmsg = pb2.comparison(pres=pres, prop=prop, T_ref=T_ref, T_comp=T_comp, truth=truth, answer=answer)
+    def comparison_result(self, rep, pres, prop, T_ref, T_comp, truth, answer):
+        compmsg = pb2.comparison(rep=rep, pres=pres, prop=prop, T_ref=T_ref, T_comp=T_comp, truth=truth, answer=answer)
         response = self.stub.comparison_result(compmsg)
         return response
     
@@ -352,18 +352,21 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         for thread in self.loggingnexus.thread_names:
             self.loggingnexus.update_suffix(suffix, thread)
 
+        return pb2.receipt(received=True)
+
 # JND Specific
     def comparison_result(self, compmsg, context):
         """
         Log comparison result
         """
+        rep = compmsg.rep
         pres = compmsg.pres
         prop = compmsg.prop
         T_ref = compmsg.T_ref
         T_comp = compmsg.T_comp
         truth = compmsg.truth
         answer = compmsg.answer
-        self.filingcabinet.writerow("comparison", [pres, prop, T_ref, T_comp, truth, answer])
+        self.filingcabinet.writerow("comparison", [rep, pres, prop, T_ref, T_comp, truth, answer])
 
         return pb2.receipt(received=True)
     
@@ -371,9 +374,11 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         """
         Update threads logging csv files
         """
-        rep = repmsg.rep
+        rep = int(repmsg.rep)
         for thread in self.loggingnexus.thread_names:
             self.loggingnexus.update_suffix("rep{}".format(rep), thread)
+
+        return pb2.receipt(received=True)
     
 # Pref Specific
     def pref_result(self, prefmsg, context):

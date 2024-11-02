@@ -6,31 +6,55 @@ from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBT
 
 
 def initialize_comparison(sm, dt):
+    """
+    Start rep
+    """
     sm.statemachine.subtrial_limit = False
     sm.statemachine.next_comparison()
 
 def subtrial_timelimit(sm, dt):
+    """
+    End rep after current comparison
+    """
     sm.statemachine.subtrial_limit = True
 
 def splitsameschedule(sm):
+    """
+    JND screen events and timing
+    """
     Clock.schedule_once(partial(initialize_comparison, sm), 0)
     Clock.schedule_once(partial(subtrial_timelimit, sm), SUBTRIAL_MAX)
 
 
 def pause_exo_bertec(sm, dt):
-    # Stop bertec
+    """
+    Stop bertec, exoboots, logging, vicon
+    """
     sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-    
-    # Pause exoboots
     sm.exoboot_remote.set_pause(mybool=True)
+    sm.exoboot_remote.set_log(mybool=True)
+    # sm.vicon.stop()
 
-def trial_ready(sm, dt):
-    sm.statemachine.next_screen()
+def loggingvicon_event(sm, dt):
+    """
+    Start logging/Vicon
+    """
+    rep = sm.statemachine.incrementrep()
+    sm.exoboot_remote.newrep(rep)
+    sm.exoboot_remote.set_log(mybool=False)
+    # sm.vicon.blah()
 
 def waitingscreenjndschedule(sm):
+    """
+    Waiting screen events and timing
+    """
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
-    Clock.schedule_once(partial(trial_ready, sm), MIN_WAIT_JND)
+    Clock.schedule_once(partial(loggingvicon_event, sm), MIN_WAIT_JND)
+    Clock.schedule_once(partial(sm.statemachine.next_screen(), sm), MIN_WAIT_JND)
 
 
 def finishscreenjndschedule(sm):
+    """
+    Finish screen event and timing
+    """
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)

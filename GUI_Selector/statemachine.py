@@ -141,6 +141,10 @@ class VASStateMachine:
         # Quit flag
         self.quit_flag = False
 
+        # Start logging/Vicon
+        self.sm.exoboot_remote.set_log(mybool=False)
+        # self.sm.vicon.blah()
+
     def generate_btn_trial_pres_list(self):
         """
         Create list of button, trial, presentation combos
@@ -187,11 +191,24 @@ class VASStateMachine:
             except:
                 pass
 
+    def getstate(self):
+        """
+        Return btp
+        """
+        return self.current_btn_option, self.current_trial, self.current_presentation
+
     def get_torque(self, ind):
         """
         Return torque (Nm) for a given btp
         """
         return self.button_mappings[self.current_btn_option][self.current_trial][self.current_presentation][ind]
+
+    def peak_btp(self):
+        """
+        Look at next btp no pop
+        """
+        [b, t, p] = self.vas_btn_trial_pres[0]
+        return b, t, p
 
     def next_trial_pres(self):
         """
@@ -246,6 +263,7 @@ class JNDStateMachine:
         self.comparitor = jnd_comparitor(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_low=REF_LOW, ref_high=REF_HIGH, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
 
         # State tracking
+        self.rep = 0
         self.pres = 0
         self.prop = 0
         self.T_ref = 0
@@ -284,11 +302,23 @@ class JNDStateMachine:
                 self.next_screen_dict["pushtostartscreenjnd"] = "samelegscreen"
                 self.next_screen_dict["samelegscreen"] = "waitingscreenjnd"
 
-    def loadstate(self, pres):
+        # Start logging/Vicon
+        self.sm.exoboot_remote.set_log(mybool=False)
+        # self.sm.vicon.blah()
+
+    def loadstate(self, rep, pres):
         """
-        Start from previous pres number
+        Start from previous rep, pres
         """
+        self.rep = rep + 1 # Start a new rep
         self.pres = pres
+
+    def incrementrep(self):
+        """
+        Increment and return rep for logging
+        """
+        self.rep += 1
+        return self.rep
 
     def next_comparison_split(self):
         """
@@ -337,10 +367,10 @@ class JNDStateMachine:
         """
         Reports result of comparison
         """
-        self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature)
+        self.sm.exoboot_remote.comparison_result(self.rep, self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature)
 
         # Save backup
-        comparisonbackup = [self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature]
+        comparisonbackup = [self.rep, self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature]
         self.sm.filingcabinet.writerow("comparison", comparisonbackup)
 
         if not self.subtrial_limit:
@@ -352,10 +382,10 @@ class JNDStateMachine:
         """
         Reports result of comparison
         """
-        self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind)
+        self.sm.exoboot_remote.comparison_result(self.rep, self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind)
 
         # Save backup
-        comparisonbackup = [self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind]
+        comparisonbackup = [self.rep, self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind]
         self.sm.filingcabinet.writerow("comparison", comparisonbackup)
 
         if not self.subtrial_limit:

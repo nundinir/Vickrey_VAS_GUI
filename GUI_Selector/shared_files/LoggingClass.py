@@ -26,8 +26,10 @@ class FilingCabinet:
         # Settings
         self.validbehaviors = ["new", "add"]
         self.validfiletypes = ("csv", "txt")
-
         self.backupexceptions = []
+
+        # Internal states
+        self.loadstatus = False
 
         self.filepaths_dict = {}
 
@@ -159,7 +161,7 @@ class FilingCabinet:
 
                 case 'JND':
                     comparisonname = "{}_{}".format(file_prefix, "comparison")
-                    self.newfile(comparisonname, "csv", dictkey="comparison", header=['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
+                    self.newfile(comparisonname, "csv", dictkey="comparison", header=['rep', 'pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
 
                 case 'PREF':
                     prefname = "{}_{}".format(file_prefix, "pref")
@@ -168,7 +170,8 @@ class FilingCabinet:
                 case 'THERMAL':
                     pass
 
-            return False
+            self.loadstatus = False
+            return self.loadstatus
 
         # find unique dictkeys
         dictkeys = []
@@ -198,7 +201,9 @@ class FilingCabinet:
                         subject_info = subject_info.split('_')
                         dictkey = subject_info[4]
                         self.load(subbackup, dictkey)
-        return True
+
+        self.loadstatus = True
+        return self.loadstatus
 
     def writerow(self, dictkey, data, fields=None):
         """

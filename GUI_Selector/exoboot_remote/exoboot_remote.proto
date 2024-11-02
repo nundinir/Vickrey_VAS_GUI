@@ -77,12 +77,13 @@ message presentation {
 
 // JND Messages
 message comparison {
-    float pres = 1;
-    float prop = 2;
-    float T_ref = 3;
-    float T_comp = 4;
-    float truth = 5;
-    float answer = 6;
+    float rep = 1;
+    float pres = 2;
+    float prop = 3;
+    float T_ref = 4;
+    float T_comp = 5;
+    float truth = 6;
+    float answer = 7;
 }
 message repmsg {
     float rep = 1;

@@ -151,10 +151,15 @@ def buildbtns(sm, screen, buttons_origin, buttons_size, ranked=None):
         screen.add_widget(btn) 
 
 def confirmranking(instance):
+    """
+    Callback for finishbutton
+    Stops logging and resets screen for next btp
+    """
     sm = instance.parent.parent
     screen = instance.parent
 
     if instance.confirmed:
+        # Second/final confirmation
         torques = []
         values = []
         for slider in screen.children:
@@ -163,8 +168,14 @@ def confirmranking(instance):
                 values.append(slider.value)
 
         sm.statemachine.presentation_result(torques, values)
+
+        # Stop logging/vicon
+        sm.exoboot_remote.set_log(mybool=True)
+        # sm.vicon.blah()
+
         sm.statemachine.next_screen()
     else:
+        # First confirmation
         instance.confirmed = True
 
         unranked_torques = []
@@ -176,13 +187,16 @@ def confirmranking(instance):
                 unranked_mvs.append(slider.value)
                 unranked_text.append(slider.btntext)
 
+        # Sort sliders by MVs and regenerate vas screen
         ranked = [[t, mv, txt] for mv, t, txt in sorted(zip(unranked_mvs, unranked_torques, unranked_text))]
         ranked = ranked[::-1]
-
         buildvasscreen(sm, screen, confirmed=True, ranked=ranked)
 
 
 def buildvasscreen(sm, screen, confirmed=False, ranked=None):
+    """
+    Add vas widgets/layout to existing screen
+    """
     screen.clear_widgets()
     screen.sm = sm
     if not confirmed:
@@ -225,6 +239,9 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
 
 
 def buildfinishscreenvas(sm):
+    """
+    Build finish screen
+    """
     screen = Screen(name="finishscreenvas")
     screen.sm = sm
 

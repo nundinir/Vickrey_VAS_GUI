@@ -414,8 +414,8 @@ class DumbWrapper:
         self.remote_thread.start()
 
         while self.quit_event.is_set():
-            print("logging: ", self.log_event)
             self.loggingnexus.log()
+            print("Logging: ", self.log_event.is_set())
             time.sleep(1.0)
 
 
