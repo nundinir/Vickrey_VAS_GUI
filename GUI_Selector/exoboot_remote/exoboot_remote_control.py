@@ -19,7 +19,7 @@ class ExobootRemoteClient:
         self.startstamp = 0
 
 # General Methods    
-    def testconnection(self, guiname='none'):
+    def testconnection(self, guiname=None):
         """
         Sends test message to LoggingServer
         """
@@ -91,6 +91,14 @@ class ExobootRemoteClient:
         surveymsg = pb2.survey(t=t, enjoyment=enjoyment, rpe=rpe)
         response = self.stub.question(surveymsg)
         return response
+    
+    def newwalk(self, t):
+        """
+        Send new walk info
+        """
+        walkmsg = pb2.walkmsg(t=t)
+        response = self.stub.newwalk(walkmsg)
+        return response
 
 # VAS Specific
     def update_vas_info(self, btn_num, trial, pres):
@@ -99,7 +107,7 @@ class ExobootRemoteClient:
         """
         msg = pb2.vas_info(btn_num=btn_num, trial=trial, pres=pres)
         response = self.stub.update_vas_info(msg)
-        return None
+        return response
 
     def slider_update(self, pitime, overtime_dict):
         """
@@ -122,11 +130,24 @@ class ExobootRemoteClient:
         msg = pb2.presentation(btn_option=btn_option, trial=trial, pres=pres, torques=torques, values=values)
         response = self.stub.presentation_result(msg)
         return response
+    
+    def newpres(self, btn_num, trial, pres):
+        """
+        Send thread new btp info
+        """
+        msg = pb2.vas_info(btn_num=btn_num, trial=trial, pres=pres)
+        response = self.stub.newpres(msg)
+        return response
 
 # JND Specific    
     def comparison_result(self, pres, prop, T_ref, T_comp, truth, answer):
         compmsg = pb2.comparison(pres=pres, prop=prop, T_ref=T_ref, T_comp=T_comp, truth=truth, answer=answer)
         response = self.stub.comparison_result(compmsg)
+        return response
+    
+    def newrep(self, rep):
+        msg = pb2.repmsg(rep=rep)
+        response = self.stub.newrep(msg)
         return response
 
 # PREF Specific
@@ -145,49 +166,16 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
     def __init__(self, mainwrapper, startstamp, filingcabinet, usebackup, quit_event, log_event):
         super().__init__()
         self.mainwrapper = mainwrapper
-        self.startstamp = startstamp
+        self.loggingnexus = self.mainwrapper.loggingnexus
         self.filingcabinet = filingcabinet
+
+        self.startstamp = startstamp
         self.usebackup = usebackup
         self.quit_event = quit_event
         self.log_event = log_event
     
         # file prefix from mainwrapper
         self.file_prefix = self.mainwrapper.file_prefix
-
-        # Load backup or...
-        loadstatus = False
-        if self.usebackup:
-            loadstatus = self.filingcabinet.loadbackup(self.file_prefix, rule="newest")
-
-        # ... create new files
-        if not loadstatus:
-            match self.mainwrapper.trial_type.upper():
-                case 'VICKREY':
-                    auctionname = "{}_{}".format(self.file_prefix, "auction")
-                    self.filingcabinet.newfile(auctionname, "csv", dictkey="auction", header=['t', 'subject_bid', 'user_win_flag', 'current_payout', 'total_winnings'])
-
-                    surveyname = "{}_{}".format(self.file_prefix, "survey")
-                    self.filingcabinet.newfile(surveyname, "csv", dictkey="survey", header=['t', 'enjoyment', 'rpe'])
-
-                case 'VAS':
-                    header = ['btn_option', 'trial', 'pres']
-                    for i in range(4): # TODO remove constant 4
-                        header.append('torque{}'.format(i))
-                        header.append('mv{}'.format(i))
-
-                    vasresultsname = "{}_{}".format(self.file_prefix, "vasresults")
-                    self.filingcabinet.newfile(vasresultsname, "csv", dictkey="vasresults", header=header)
-
-                case 'JND':
-                    comparisonname = "{}_{}".format(self.file_prefix, "comparison")
-                    self.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison", header=['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
-
-                case 'PREF':
-                    prefname = "{}_{}".format(self.file_prefix, "pref")
-                    self.filingcabinet.newfile(prefname, "csv", dictkey="pref", header=['pres', 'torque'])
-
-                case 'THERMAL':
-                    pass
 
 # General Methods
     def testconnection(self, request, context):
@@ -263,6 +251,9 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
 
 # Vickrey Auction Specific
     def call(self, resultmsg, context):
+        """
+        Log auction result
+        """
         t = resultmsg.t
         subject_bid = resultmsg.subject_bid
         user_win_flag = resultmsg.user_win_flag
@@ -270,25 +261,28 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         total_winnings = resultmsg.total_winnings
 
         print("Received auction results: {}, {}, {}, {}, {}".format(t, subject_bid, user_win_flag, current_payout, total_winnings))
-        datalist = [t, subject_bid, user_win_flag, current_payout, total_winnings]
-
-        auctionpath = self.filingcabinet.getpath("auction")
-        with open(auctionpath, 'a', newline='') as f: 
-            csv.writer(f).writerow(datalist)
+        self.filingcabinet.writerow("auction", [t, subject_bid, user_win_flag, current_payout, total_winnings])
 
         return pb2.receipt(received=True)
     
     def question(self, surveymsg, context):
+        """
+        Log survey result
+        """
         t = surveymsg.t
         enjoyment = surveymsg.enjoyment
         rpe = surveymsg.rpe
+        self.filingcabinet.writerow("survey", [t, enjoyment, rpe])
 
-        print("Received survey results: {}, {}, {}".format(t, enjoyment, rpe))
-        datalist = [t, enjoyment, rpe]
+        return pb2.receipt(received=True)
 
-        surveypath = self.filingcabinet.getpath("survey")
-        with open(surveypath, 'a', newline='') as f:
-            csv.writer(f).writerow(datalist)
+    def newwalk(self, walkmsg, context):
+        """
+        Update pi threads logging file
+        """
+        t = 2 * walkmsg.t
+        for thread in self.loggingnexus.thread_names:
+            self.loggingnexus.update_suffix("t{}".format(t), thread)
 
         return pb2.receipt(received=True)
 
@@ -297,21 +291,18 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         """
         Start overtime logging in a new file
         """
-        btn_num = int(vasinfomsg.btn_num)
+        btn = int(vasinfomsg.btn_num)
         trial = int(vasinfomsg.trial)
         pres = int(vasinfomsg.pres)
 
-        print("Received updated vas info: ", btn_num, trial, pres)
-        overtimename = "{}_T{}_P{}_vas_overtime".format(self.file_prefix, trial, pres)
-        overtimepath = self.filingcabinet.newfile(overtimename, "csv", dictkey="overtime")
-
+        print("Received updated vas info: ", btn, trial, pres)
         header = ['pitime']
-        for i in range(btn_num):
+        for i in range(btn):
             header.append("Torque{}".format(i))
             header.append("MV{}".format(i))
 
-        with open(overtimepath, 'a', newline='') as f:
-            csv.writer(f).writerow(header)
+        overtimename = "{}_overtime_B{}_T{}_P{}".format(self.file_prefix, btn, trial, pres)
+        self.filingcabinet.newfile(overtimename, "csv", dictkey="overtime", header=header)
 
         return pb2.receipt(received=True)
 
@@ -323,14 +314,11 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         torques = slidermsg.torques
         mvs = slidermsg.mvs
 
-        datalist = [pitime]
+        data = [pitime]
         for torque, mv in zip(torques, mvs):
-            datalist.append(torque)
-            datalist.append(mv)
-
-        overtimepath = self.filingcabinet.getpath("overtime")
-        with open(overtimepath, 'a', newline='') as f:
-            csv.writer(f).writerow(datalist)
+            data.append(torque)
+            data.append(mv)
+        self.filingcabinet.writerow("overtime", data)
 
         return pb2.receipt(received=True)
     
@@ -344,45 +332,58 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         torques = presmsg.torques
         values = presmsg.values
 
-        print("Received presentation results: {}, {}, {}, {}, {}".format(btn_option, trial, pres, torques, values))
-        datalist = [btn_option, trial, pres]
+        data = [btn_option, trial, pres]
         for t, mv in zip(torques, values):
-            datalist.append(t)
-            datalist.append(mv)
+            data.append(t)
+            data.append(mv)
+        self.filingcabinet.writerow("vasresults", data)
 
-        vasresultspath = self.filingcabinet.getpath("vasresults")
-        with open(vasresultspath, 'a', newline='') as f:
-            csv.writer(f).writerow(datalist)
         return pb2.receipt(received=True)
 
-# JND Specific  
+    def newpres(self, vasinfomsg, context):
+        """
+        Update thread logging csv
+        """
+        btn = int(vasinfomsg.btn_num)
+        trial = int(vasinfomsg.trial)
+        pres = int(vasinfomsg.pres)
+        suffix = "B{}_T{}_P{}".format(btn, trial, pres)
+
+        for thread in self.loggingnexus.thread_names:
+            self.loggingnexus.update_suffix(suffix, thread)
+
+# JND Specific
     def comparison_result(self, compmsg, context):
+        """
+        Log comparison result
+        """
         pres = compmsg.pres
         prop = compmsg.prop
         T_ref = compmsg.T_ref
         T_comp = compmsg.T_comp
         truth = compmsg.truth
         answer = compmsg.answer
+        self.filingcabinet.writerow("comparison", [pres, prop, T_ref, T_comp, truth, answer])
 
-        print("Received comparison results: {}, {}, {}, {}, {}, {}".format(pres, prop, T_ref, T_comp, truth, answer))
-        datalist = [pres, prop, T_ref, T_comp, truth, answer]
-
-        comparisonpath = self.filingcabinet.getpath("comparison")
-        with open(comparisonpath, 'a', newline='') as f:
-            csv.writer(f).writerow(datalist)
         return pb2.receipt(received=True)
+    
+    def newrep(self, repmsg, context):
+        """
+        Update threads logging csv files
+        """
+        rep = repmsg.rep
+        for thread in self.loggingnexus.thread_names:
+            self.loggingnexus.update_suffix("rep{}".format(rep), thread)
     
 # Pref Specific
     def pref_result(self, prefmsg, context):
+        """
+        Log pref results
+        """
         pres = prefmsg.pres
         torque = prefmsg.torque
+        self.filingcabinet.writerow("pref", [pres, torque])
 
-        print("Received preference results: {}, {}".format(pres, torque))
-        datalist = [pres, torque]
-
-        prefpath = self.filingcabinet.getpath("pref")
-        with open(prefpath, 'a', newline='') as f:
-            csv.writer(f).writerow(datalist)
         return pb2.receipt(received=True)
 
 
@@ -394,10 +395,10 @@ class ExobootRemoteServerThread(BaseThread):
 
     Does not pause
     """
-    def __init__(self, mainwrapper, startstamp, filingcabinet, usebackup=False, name='exoboot_remote_thread', daemon=True, pause_event=Type[threading.Event], quit_event=Type[threading.Event], log_event=Type[threading.Event]):
+    def __init__(self, mainwrapper, startstamp, filingcabinet, usebackup=False, name='exoboot_remote_thread', daemon=True, backupexceptions=None, pause_event=Type[threading.Event], quit_event=Type[threading.Event], log_event=Type[threading.Event]):
         super().__init__(name, daemon, pause_event, quit_event, log_event)
         self.mainwrapper = mainwrapper
-        self.exoboot_remote_servicer = ExobootCommServicer(self.mainwrapper, startstamp, filingcabinet, usebackup, self.quit_event, self.log_event)
+        self.exoboot_remote_servicer = ExobootCommServicer(self.mainwrapper, startstamp, filingcabinet, usebackup=usebackup, quit_event=self.quit_event, log_event=self.log_event)
         self.target_IP = ''
     
     def set_target_IP(self, target_IP):

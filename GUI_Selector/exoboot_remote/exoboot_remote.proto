@@ -6,7 +6,6 @@ build command: python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=
 
 // General Messages
 message null {}
-
 message receipt {
     bool received = 1;
 }
@@ -26,14 +25,11 @@ message torques {
     float peak_torque_right = 2;
 }
 
-
 // Logging Messages
 message beaver {}
-
 message testmsg {
     string msg = 1;
 }
-
 message subject_info {
     float startstamp = 1;
     string subjectID = 2;
@@ -51,13 +47,11 @@ message result {
     float current_payout = 4;
     float total_winnings = 5;
 }
-
 message survey {
     float t = 1;
     float enjoyment = 2;
     float rpe = 3;
 }
-
 message walkmsg {
     float t = 1;
 }
@@ -68,24 +62,17 @@ message vas_info {
     float trial = 2;
     float pres = 3;
 }
-
 message slider {
     float pitime = 1;
     repeated float torques = 2;
     repeated float mvs = 3;
 }
-
 message presentation {
     float btn_option = 1;
     float trial = 2;
     float pres = 3;
     repeated float torques = 4;
     repeated float values = 5; 
-}
-
-message presmsg {
-    float trial = 1;
-    float pres = 2;
 }
 
 // JND Messages
@@ -97,7 +84,6 @@ message comparison {
     float truth = 5;
     float answer = 6;
 }
-
 message repmsg {
     float rep = 1;
 }
@@ -113,11 +99,9 @@ message preference {
 message header {
     repeated string names = 1;
 }
-
 message type {
     repeated string types = 1;
 }
-
 message datastream {
     repeated string data = 1;
 }
@@ -145,7 +129,7 @@ service exoboot_over_network {
     rpc update_vas_info (vas_info) returns (receipt) {};
     rpc slider_update (slider) returns (receipt) {};
     rpc presentation_result (presentation) returns (receipt) {};
-    rpc newpres (presmsg) returns (receipt) {};
+    rpc newpres (vas_info) returns (receipt) {};
 
     // JND Specific
     rpc comparison_result (comparison) returns (receipt) {};

@@ -23,10 +23,14 @@ class FilingCabinet:
             os.mkdir(os.path.join(self.pfolderpath, self.subject))
         self.pfolderpath = os.path.join(self.pfolderpath, self.subject)
 
-        self.filepaths_dict = {}
+        # Settings
+        self.validbehaviors = ["new", "add"]
         self.validfiletypes = ("csv", "txt")
 
-        self.validbehaviors = ["new", "add"]
+        self.backupexceptions = []
+
+        self.filepaths_dict = {}
+
         try:
             assert defaultbehavior in self.validbehaviors
             self.defaultbehavior = defaultbehavior
@@ -61,6 +65,13 @@ class FilingCabinet:
         Save header for a given dictkey
         """
         self.csvheaders[dictkey] = header
+
+    def set_backupexceptions(self, backupexceptions):
+        """"
+        Set strings to ignore when loading backups
+        Use to ignore exothread/GSE logging files
+        """
+        self.backupexceptions = backupexceptions
     
     def newfile(self, name, type, behavior=None, dictkey=None, header=None):
         """
@@ -111,18 +122,52 @@ class FilingCabinet:
 
         return fullpath
 
-    def loadbackup(self, file_prefix, rule=None):
+    def loadbackup(self, trial_type, file_prefix, rule="newest"):
         """
         Find newest existing file with file_prefix
         returns bool for completion status
         """
+        if not self.backupexceptions:
+            print("WARNING: No backupexceptions set. Set before loading otherwise loadbackup() will most likely fail")
+            print(self.backupexceptions)
+
         backupfiles = []
         pfolderpath = self.getpfolderpath()
         for file in os.listdir(pfolderpath):
-            if file_prefix in file:
+            isloadexception = any(loadexc in file for loadexc in self.backupexceptions)
+            if file_prefix in file and not isloadexception:
                 backupfiles.append(os.path.join(pfolderpath, file))
 
         if not backupfiles:
+            # Create new files
+            match trial_type.upper():
+                case 'VICKREY':
+                    auctionname = "{}_{}".format(file_prefix, "auction")
+                    self.newfile(auctionname, "csv", dictkey="auction", header=['t', 'subject_bid', 'user_win_flag', 'current_payout', 'total_winnings'])
+
+                    surveyname = "{}_{}".format(file_prefix, "survey")
+                    self.newfile(surveyname, "csv", dictkey="survey", header=['t', 'enjoyment', 'rpe'])
+
+                case 'VAS':
+                    header = ['btn_option', 'trial', 'pres']
+                    for i in range(4): # TODO remove constant 4
+                        header.append('torque{}'.format(i))
+                        header.append('mv{}'.format(i))
+
+                    vasresultsname = "{}_{}".format(file_prefix, "vasresults")
+                    self.newfile(vasresultsname, "csv", dictkey="vasresults", header=header)
+
+                case 'JND':
+                    comparisonname = "{}_{}".format(file_prefix, "comparison")
+                    self.newfile(comparisonname, "csv", dictkey="comparison", header=['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
+
+                case 'PREF':
+                    prefname = "{}_{}".format(file_prefix, "pref")
+                    self.newfile(prefname, "csv", dictkey="pref", header=['pres', 'torque'])
+
+                case 'THERMAL':
+                    pass
+
             return False
 
         # find unique dictkeys
@@ -178,18 +223,19 @@ class FilingCabinet:
         Don't mix types in datalist
         """
         filepath = self.filepaths_dict[dictkey]
-        stash_size = len(datastash)
+        stashsize = len(datastash)
         fields = fields if fields else datastash[0].keys()
-        match datastash[0]:
-            case list():
-                for _ in range(stash_size):
-                    csv.writer(open(filepath, 'a'), lineterminator='\n',quotechar='|').writerow(datastash.popleft())
-            case dict():
-                for _ in range(stash_size):
-                    csv.DictWriter(open(filepath, 'a'), fieldnames=fields, lineterminator='\n',quotechar='|').writerow(datastash.popleft())
-            case _:
-                # TODO add other csv writers?
-                raise TypeError("Invalid data to writerow")
+        if stashsize > 0:
+            match datastash[0]:
+                case list():
+                    for _ in range(stashsize):
+                        csv.writer(open(filepath, 'a'), lineterminator='\n',quotechar='|').writerow(datastash.popleft())
+                case dict():
+                    for _ in range(stashsize):
+                        csv.DictWriter(open(filepath, 'a'), fieldnames=fields, lineterminator='\n',quotechar='|').writerow(datastash.popleft())
+                case _:
+                    # TODO add other csv writers?
+                    raise TypeError("Invalid data to writerow")
 
 
 class LoggingNexus:
@@ -223,13 +269,19 @@ class LoggingNexus:
             self.filenames[threadname] = "{}_{}".format(self.file_prefix, threadname)
 
             # New file using FilingCabinet
-            self.filingcabinet.newfile(self.filenames[threadname], "csv", behavior="new", dictkey=threadname, header=self.thread_fields[thread])
+            # self.filingcabinet.newfile(self.filenames[threadname], "csv", behavior="new", dictkey=threadname, header=self.thread_fields[threadname])
 
     def update_suffix(self, suffix, thread):
         """
         Create new file with same file_prefix, thread, new suffix
         Redirect thread logging to the new file
+        Clear stashs
         """
+        # Log leftovers and clear deques
+        self.log()
+        self.flush()
+
+        # New csv logging destination
         self.filenames[thread] = "{}_{}_{}".format(self.file_prefix, thread, suffix)
         self.filingcabinet.newfile(self.filenames[thread], "csv", behavior="new", dictkey=thread, header=self.thread_fields[thread])
 
@@ -277,11 +329,19 @@ class LoggingNexus:
                 for thread in self.thread_names:
                     fields = self.thread_fields[thread]
                     stash = self.thread_stashes[thread]
-
                     self.filingcabinet.writerowmulti(thread, stash, fields=fields)
-
+        except KeyError:
+            pass
         except Exception as e:
             print("LoggingNexus.log() error: ", e)
+
+    def flush(self):
+        """
+        Clear deques
+        """
+        for stash in self.thread_stashes.values():
+            if stash:
+                stash.clear()
 
 
 if __name__ == "__main__":

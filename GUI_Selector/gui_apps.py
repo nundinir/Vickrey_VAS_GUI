@@ -105,8 +105,11 @@ class VickreyGUI(BaseGui):
                     states["state"] = auction[2] in ["True"]
                     states["total_winnings"] = float(auction[4])
                     states["robostates"] = auction[5::]
-                
                 self.sm.statemachine.loadstate(states)
+
+                if states["state"]:
+                    self.sm.exoboot_remote.set_log(mybool=False)
+                    self.sm.exoboot_remote.newwalk(int(states["t"]/2))
         except:
             usebackup = False
 

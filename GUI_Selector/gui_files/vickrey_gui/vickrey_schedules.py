@@ -57,6 +57,16 @@ def survey_schedule(sm):
     Clock.schedule_once(sm.statemachine.next_screen, RESULT_SHOW-BIDDING_CLOSE)
 
 
+def logging_event(sm, dt):
+    state = sm.statemachine.state
+    prev_state = sm.statemachine.prev_state
+    if state and not prev_state:
+        # Start logging/Vicon early
+        sm.exoboot_remote.newwalk(sm.statemachine.auction_tally)
+        sm.exoboot_remote.set_log(mybool=False)
+
+        # sm.vicon.blah()
+
 def result_screens_event(sm, dt):
     state = sm.statemachine.state
     prev_state = sm.statemachine.prev_state
@@ -64,8 +74,9 @@ def result_screens_event(sm, dt):
         # Stop Bertec and pause exoboots
         sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
         sm.exoboot_remote.set_pause(mybool=True)
+        sm.exoboot_remote.set_log(mybool=True)
 
-    if state and not prev_state:
+    elif state and not prev_state:
         # push to start if getting on treadmill
         sm.current = "pushtostartscreen"
     else:
@@ -73,4 +84,5 @@ def result_screens_event(sm, dt):
         sm.current = "numpad"
 
 def result_screens_schedule(sm):
+    Clock.schedule_once(partial(logging_event, sm), 0)
     Clock.schedule_once(partial(result_screens_event,sm), AUCTION_CLOSE - RESULT_SHOW)

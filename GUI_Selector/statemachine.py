@@ -12,7 +12,7 @@ class VickreyStateMachine:
     def __init__(self, screenmanager, num_robobidders=NUM_ROBOBIDDERS):
         self.sm = screenmanager
 
-        # Check if loaded backup
+        # backupflag
         self.backupflag = False
 
         # Init RoboBidders
@@ -37,15 +37,21 @@ class VickreyStateMachine:
                                  }
 
     def loadstate(self, states_dict: dict):
+        """
+        Load state into internal variables
+        """
         self.auction_tally = int((states_dict["t"])/ 2) + 1
         self.state = states_dict["state"]
         self.prev_state = states_dict["prev_state"]
         self.total_winnings = states_dict["total_winnings"]
         self.robomodel.loadstate(states_dict["robostates"])
-        
+
         self.backupflag = True
 
     def determine_auction(self):
+        """
+        Determine Vickrey auction outcome
+        """
         no_bid = not self.sm.bid
         no_prev_bid = not self.sm.previous_bid
         # Convert bid from string to float

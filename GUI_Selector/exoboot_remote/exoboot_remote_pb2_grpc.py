@@ -107,7 +107,7 @@ class exoboot_over_networkStub(object):
                 _registered_method=True)
         self.newpres = channel.unary_unary(
                 '/exoboot_over_network/newpres',
-                request_serializer=exoboot__remote__pb2.presmsg.SerializeToString,
+                request_serializer=exoboot__remote__pb2.vas_info.SerializeToString,
                 response_deserializer=exoboot__remote__pb2.receipt.FromString,
                 _registered_method=True)
         self.comparison_result = channel.unary_unary(
@@ -309,7 +309,7 @@ def add_exoboot_over_networkServicer_to_server(servicer, server):
             ),
             'newpres': grpc.unary_unary_rpc_method_handler(
                     servicer.newpres,
-                    request_deserializer=exoboot__remote__pb2.presmsg.FromString,
+                    request_deserializer=exoboot__remote__pb2.vas_info.FromString,
                     response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
             ),
             'comparison_result': grpc.unary_unary_rpc_method_handler(
@@ -705,7 +705,7 @@ class exoboot_over_network(object):
             request,
             target,
             '/exoboot_over_network/newpres',
-            exoboot__remote__pb2.presmsg.SerializeToString,
+            exoboot__remote__pb2.vas_info.SerializeToString,
             exoboot__remote__pb2.receipt.FromString,
             options,
             channel_credentials,
