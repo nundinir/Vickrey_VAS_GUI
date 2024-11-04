@@ -147,6 +147,7 @@ class FilingCabinet:
                     auctionname = "{}_{}".format(file_prefix, "auction")
                     self.newfile(auctionname, "csv", dictkey="auction", header=['t', 'subject_bid', 'user_win_flag', 'current_payout', 'total_winnings'])
 
+                    # TODO add settings to not create this file on the GUI side
                     surveyname = "{}_{}".format(file_prefix, "survey")
                     self.newfile(surveyname, "csv", dictkey="survey", header=['t', 'enjoyment', 'rpe'])
 
