@@ -46,17 +46,17 @@ class BaseGui(App):
             Stop Bertec treadmill and close Bertec
             Shutdown exoboots remotely
             """
-            print("Closing Bertec")
+            # print("Closing Bertec")
             self.bertec.write_command(0, 0, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
             self.bertec.stop()
 
-            print("Stopping Vicon")
+            # print("Stopping Vicon")
             self.vicon.stop_recording()
 
-            print("Exiting Logging Server")
+            # print("Exiting Logging Server")
             self.exoboot_remote.chop()
 
-            print("Shutting down exoboots")
+            # print("Shutting down exoboots")
             self.exoboot_remote.set_quit(mybool=True)
             print("Goodbye")
 
@@ -105,8 +105,11 @@ class VickreyGUI(BaseGui):
             self.sm.statemachine.loadstate(states)
 
             if states["state"]:
+                # Start logging/Vicon
                 self.sm.exoboot_remote.set_log(mybool=False)
                 self.sm.exoboot_remote.newwalk(int(states["t"]/2))
+                auctionname = "{}_t{}".format(self.sm.file_prefix, 2 * self.sm.statemachine.auction_tally)
+                self.sm.vicon.start_recording(auctionname)
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
@@ -136,11 +139,11 @@ class VASGUI(BaseGui):
     """
     def __init__(self, startstamp, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon):
         super().__init__("VAS", exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
-        self.startstamp = startstamp
+        self.sm.startstamp = startstamp
 
     def build(self):
         # State machine
-        self.sm.statemachine = VASStateMachine(self.sm, self.startstamp)
+        self.sm.statemachine = VASStateMachine(self.sm, self.sm.startstamp)
 
         # Load existing or create new backup
         if self.sm.filingcabinet.loadstatus:
@@ -175,6 +178,11 @@ class VASGUI(BaseGui):
         self.sm.add_widget(waitingscreen)
         self.sm.add_widget(finishscreen)
 
+        # Start logging/Vicon
+        self.sm.exoboot_remote.set_log(mybool=False)
+        btpname = "{}_B{}_T{}_P{}".format(self.sm.file_prefix, b, t, p)
+        self.sm.vicon.start_recording(btpname)
+
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreen"
 
@@ -187,14 +195,13 @@ class JNDGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, jnd_type, usebackup=False):
+    def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, jnd_type):
         super().__init__('JND', exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
-        self.jnd_type = jnd_type
-        self.usebackup = usebackup
+        self.sm.jnd_type = jnd_type
 
     def build(self):
         # Statemachine
-        self.sm.statemachine = JNDStateMachine(self.sm, jnd_type=self.jnd_type)
+        self.sm.statemachine = JNDStateMachine(self.sm, jnd_type=self.sm.jnd_type)
 
         # Load existing or create new backup
         if self.sm.filingcabinet.loadstatus:
@@ -204,16 +211,16 @@ class JNDGUI(BaseGui):
             # Load backup into statemachine
             reader = csv.reader(open(comparisonbackup), delimiter=',')
             next(reader) # Skip Header
-            rep = 0
+            walk = 0
             pres = 0
             for comp in reader:
-                rep = int(comp[0])
+                walk = int(comp[0])
                 pres = int(comp[1])
-            self.sm.statemachine.loadstate(rep, pres)
+            self.sm.statemachine.loadstate(walk, pres)
 
         # Load logging
-        rep = self.sm.statemachine.rep
-        self.sm.exoboot_remote.newrep(rep)
+        walk = self.sm.statemachine.walk
+        self.sm.exoboot_remote.newwalk(walk)
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
@@ -228,13 +235,18 @@ class JNDGUI(BaseGui):
         self.sm.add_widget(finishscreenjnd)
 
         # Split or same trial cond
-        match self.jnd_type:
+        match self.sm.jnd_type:
             case "SPLITLEG":
                 splitlegscreen = buildsplitlegscreen(self.sm)
                 self.sm.add_widget(splitlegscreen)
             case "SAMELEG":
                 samelegscreen = buildsamelegscreen(self.sm)
                 self.sm.add_widget(samelegscreen)
+
+        # Start logging/Vicon
+        self.sm.exoboot_remote.set_log(mybool=False)
+        btpname = "{}_walk{}".format(self.sm.file_prefix, walk)
+        self.sm.vicon.start_recording(btpname)
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenjnd"

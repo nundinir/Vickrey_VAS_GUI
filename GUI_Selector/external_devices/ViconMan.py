@@ -88,6 +88,6 @@ class Vicon:
 
 if __name__ == '__main__':
     vicon = Vicon()
-    vicon.start_recording('File1')
+    vicon.start_recording('asdf')
     sleep(5)
     vicon.stop_recording()

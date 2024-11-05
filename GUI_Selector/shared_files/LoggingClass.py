@@ -9,7 +9,9 @@ class FilingCabinet:
     """
     Class to create subject_data folder and subject subfolders
     Access file using dictkey, write headers automatically
-    Write row or rows of data, 
+    Write row or rows of data
+
+    # TODO allow more subfolders
     """
     def __init__(self, pfolder, subject, defaultbehavior="new"):
         self.subject = subject
@@ -162,7 +164,7 @@ class FilingCabinet:
 
                 case 'JND':
                     comparisonname = "{}_{}".format(file_prefix, "comparison")
-                    self.newfile(comparisonname, "csv", dictkey="comparison", header=['rep', 'pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
+                    self.newfile(comparisonname, "csv", dictkey="comparison", header=['walk', 'pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
 
                 case 'PREF':
                     prefname = "{}_{}".format(file_prefix, "pref")
@@ -234,11 +236,13 @@ class FilingCabinet:
         if stashsize > 0:
             match datastash[0]:
                 case list():
+                    writer = csv.writer(open(filepath, 'a'), lineterminator='\n',quotechar='|')
                     for _ in range(stashsize):
-                        csv.writer(open(filepath, 'a'), lineterminator='\n',quotechar='|').writerow(datastash.popleft())
+                        writer.writerow(datastash.popleft())
                 case dict():
+                    writer = csv.DictWriter(open(filepath, 'a'), fieldnames=fields, lineterminator='\n',quotechar='|')
                     for _ in range(stashsize):
-                        csv.DictWriter(open(filepath, 'a'), fieldnames=fields, lineterminator='\n',quotechar='|').writerow(datastash.popleft())
+                        writer.writerow(datastash.popleft())
                 case _:
                     # TODO add other csv writers?
                     raise TypeError("Invalid data to writerow")

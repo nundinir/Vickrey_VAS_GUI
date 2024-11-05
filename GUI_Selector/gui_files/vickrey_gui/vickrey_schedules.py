@@ -76,12 +76,11 @@ def logging_event(sm, dt):
     state = sm.statemachine.state
     prev_state = sm.statemachine.prev_state
     if state and not prev_state: # Get subject ON treadmill
-        # Start logging
         sm.exoboot_remote.newwalk(sm.statemachine.auction_tally)
         sm.exoboot_remote.set_log(mybool=False)
 
-        # Start Vicon
-        # sm.vicon.blah()
+        auctionname = "{}_t{}".format(sm.file_prefix, 2 * sm.statemachine.auction_tally)
+        sm.vicon.start_recording(auctionname)
 
 def result_screens_event(sm, dt):
     """
@@ -94,9 +93,12 @@ def result_screens_event(sm, dt):
     if not state and prev_state: # Get subject OFF treadmill
         sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
         
-        # Stop logging/Vicon
+        # Stop logging and pause exoboots
         sm.exoboot_remote.set_pause(mybool=True)
         sm.exoboot_remote.set_log(mybool=True)
+
+        # Stop Vicon recording
+        sm.vicon.stop_recording()
 
         sm.current = "numpad"
 

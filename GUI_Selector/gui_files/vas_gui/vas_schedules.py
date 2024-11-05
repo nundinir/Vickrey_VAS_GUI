@@ -12,7 +12,7 @@ def pause_exo_bertec(sm, dt):
     sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
     sm.exoboot_remote.set_pause(mybool=True)
     sm.exoboot_remote.set_log(mybool=True)
-    # sm.vicon.stop()
+    sm.vicon.stop_recording()
 
 def loggingvicon_event(sm, dt):
     """
@@ -21,7 +21,9 @@ def loggingvicon_event(sm, dt):
     b, t, p = sm.statemachine.peak_btp()
     sm.exoboot_remote.newpres(b, t, p)
     sm.exoboot_remote.set_log(mybool=False)
-    # sm.vicon.blah()
+    
+    btpname = "{}_B{}_T{}_P{}".format(sm.file_prefix, b, t, p)
+    sm.vicon.start_recording(btpname)
 
 def waitingscreevasschedule(sm):
     """

@@ -7,14 +7,14 @@ from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBT
 
 def initialize_comparison(sm, dt):
     """
-    Start rep
+    Start walk
     """
     sm.statemachine.subtrial_limit = False
     sm.statemachine.next_comparison()
 
 def subtrial_timelimit(sm, dt):
     """
-    End rep after current comparison
+    End walk after current comparison
     """
     sm.statemachine.subtrial_limit = True
 
@@ -33,16 +33,18 @@ def pause_exo_bertec(sm, dt):
     sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
     sm.exoboot_remote.set_pause(mybool=True)
     sm.exoboot_remote.set_log(mybool=True)
-    # sm.vicon.stop()
+    sm.vicon.stop_recording()
 
 def loggingvicon_event(sm, dt):
     """
     Start logging/Vicon
     """
-    rep = sm.statemachine.incrementrep()
-    sm.exoboot_remote.newrep(rep)
+    walk = sm.statemachine.incrementwalk()
+    sm.exoboot_remote.newwalk(walk)
     sm.exoboot_remote.set_log(mybool=False)
-    # sm.vicon.blah()
+
+    btpname = "{}_walk{}".format(sm.file_prefix, walk)
+    sm.vicon.start_recording(btpname)
 
 def waitingscreenjndschedule(sm):
     """
@@ -50,7 +52,7 @@ def waitingscreenjndschedule(sm):
     """
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
     Clock.schedule_once(partial(loggingvicon_event, sm), MIN_WAIT_JND)
-    Clock.schedule_once(partial(sm.statemachine.next_screen(), sm), MIN_WAIT_JND)
+    Clock.schedule_once(partial(sm.statemachine.next_screen, sm), MIN_WAIT_JND)
 
 
 def finishscreenjndschedule(sm):

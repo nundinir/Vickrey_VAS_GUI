@@ -107,7 +107,7 @@ class DumbVicon:
             fileNameIn: File name to be used on the vicon PC
             fileDescription: Any notes you want to add to your file. Fills the description field on vicon 
         """
-        print("VICON START: {}, {}", fileNameIn, fileDescription)
+        print("VICON START: {}, {}".format(fileNameIn, fileDescription))
         # msg = self._assemble_payload_start(fileNameIn, fileDescription)
         # self.sock.sendto(msg, (self.destinationIP, self.destinationPort))
         pass
@@ -372,7 +372,6 @@ class DumbWrapper:
         self.trial_cond = trial_cond.upper()
         self.description = description
         self.usebackup = usebackup in ["true", "True", "1", "yes", "Yes"]
-
         self.file_prefix = "{}_{}_{}_{}".format(self.subjectID, self.trial_type, self.trial_cond, self.description)
         
         print("Subject: {}".format(self.subjectID))
