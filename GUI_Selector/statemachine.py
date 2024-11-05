@@ -417,6 +417,9 @@ class PrefStateMachine:
             case 'BUTTON':
                 self.next_screen_dict["pushtostartscreenpref"] = "btnscreen"
                 self.next_screen_dict["btnscreen"] = "waitingscreenpref"
+            case 'DIAL':
+                self.next_screen_dict["pushtostartscreenpref"] = "dialscreen"
+                self.next_screen_dict["dialscreen"] = "waitingscreenpref"
 
     def report_pref(self, torque):
         """

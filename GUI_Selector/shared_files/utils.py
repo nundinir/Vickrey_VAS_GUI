@@ -87,3 +87,8 @@ def decimal_format(str):
     withsigdigs = '0' * max(3 - len(str), 0) + str
     withdecimal = withsigdigs[:-2] + '.' + withsigdigs[-2:]
     return withdecimal
+
+# if __name__ == "__main__":
+#     f = open("shared_files/inspiration.txt", "r", encoding="utf8")
+#     for line in f.readlines():
+#         print(line.strip())

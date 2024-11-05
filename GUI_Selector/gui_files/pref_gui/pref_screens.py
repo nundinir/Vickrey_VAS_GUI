@@ -3,8 +3,10 @@ from functools import partial
 
 from kivy.clock import Clock
 from kivy.uix.label import Label
+from kivy.uix.image import Image
 from kivy.uix.slider import Slider
 from kivy.uix.button import Button
+from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.screenmanager import Screen
 
 from constants import *
@@ -164,6 +166,12 @@ def buildbtnscreenpref(sm, screen):
     screen.prev_btn = 0
 
     screen.on_pre_enter = partial(buildbtnscreenpref, sm, screen)
+
+
+def builddialscreenpref(sm):
+    pass
+
+    # return screen
 
 
 def buildfinishscreenpref(sm):

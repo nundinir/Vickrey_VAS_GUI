@@ -10,7 +10,7 @@ from constants import *
 from gui_files.vickrey_gui.vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen
 from gui_files.vas_gui.vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildfinishscreenvas
 from gui_files.jnd_gui.jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
-from gui_files.pref_gui.pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref
+from gui_files.pref_gui.pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreenpref, buildbtnscreenpref, builddialscreenpref, buildfinishscreenpref
 from gui_files.acclimation_gui.acclimation_screens import buildpushtostartscreenaccl, buildsliderscreenaccl, buildfinishscreenaccl
 from gui_files.speedfinder_gui.speedfinder_screens import buildpushtostartscreensf, buildspeedfinderscreen, buildfinishscreensf
 
@@ -286,6 +286,10 @@ class PREFGUI(BaseGui):
                 buildbtnscreenpref(self.sm, btnscreenpref)
                 self.sm.add_widget(btnscreenpref)
                 self.sm.prefscreen = btnscreenpref
+            case "DIAL":
+                dialscreenpref = builddialscreenpref(self.sm)
+                self.sm.add_widget(dialscreenpref)
+                self.sm.dialscreenpref = dialscreenpref
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenpref"
