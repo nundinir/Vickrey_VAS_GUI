@@ -15,17 +15,18 @@ def pause_exo_bertec(sm, dt):
     # Stop Vicon
     sm.vicon.stop_recording()
 
-def start_vicon_recording(sm, dt):
+def next_presentation(sm, dt):
     # Start Vicon
     b, t, p = sm.statemachine.peak_btp()
     recording_name = "{}_B{}_T{}_P{}".format(sm.file_prefix, b, t, p)
     sm.vicon.start_recording(recording_name)
 
+    # Go to next screen
+    sm.statemachine.next_screen()
 
 def waitingscreevasschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
-    Clock.schedule_once(partial(start_vicon_recording, sm), MIN_WAIT_VAS)
-    Clock.schedule_once(sm.statemachine.next_screen, MIN_WAIT_VAS)
+    Clock.schedule_once(partial(next_presentation, sm), MIN_WAIT_VAS)
 
 
 def finishscreenvasschedule(sm):

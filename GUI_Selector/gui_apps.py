@@ -201,7 +201,6 @@ class VASGUI(BaseGui):
         # Start Vicon Recording
         b, t, p = self.sm.statemachine.peak_btp()
         recording_name = "{}_B{}_T{}_P{}".format(self.sm.file_prefix, b, t, p)
-        print(recording_name)
         self.sm.vicon.start_recording(recording_name)
 
         # Create Screens
