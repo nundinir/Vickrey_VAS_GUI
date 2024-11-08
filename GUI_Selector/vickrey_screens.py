@@ -13,7 +13,7 @@ from kivy_utils import CountDownTimer
 # push to start screen
 def startbttn_CB(instance):
     sm = instance.parent.parent
-    if sm.statemachine.auction_tally > 0:        
+    if sm.statemachine.auction_tally > 0 and sm.statemachine.state:        
         # Start treadmill and unpause exoboots
         sm.bertec.write_command(BERTEC_SPEED_RIGHT, BERTEC_SPEED_LEFT, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
         sm.exoboot_remote.set_pause(mybool=False)
@@ -33,6 +33,8 @@ def buildpushtostartscreen(sm):
             text = "Touch to begin"
         elif state:
             text = "Return to treadmill\n Touch to resume"
+            recording_name = "{}_t{}".format(sm.file_prefix, int(sm.statemachine.auction_tally * ROBOWALK_DUR))
+            sm.vicon.start_recording(recording_name)
         else:
             text = "Remain seated\nTouch to resume"
     else:

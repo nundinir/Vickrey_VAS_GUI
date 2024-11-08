@@ -60,6 +60,7 @@ def survey_schedule(sm):
 def result_screens_event(sm, dt):
     state = sm.statemachine.state
     prev_state = sm.statemachine.prev_state
+    
     if not state and prev_state:        
         # Stop Bertec and pause exoboots
         sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
