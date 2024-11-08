@@ -17,7 +17,8 @@ def pause_exo_bertec(sm, dt):
 
 def start_vicon_recording(sm, dt):
     # Start Vicon
-    recording_name = "{}_{}{}{}".format(sm.file_prefix, sm.statemachine.current_btn_option, sm.statemachine.current_trial, sm.statemachine.current_presentation)
+    b, t, p = sm.statemachine.peak_btp()
+    recording_name = "{}_B{}_T{}_P{}".format(sm.file_prefix, b, t, p)
     sm.vicon.start_recording(recording_name)
 
 

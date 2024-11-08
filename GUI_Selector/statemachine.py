@@ -174,6 +174,13 @@ class VASStateMachine:
 
             self.button_mappings[btn_num] = trial_mappings
 
+    def peak_btp(self):
+        if self.vas_btn_trial_pres:
+            [b, t, p] = self.vas_btn_trial_pres[0]
+            return b, t, p
+        else:
+            return -1, -1, -1
+
     def loadstate(self, btpcompleted):
         """
         Remove completed btp from vas_btn_trial_pres list
