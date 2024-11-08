@@ -198,6 +198,10 @@ class VASGUI(BaseGui):
                     header.append('mv{}'.format(i))
                 csv.writer(f).writerow(header)
 
+        # Start Vicon Recording
+        recording_name = "{}_B{}_T{}_P{}".format(self.sm.file_prefix, self.sm.statemachine.current_btn_option, self.sm.statemachine.current_trial, self.sm.statemachine.current_presentation)
+        self.sm.vicon.start_recording(recording_name)
+
         # Create Screens
         dummyscreen = Screen(name="dummy")
         pushtostartscreen = buildpushtostartscreenvas()
@@ -327,7 +331,7 @@ class PREFGUI(BaseGui):
         self.sm.current = "pushtostartscreenpref"
 
         return self.sm
-    
+
 
 class AcclimationGUI(BaseGui):
     def __init__(self, exoboot_remote_client, bertec):

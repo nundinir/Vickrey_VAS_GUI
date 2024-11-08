@@ -12,9 +12,18 @@ def pause_exo_bertec(sm, dt):
     # Pause exoboots
     sm.exoboot_remote.set_pause(mybool=True)
 
+    # Stop Vicon
+    sm.vicon.stop_recording()
+
+def start_vicon_recording(sm, dt):
+    # Start Vicon
+    recording_name = "{}_{}{}{}".format(sm.file_prefix, sm.statemachine.current_btn_option, sm.statemachine.current_trial, sm.statemachine.current_presentation)
+    sm.vicon.start_recording(recording_name)
+
 
 def waitingscreevasschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
+    Clock.schedule_once(partial(start_vicon_recording, sm), MIN_WAIT_VAS)
     Clock.schedule_once(sm.statemachine.next_screen, MIN_WAIT_VAS)
 
 

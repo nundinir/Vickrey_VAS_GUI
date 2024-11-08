@@ -52,3 +52,4 @@ if __name__ == "__main__":
             SpeedFinderGUI(exoboot_remote, bertec).run()
         case _:
             print("INVALID CASE")
+
