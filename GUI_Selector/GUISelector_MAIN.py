@@ -43,7 +43,7 @@ if __name__ == "__main__":
         case 'JND':
             JNDGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond, usebackup=usebackup).run()
         case 'PREF':
-            PREFGUI(exoboot_remote, bertec, trial_cond).run()
+            PREFGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond).run()
         case 'ACCLIMATION':
             AcclimationGUI(exoboot_remote, bertec).run()
         case'SPEEDFINDER':

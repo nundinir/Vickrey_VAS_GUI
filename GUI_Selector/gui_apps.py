@@ -18,7 +18,7 @@ from constants import *
 from vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen
 from vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildfinishscreenvas
 from jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
-from pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref
+from pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref, builddialscreenpref
 from acclimation_screens import buildpushtostartscreenaccl, buildsliderscreenaccl, buildfinishscreenaccl
 from speedfinder_screens import buildpushtostartscreensf, buildspeedfinderscreen, buildfinishscreensf
 
@@ -296,9 +296,9 @@ class JNDGUI(BaseGui):
 
 
 class PREFGUI(BaseGui):
-    def __init__(self, exoboot_remote_client, pref_type):
-        super().__init__(name='TorquePreference', exoboot_remote_client=exoboot_remote_client)
-        self.pref_type = pref_type
+    def __init__(self, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond):
+        super().__init__('TorquePreference', exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
+        self.pref_type = trial_cond
 
     def build(self):
         self.sm.statemachine = PrefStateMachine(self.sm, pref_type=self.pref_type)
@@ -327,6 +327,10 @@ class PREFGUI(BaseGui):
                 buildbtnscreenpref(self.sm, btnscreenpref)
                 self.sm.add_widget(btnscreenpref)
                 self.sm.prefscreen = btnscreenpref
+            case "DIAL":
+                dialscreenpref = builddialscreenpref(self.sm)
+                self.sm.add_widget(dialscreenpref)
+                self.sm.dialscreenpref = dialscreenpref
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenpref"
