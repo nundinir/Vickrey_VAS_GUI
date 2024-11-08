@@ -116,7 +116,7 @@ class FilingCabinet:
         dkey = dictkey if dictkey else name
         self.filepaths_dict[dkey] = fullpath
 
-        # CSV Additions
+        # Set and write header
         if header:
             self.setheader(dkey, header)
         
@@ -126,66 +126,72 @@ class FilingCabinet:
 
         return fullpath
 
-    def loadbackup(self, trial_type, file_prefix, rule="newest"):
+    def loadbackup(self, includes, dictkey=None, rule="newest"):
         """
         Find newest existing file with file_prefix
         returns bool for completion status
         """
-        if not self.backupexceptions:
-            print("WARNING: No backupexceptions set. Set before loading otherwise loadbackup() will most likely fail")
-            print(self.backupexceptions)
+        # if not self.backupexceptions: # TODO deterimine if necessary
+        #     print("WARNING: No backupexceptions set. Set before loading otherwise loadbackup() will most likely fail")
+        #     print(self.backupexceptions)
 
         backupfiles = []
         pfolderpath = self.getpfolderpath()
         for file in os.listdir(pfolderpath):
-            isloadexception = any(loadexc in file for loadexc in self.backupexceptions)
-            if file_prefix in file and not isloadexception:
+            isnotloadexception = not any(loadexc in file for loadexc in self.backupexceptions)
+            hasincludes = all(incl in file for incl in includes)
+            if hasincludes and isnotloadexception:
                 backupfiles.append(os.path.join(pfolderpath, file))
 
         if not backupfiles:
             # Create new files
-            match trial_type.upper():
-                case 'VICKREY':
-                    auctionname = "{}_{}".format(file_prefix, "auction")
-                    self.newfile(auctionname, "csv", dictkey="auction", header=['t', 'subject_bid', 'user_win_flag', 'current_payout', 'total_winnings'])
+            # match trial_type.upper():
+            #     case 'VICKREY':
+            #         auctionname = "{}_{}".format(file_prefix, "auction")
+            #         self.newfile(auctionname, "csv", dictkey="auction", header=['t', 'subject_bid', 'user_win_flag', 'current_payout', 'total_winnings'])
 
-                    # TODO add settings to not create this file on the GUI side
-                    surveyname = "{}_{}".format(file_prefix, "survey")
-                    self.newfile(surveyname, "csv", dictkey="survey", header=['t', 'enjoyment', 'rpe'])
+            #         # TODO add settings to not create this file on the GUI side
+            #         surveyname = "{}_{}".format(file_prefix, "survey")
+            #         self.newfile(surveyname, "csv", dictkey="survey", header=['t', 'enjoyment', 'rpe'])
 
-                case 'VAS':
-                    header = ['btn_option', 'trial', 'pres']
-                    for i in range(4): # TODO remove constant 4
-                        header.append('torque{}'.format(i))
-                        header.append('mv{}'.format(i))
+            #     case 'VAS':
+            #         header = ['btn_option', 'trial', 'pres']
+            #         for i in range(4): # TODO remove constant 4
+            #             header.append('torque{}'.format(i))
+            #             header.append('mv{}'.format(i))
 
-                    vasresultsname = "{}_{}".format(file_prefix, "vasresults")
-                    self.newfile(vasresultsname, "csv", dictkey="vasresults", header=header)
+            #         vasresultsname = "{}_{}".format(file_prefix, "vasresults")
+            #         self.newfile(vasresultsname, "csv", dictkey="vasresults", header=header)
 
-                case 'JND':
-                    comparisonname = "{}_{}".format(file_prefix, "comparison")
-                    self.newfile(comparisonname, "csv", dictkey="comparison", header=['walk', 'pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
+            #     case 'JND':
+            #         comparisonname = "{}_{}".format(file_prefix, "comparison")
+            #         self.newfile(comparisonname, "csv", dictkey="comparison", header=['walk', 'pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
 
-                case 'PREF':
-                    prefname = "{}_{}".format(file_prefix, "pref")
-                    self.newfile(prefname, "csv", dictkey="pref", header=['pres', 'torque'])
+            #     case 'PREF':
+            #         prefname = "{}_{}".format(file_prefix, "pref")
+            #         self.newfile(prefname, "csv", dictkey="pref", header=['pres', 'torque'])
 
-                case 'THERMAL':
-                    pass
+            #     case 'THERMAL':
+            #         pass
 
             self.loadstatus = False
             return self.loadstatus
 
         # find unique dictkeys
+        print("1", backupfiles)
         dictkeys = []
         for file in backupfiles:
             if file.endswith(self.validfiletypes):
                 dictkey = file.split('.')[0]
+                print("11", dictkey)
                 dictkey = dictkey.replace(os.path.join(self.getpfolderpath(), file_prefix), "")
+                print("12", dictkey)
                 dictkey = dictkey.replace("_new", "").strip('_')
+                print("13", dictkey)
                 dictkeys.append(dictkey)
         dictkeys = set(dictkeys)
 
+        print(")(*) ", dictkeys)
         # Find path to each unique dictkey
         for dictkey in dictkeys:
             subbackupfiles = [f for f in backupfiles if dictkey in f]
@@ -198,12 +204,19 @@ class FilingCabinet:
                     case _:
                         print("No rule implemented for case {}".format(rule))
 
+                print("ZXCV ", subbackup)
                 for snippet in subbackup.split(os.sep):
                     if snippet.endswith(self.validfiletypes):
                         subject_info = snippet.split('.')[0]
-                        subject_info = subject_info.split('_')
-                        dictkey = subject_info[4]
-                        self.load(subbackup, dictkey)
+                        # subject_info = subject_info.split('_')
+                        # dictkey = subject_info[4]
+                        print("ASD ", subject_info, dictkey)
+                        if dictkey:
+                            print("loading")
+                            self.load(subbackup, dictkey)
+                            print(self.filepaths_dict)
+                        else:
+                            self.load(subbackup, subject_info)
 
         self.loadstatus = True
         return self.loadstatus
@@ -279,7 +292,7 @@ class LoggingNexus:
             self.filenames[threadname] = "{}_{}".format(self.file_prefix, threadname)
 
             # New file using FilingCabinet
-            # self.filingcabinet.newfile(self.filenames[threadname], "csv", behavior="new", dictkey=threadname, header=self.thread_fields[threadname])
+            self.filingcabinet.newfile(self.filenames[threadname], "csv", behavior="new", dictkey=threadname, header=self.thread_fields[threadname])
 
     def update_suffix(self, suffix, thread):
         """
@@ -302,26 +315,6 @@ class LoggingNexus:
         """
         data = copy.deepcopy(data_dict)
         self.thread_stashes[threadname].append(data)
-        
-        # # send client
-        # if 'exothread_' in threadname:
-        #     if 'left' in threadname:
-        #         # pull data from dictionary
-        #         self.rtplot_data_dict['pitime_left'] = data['pitime']
-        #         self.rtplot_data_dict['motor_current_left'] = data['motor_current']
-        #         self.rtplot_data_dict['batt_volt_left'] = data['battery_voltage']
-        #         self.rtplot_data_dict['case_temp_left'] = data['temperature']
-                
-        #         plot_data_array = [self.rtplot_data_dict.values()]
-        #     else:
-        #         self.rtplot_data_dict['pitime_right'] = data['pitime']
-        #         self.rtplot_data_dict['motor_current_right'] = data['motor_current']
-        #         self.rtplot_data_dict['batt_volt_right'] = data['battery_voltage']
-        #         self.rtplot_data_dict['case_temp_right'] = data['temperature']
-                
-        #         plot_data_array = [self.rtplot_data_dict.values()]
-            
-        #     client.send_array(plot_data_array)
 
     def get(self, threadname, field):
         try:
@@ -363,36 +356,12 @@ if __name__ == "__main__":
     pfolder = "testfolder"
     cabinet = FilingCabinet(pfolder, "dummy")
 
-    # Create txt files in subject_data and subject subfolder to show they exist
-    Path(os.path.join(pfolder, "asdf.txt")).touch()
-    Path(os.path.join(cabinet.getpfolderpath(), "qwer.txt")).touch()
+    cabinet.newfile("myfile", "csv", dictkey="unique_file", header=["THIS", 'IS', 'A', 'HEADER'])
+    cabinet.writerow("unique_file", ['my', 'first', 'line'])
 
-    # Use FilingCabinet to create new file
-    # Since qwer.txt exists, follow "new" behavior (add _new to filename)
-    qwer_path = cabinet.newfile("qwer", "csv", behavior="new", dictkey="special_identifier")
-    print("qwer filepath: {}".format(qwer_path))
+    newcabinet = FilingCabinet(pfolder, "dummy")
+    loadstatus = cabinet.loadbackup("myfile", "unique2")
+    print("Loadstatus: ", loadstatus)
+    print(newcabinet.filepaths_dict)
 
-    # Get qwer_file path using getpath
-    # Should be same as qwer_path
-    iforgotpath = cabinet.getpath("special_identifier")
-    print("from getpath: {}".format(iforgotpath))
-
-    # Create testcsv in subject subfolder
-    with open(iforgotpath, 'a') as f:
-        writer = csv.writer(f, lineterminator='\n',quotechar='|')
-        writer.writerow(["foo", "bar"])
-
-    # Write using FilingCabinet writerow
-    cabinet.writerow("special_identifier", ["bas", "boo"])
-
-    # Set special_identifier header
-    cabinet.setheader("special_identifier", ["my", "header", "test", "header"])
-    print("Header", cabinet.csvheaders["special_identifier"])
-
-    # Assign new file to special_identifier
-    cabinet.newfile("qwer2", "csv", dictkey="special_identifier")
-
-    # Write data using writerow
-    cabinet.writerow("special_identifier", ["boo", "halloween"])
-
-    print("Demo Finished")
+    newcabinet.writerow("unique2", ["my", "second", "line"])
