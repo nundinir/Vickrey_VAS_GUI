@@ -65,9 +65,15 @@ def result_screens_event(sm, dt):
         sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
         sm.exoboot_remote.set_pause(mybool=True)
 
+        # Stop Vicon
+        sm.vicon.stop_recording()
+
     if state and not prev_state:
         # push to start if getting on treadmill
         sm.current = "pushtostartscreen"
+
+        recording_name = "{}_t{}".format(sm.file_prefix, int(sm.statemachine.auction_tally * ROBOWALK_DUR))
+        sm.vicon.start_recording(recording_name)
     else:
         # continue sitting/walking/sitting out
         sm.current = "numpad"
