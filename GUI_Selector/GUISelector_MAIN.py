@@ -13,7 +13,7 @@ from constants import PI_IP, LOCALHOST
 
 if __name__ == "__main__":
     # Connect to Exoboot
-    exoboot_remote = ExobootRemoteClient(PI_IP)
+    exoboot_remote = ExobootRemoteClient(LOCALHOST)
 
     # Get subject info
     startstamp, subjectID, trial_type, trial_cond, description, usebackup = exoboot_remote.get_subject_info()
