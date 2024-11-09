@@ -1,10 +1,12 @@
-# Class to handle continuous rotation of Kivy Radial dial
+from math import atan2, pi
 
 from kivy.properties import NumericProperty
 from kivy_garden.radialslider import RadialSlider
-from math import atan2
 
 class PrefDial(RadialSlider):
+    """
+    Class to handle continuous rotation of Kivy Radial dial
+    """
     rotations = NumericProperty(0)  # Track full rotations in either direction
     torque_value = NumericProperty(0)
     min_torque = NumericProperty(0)
@@ -60,32 +62,35 @@ class PrefDial(RadialSlider):
         """Calculate the angle between touch position and the center of the widget."""
         x, y = touch.pos
         center_x, center_y = self.center
-        return (180 / 3.14159) * -atan2(y - center_y, x - center_x) % 360
+        return (180 / pi) * -atan2(y - center_y, x - center_x) % 360
 
     def update_torque_value(self):
         """Calculate torque based on the cumulative virtual angle."""
         
         # saturate at endpoints
-        if self.virtual_angle >= 3*360:
-            self.virtual_angle_temp = 3*360
-        elif self.virtual_angle <= 0:
-            self.virtual_angle_temp = 0
-            self.low_counter = 1
+        # if self.virtual_angle >= 3*360:
+        #     self.virtual_angle_temp = 3*360
+        # elif self.virtual_angle <= 0:
+        #     self.virtual_angle_temp = 0
+        #     self.low_counter = 1
                 
-        else:
-            self.virtual_angle_temp = self.virtual_angle
+        # else:
+        #     self.virtual_angle_temp = self.virtual_angle
         
         # cumulative_rotation = self.virtual_angle % self.total_rotation_value
         # torque_percentage = cumulative_rotation / self.total_rotation_value
         # self.torque_value = self.min_torque + torque_percentage * (self.max_torque - self.min_torque)
         
         self.torque_value = self.torque_value + self.angle_diff * 0.05
-        
+
         # clamp to min and max torque values
-        if self.torque_value < self.min_torque:
-            self.torque_value = self.min_torque
-        elif self.torque_value > self.max_torque:
-            self.torque_value = self.max_torque
+        self.torque_value = max(min(self.torque_value, self.max_torque), self.min_torque)
+
+        # clamp to min and max torque values
+        # if self.torque_value < self.min_torque:
+        #     self.torque_value = self.min_torque
+        # elif self.torque_value > self.max_torque:
+        #     self.torque_value = self.max_torque
         
         #self.min_torque + (0.33 * self.virtual_angle_temp)
-        print(self.torque_value)
+        # print(self.torque_value)

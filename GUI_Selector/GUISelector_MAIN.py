@@ -1,11 +1,11 @@
 import os
 
 from test_server import DumbBertec, DumbVicon
-from BertecMan import Bertec
-from ViconMan import Vicon
+from external_devices.BertecMan import Bertec
+from external_devices.ViconMan import Vicon
 
-from LoggingClass import FilingCabinet
-from exoboot_remote_control import ExobootRemoteClient
+from shared_files.LoggingClass import FilingCabinet
+from exoboot_remote.exoboot_remote_control import ExobootRemoteClient
 
 from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI, AcclimationGUI, SpeedFinderGUI
 from constants import PI_IP, LOCALHOST

@@ -2,9 +2,9 @@ import csv, time, random
 import numpy as np
 
 from constants import *
-from Robobidders import *
-from jnd_utils import jnd_comparitor
-from SoftRTloop import FlexibleSleeper
+from gui_files.vickrey_gui.Robobidders import *
+from gui_files.jnd_gui.jnd_comparitors import UniformSampler
+from shared_files.SoftRTloop import FlexibleSleeper
 
 from constants import BTN_NUMS, MAX_TRIALS_DICT, MAX_PRESENTATIONS_DICT
 
@@ -245,15 +245,16 @@ class VASStateMachine:
 
 
 class JNDStateMachine:
-    def __init__(self, screenmanager, jnd_type='SPLITLEG', which_comparitor="uniform"):
+    def __init__(self, screenmanager, jnd_type='SPLITLEG', which_comparitor="UNIFORM"):
         self.sm = screenmanager
         self.jnd_type = jnd_type.upper()
+        self.which_comparitor = which_comparitor.upper()
 
         # JND Comparitor
-        match which_comparitor:
-            case "uniform":
-                self.comparitor = jnd_comparitor(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_list=REF_LIST, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
-            case "stair":
+        match self.which_comparitor:
+            case "UNIFORM":
+                self.comparitor = UniformSampler(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_list=REF_LIST, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
+            case "STAIR":
                 self.comparitor = None
                 pass
             case _:

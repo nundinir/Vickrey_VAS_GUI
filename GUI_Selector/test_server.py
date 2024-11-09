@@ -2,8 +2,8 @@ import sys, time, socket, threading
 
 from random import randint
 
-from LoggingClass import FilingCabinet
-from exoboot_remote_control import ExobootRemoteServerThread
+from shared_files.LoggingClass import FilingCabinet
+from exoboot_remote.exoboot_remote_control import ExobootRemoteServerThread
 
 class DumbBertec:
     """
