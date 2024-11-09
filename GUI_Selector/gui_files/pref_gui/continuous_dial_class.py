@@ -84,13 +84,10 @@ class PrefDial(RadialSlider):
         self.torque_value = self.torque_value + self.angle_diff * 0.05
 
         # clamp to min and max torque values
-        self.torque_value = max(min(self.torque_value, self.max_torque), self.min_torque)
-
-        # clamp to min and max torque values
-        # if self.torque_value < self.min_torque:
-        #     self.torque_value = self.min_torque
-        # elif self.torque_value > self.max_torque:
-        #     self.torque_value = self.max_torque
+        if self.torque_value < self.min_torque:
+            self.torque_value = self.min_torque
+        elif self.torque_value > self.max_torque:
+            self.torque_value = self.max_torque
         
         #self.min_torque + (0.33 * self.virtual_angle_temp)
         # print(self.torque_value)

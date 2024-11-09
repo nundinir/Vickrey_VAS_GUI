@@ -1,0 +1,104 @@
+#this file is used to define the layout of the GUI
+#:import Factory kivy.factory.Factory
+#:import utils kivy.utils
+
+#This describes the layout and the orientation of the 10 buttons on the GUI
+<MyLayout>:
+    BoxLayout:
+        id: plotter
+        size_hint_y: 0.5
+        pos_hint: {"top":1}
+
+    BoxLayout:
+        orientation: 'vertical'
+        size: root.width, root.height
+        size_hint_y: 0.5
+
+        GridLayout:
+            cols: 10
+            rows: 1
+
+            Button:
+                id: A
+                text: "A"
+                font_size:64
+                on_release:root.press('A')
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#0d9c35')
+            Button:
+                id: B
+                text: "B"
+                font_size:64
+                on_release:root.press('B')
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#00954b')
+
+            Button:
+                id: C
+                text: "C"
+                font_size:64
+                on_release:root.press('C')
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#92dc7e')
+
+            Button:
+                id: D
+                text: "D"
+                font_size:64
+                on_release:root.press('D')
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#64c987')
+            Button:
+                id: E
+                text: "E"
+                font_size:64
+                on_release:root.press('E')
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#39b48e')
+            Button:
+                id: F
+                text: "F"
+                font_size:64
+                on_release:root.press('F')
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#089f8f')
+            Button:
+                id: G
+                text: "G"
+                font_size:64
+                on_release:root.press('G')
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#00898a')
+            Button:
+                id: H
+                text: "H"
+                font_size:64
+                on_release:root.press('H')
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#08737f')
+            Button:
+                id: I
+                text: "I"
+                font_size:64
+                on_release:root.press('I')
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#215d6e')
+            Button:
+                id: J
+                text: "J"
+                font_size:64
+                on_release:root.press('J')
+                background_normal: ''
+                background_color: utils.get_color_from_hex('#2a4858')
+        
+
+
+
+
+
+
+
+
+
+
+
