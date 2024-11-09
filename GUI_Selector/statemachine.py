@@ -245,12 +245,19 @@ class VASStateMachine:
 
 
 class JNDStateMachine:
-    def __init__(self, screenmanager, jnd_type='SPLITLEG'):
+    def __init__(self, screenmanager, jnd_type='SPLITLEG', which_comparitor="uniform"):
         self.sm = screenmanager
         self.jnd_type = jnd_type.upper()
 
         # JND Comparitor
-        self.comparitor = jnd_comparitor(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_low=REF_LOW, ref_high=REF_HIGH, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
+        match which_comparitor:
+            case "uniform":
+                self.comparitor = jnd_comparitor(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_list=REF_LIST, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
+            case "stair":
+                self.comparitor = None
+                pass
+            case _:
+                Exception("Invalid comparitor type")
 
         # State tracking
         self.pres = 0
@@ -312,6 +319,7 @@ class JNDStateMachine:
                 self.peak_torque_left = self.T_ref
                 self.peak_torque_right = self.T_comp
                 self.truth = int(truth)
+
             else:
                 self.peak_torque_left = self.T_comp
                 self.peak_torque_right = self.T_ref

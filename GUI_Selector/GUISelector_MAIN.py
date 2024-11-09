@@ -41,7 +41,7 @@ if __name__ == "__main__":
         case 'VAS':
             VASGUI(startstamp, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, usebackup=usebackup).run()
         case 'JND':
-            JNDGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond, usebackup=usebackup).run()
+            JNDGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond, description, usebackup=usebackup).run()
         case 'PREF':
             PREFGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond).run()
         case 'ACCLIMATION':

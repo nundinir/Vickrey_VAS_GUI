@@ -66,6 +66,7 @@ class BaseGui(App):
 
             print("Shutting down exoboots")
             self.exoboot_remote.set_quit(mybool=True)
+
             print("Goodbye")
 
         Window.bind(on_request_close=partial(on_request_close, self.sm))
@@ -232,14 +233,15 @@ class JNDGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, jnd_type, usebackup=False):
+    def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, jnd_type, which_comparitor, usebackup=False):
         super().__init__('JND', exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
         self.jnd_type = jnd_type
+        self.which_comparitor = which_comparitor
         self.usebackup = usebackup
 
     def build(self):
         # Statemachine
-        self.sm.statemachine = JNDStateMachine(self.sm, jnd_type=self.jnd_type)
+        self.sm.statemachine = JNDStateMachine(self.sm, jnd_type=self.jnd_type, which_comparitor=self.which_comparitor)
 
         # Load existing or create new backup
         usebackup = self.usebackup
