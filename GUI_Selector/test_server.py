@@ -186,6 +186,9 @@ class DumbWrapper:
 
         # Filing Cabinet
         self.filingcabinet = FilingCabinet("subject_data", self.subjectID)
+        if self.usebackup:
+            loadstatus = self.filingcabinet.loadbackup(self.file_prefix, rule="newest")
+            print("Backup Load Status: {}".format("SUCCESS" if loadstatus else "FAILURE"))
 
         self.gse_thread = DumbGSE()
 

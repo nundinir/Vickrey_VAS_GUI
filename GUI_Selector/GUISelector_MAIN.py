@@ -22,7 +22,6 @@ if __name__ == "__main__":
 
     # FilingCabinet for backups
     filingcabinet = FilingCabinet("trial_backups", subjectID)
-
     if usebackup:
         loadstatus = filingcabinet.loadbackup(file_prefix, rule="newest")
         print("Backup load status: {}".format("SUCCESS" if loadstatus else "FAILURE"))
