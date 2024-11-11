@@ -52,14 +52,16 @@ class ExobootRemoteClient:
         return response
 
 # Exoboot Controller Commands
+    def set_quit(self, mybool=False):
+        receipt = self.stub.set_quit(pb2.quit(mybool=mybool))
+        return receipt
+
     def set_pause(self, mybool=False):
-        pause_msg = pb2.pause(mybool=mybool)
-        receipt = self.stub.set_pause(pause_msg)
+        receipt = self.stub.set_pause(pb2.pause(mybool=mybool))
         return receipt
     
-    def set_quit(self, mybool=False):
-        quit_msg = pb2.quit(mybool=mybool)
-        receipt = self.stub.set_quit(quit_msg)
+    def set_log(self, mybool=False):
+        receipt = self.stub.set_log(pb2.log(mybool=mybool))
         return receipt
 
     def set_torques(self, peak_torque_left=0, peak_torque_right=0):
@@ -217,28 +219,43 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         return pb2.receipt(received=True)
 
 # Exoboot Controller Commands
+    def set_quit(self, quit_msg, context):
+        """
+        Exoboot_Thread Command
+        Set quit event
+        """
+        quit = quit_msg.mybool
+        print("QUIT COMMAND: {}".format(quit))
+        if quit:
+            self.mainwrapper.quit_event.clear()
+        else:
+            self.mainwrapper.quit_event.set()
+        return pb2.receipt(received=True)
+
     def set_pause(self, pause_msg, context):
         """
         Exoboot_Thread Command
-        Pauses threads in main
+        Set pause event
         """
         pause = pause_msg.mybool
+        print("PAUSE COMMAND: {}".format(pause))
         if pause:
             self.mainwrapper.pause_event.clear()
         else:
             self.mainwrapper.pause_event.set()
         return pb2.receipt(received=True)
 
-    def set_quit(self, quit_msg, context):
+    def set_log(self, log_msg, context):
         """
         Exoboot_Thread Command
-        Quits execution in main
+        Set log event
         """
-        quit = quit_msg.mybool
-        if quit:
-            self.mainwrapper.quit_event.clear()
+        log = log_msg.mybool
+        print("LOG COMMAND: {}".format(log))
+        if log:
+            self.mainwrapper.log_event.clear()
         else:
-            self.mainwrapper.quit_event.set()
+            self.mainwrapper.log_event.set()
         return pb2.receipt(received=True)
 
     def set_torque(self, torque_msg, context):

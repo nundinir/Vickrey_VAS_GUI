@@ -45,7 +45,7 @@ if __name__ == "__main__":
         case 'PREF':
             PREFGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond).run()
         case 'ACCLIMATION':
-            AcclimationGUI(exoboot_remote, bertec).run()
+            AcclimationGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon).run()
         case'SPEEDFINDER':
             # TODO finish speedfindergui or remove
             # Is a WIP

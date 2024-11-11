@@ -90,11 +90,13 @@ class DumbVicon:
             fileNameIn: File name to be used on the vicon PC
             fileDescription: Any notes you want to add to your file. Fills the description field on vicon 
         """
+        print("VICON_START: {}".format(fileNameIn))
         # msg = self._assemble_payload_start(fileNameIn, fileDescription)
         # self.sock.sendto(msg, (self.destinationIP, self.destinationPort))
         pass
 
     def stop_recording(self):
+        print("VICON_STOP")
         # msg = self._assemble_payload_stop()
         # self.sock.sendto(msg, (self.destinationIP, self.destinationPort))
         pass
@@ -161,10 +163,12 @@ class DumbGSE:
 class DumbWrapper:
     def __init__(self, subjectID, trial_type, trial_cond, description, usebackup):
         self.startstamp = time.perf_counter()
-        self.pause_event = threading.Event()
         self.quit_event = threading.Event()
-        self.pause_event.set()
+        self.pause_event = threading.Event()
+        self.log_event = threading.Event()
         self.quit_event.set()
+        self.pause_event.clear()
+        self.log_event.clear()
 
         self.subjectID = subjectID
         self.trial_type = trial_type.upper()

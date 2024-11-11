@@ -12,6 +12,9 @@ def pause_exo_bertec(sm, dt):
     # Pause exoboots
     sm.exoboot_remote.set_pause(mybool=True)
 
+    # Stop exo logging
+    sm.exoboot_remote.set_log(mybool=True)
+
     # Stop Vicon
     sm.vicon.stop_recording()
 
@@ -20,6 +23,9 @@ def next_presentation(sm, dt):
     b, t, p = sm.statemachine.peak_btp()
     recording_name = "{}_B{}_T{}_P{}".format(sm.file_prefix, b, t, p)
     sm.vicon.start_recording(recording_name)
+
+    # Start exo logging
+    sm.exoboot_remote.set_log(mybool=False)
 
     # Go to next screen
     sm.statemachine.next_screen()

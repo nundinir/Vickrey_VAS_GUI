@@ -109,15 +109,21 @@ class VickreyGUI(BaseGui):
                 # Load in most recent auction
                 states = {"t": 0, "state": False, "prev_state": False, "total_winnings": 0, "robostates": []}
                 for auction in reader:
-                    print("asdf", auction)
                     states["t"] = int(auction[0])
                     states["prev_state"] = states["state"]
                     states["state"] = auction[2] in ["True"]
                     states["total_winnings"] = float(auction[4])
                     states["robostates"] = auction[5::]
                 
-                print("wer", states)
                 self.sm.statemachine.loadstate(states)
+
+                if self.sm.statemachine.state:
+                    # Start Vicon
+                    recording_name = "{}_t{}".format(self.file_prefix, int(self.sm.statemachine.auction_tally * ROBOWALK_DUR))
+                    self.sm.vicon.start_recording(recording_name)
+
+                    # Start exo logging
+                    self.sm.exoboot_remote.set_log(mybool=False)
         except:
             usebackup = False
 
@@ -204,6 +210,8 @@ class VASGUI(BaseGui):
         recording_name = "{}_B{}_T{}_P{}".format(self.sm.file_prefix, b, t, p)
         self.sm.vicon.start_recording(recording_name)
 
+        self.sm.exoboot_remote.set_log(mybool=False)
+
         # Create Screens
         dummyscreen = Screen(name="dummy")
         pushtostartscreen = buildpushtostartscreenvas()
@@ -234,7 +242,7 @@ class JNDGUI(BaseGui):
     bertec          - Remote control of Bertec treadmill
     """
     def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, jnd_type, which_comparitor, usebackup=False):
-        super().__init__('JND', exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
+        super().__init__("JND", exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
         self.jnd_type = jnd_type
         self.which_comparitor = which_comparitor
         self.usebackup = usebackup
@@ -270,6 +278,13 @@ class JNDGUI(BaseGui):
             with open(comparisonpath, 'a', newline='') as f:
                 csv.writer(f).writerow(['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
 
+        # Start Vicon
+        recording_name = "{}_walk{}".format(self.sm.file_prefix, self.sm.statemachine.walknum)
+        self.sm.vicon.start_recording(recording_name)
+
+        # Start exo logging
+        self.sm.exoboot_remote.set_log(mybool=False)
+
         # Create Screens
         dummyscreen = Screen(name="dummy")
         pushtostartscreenjnd = buildpushtostartscreenjnd()
@@ -299,11 +314,18 @@ class JNDGUI(BaseGui):
 
 class PREFGUI(BaseGui):
     def __init__(self, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond):
-        super().__init__('TorquePreference', exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
+        super().__init__("PREFERENCE", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
         self.pref_type = trial_cond
 
     def build(self):
         self.sm.statemachine = PrefStateMachine(self.sm, pref_type=self.pref_type)
+
+        # Start Vicon
+        recording_name = "{}_walk{}".format(self.sm.file_prefix, self.sm.statemachine.pres)
+        self.sm.vicon.start_recording(recording_name)
+
+        # Start logging
+        self.sm.exoboot_remote.set_log(mybool=False)
 
         # Create Screens
         dummyscreen = Screen(name="dummy")
@@ -341,8 +363,8 @@ class PREFGUI(BaseGui):
 
 
 class AcclimationGUI(BaseGui):
-    def __init__(self, exoboot_remote_client, bertec):
-        super().__init__(name='ACCLIMATION', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+    def __init__(self, exoboot_remote, filingcabinet, file_prefix, bertec, vicon):
+        super().__init__("ACCLIMATION", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
 
     def build(self):
         self.sm.statemachine = AcclimationStateMachine(self.sm)
@@ -364,7 +386,8 @@ class AcclimationGUI(BaseGui):
         self.sm.current = "pushtostartscreenaccl"
 
         return self.sm
-    
+
+
 class SpeedFinderGUI(BaseGui):
     def __init__(self, exoboot_remote_client, bertec):
         super().__init__(name='SPEEDFINDER', exoboot_remote_client=exoboot_remote_client, bertec=bertec)

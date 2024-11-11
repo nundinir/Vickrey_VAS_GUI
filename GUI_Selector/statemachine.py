@@ -261,6 +261,7 @@ class JNDStateMachine:
                 Exception("Invalid comparitor type")
 
         # State tracking
+        self.walknum = 0
         self.pres = 0
         self.prop = 0
         self.T_ref = 0
@@ -363,6 +364,7 @@ class JNDStateMachine:
         if not self.subtrial_limit:
             self.next_comparison()
         else:
+            self.walknum += 1
             self.next_screen()
 
     def report_higher_same(self):

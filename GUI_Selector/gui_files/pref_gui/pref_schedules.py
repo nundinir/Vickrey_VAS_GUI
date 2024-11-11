@@ -11,8 +11,19 @@ def pause_exo_bertec(sm, dt):
     # 0 Torque/Pause exoboots
     sm.exoboot_remote.set_torques(peak_torque_left=0, peak_torque_right=0)
     sm.exoboot_remote.set_pause(mybool=True)
+    sm.exoboot_remote.set_log(mybool=True)
+
+    # Stop Vicon
+    sm.vicon.stop_recording()
 
 def trial_ready(sm, dt):
+    # Start Vicon
+    recording_name = "{}_walk{}".format(sm.file_prefix, sm.statemachine.pres)
+    sm.vicon.start_recording(recording_name)
+
+    # Start logging
+    sm.exoboot_remote.set_log(mybool=False)
+
     sm.statemachine.next_screen()
 
 def waitingscreenprefschedule(sm):
