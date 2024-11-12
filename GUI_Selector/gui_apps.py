@@ -79,9 +79,12 @@ class VickreyGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, usebackup=False):
+    def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, trial_cond, usebackup=False):
         super().__init__("VICKREY", exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
         self.usebackup = usebackup
+
+        # Set peak_torque according to trial_cond
+        self.sm.peak_torque = VICKREY_PEAK_TORQUES[trial_cond]
 
     def build(self):
         # Vickrey bids

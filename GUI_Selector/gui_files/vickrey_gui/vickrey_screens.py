@@ -17,7 +17,7 @@ def startbttn_CB(instance):
         # Start treadmill and unpause exoboots
         sm.bertec.write_command(BERTEC_SPEED_RIGHT, BERTEC_SPEED_LEFT, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
         sm.exoboot_remote.set_pause(mybool=False)
-        sm.exoboot_remote.set_torques(peak_torque_left=PEAK_TORQUE_LEFT, peak_torque_right=PEAK_TORQUE_RIGHT)
+        sm.exoboot_remote.set_torques(peak_torque_left=sm.peak_torque, peak_torque_right=sm.peak_torque)
 
     sm.statemachine.next_screen()
 

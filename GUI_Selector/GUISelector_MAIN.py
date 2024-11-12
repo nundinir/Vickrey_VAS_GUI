@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     match trial_type.upper():
         case 'VICKREY':
-            VickreyGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, usebackup=usebackup).run()
+            VickreyGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond, usebackup=usebackup).run()
         case 'VAS':
             VASGUI(startstamp, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, usebackup=usebackup).run()
         case 'JND':

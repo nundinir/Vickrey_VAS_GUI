@@ -31,6 +31,13 @@ def waitingscreenprefschedule(sm):
     Clock.schedule_once(partial(trial_ready, sm), MIN_WAIT_PREF)
 
 
+def trial_start(sm, dt):
+    sm.exoboot_remote.set_pause(mybool=False)
+
+def prefscreenschedule(sm):
+    Clock.schedule_once(partial(trial_start, sm), 0)
+
+
 def reset_sliderscreen(sm, screen):
     screen.confirm_btn.confirmed = False
     screen.confirm_btn.text = "Confirm"

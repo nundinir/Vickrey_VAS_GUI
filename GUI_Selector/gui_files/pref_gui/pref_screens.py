@@ -22,7 +22,7 @@ from kivy.uix.screenmanager import Screen
 from kivy_garden.radialslider import RadialSlider
 
 from constants import *
-from gui_files.pref_gui.pref_schedules import waitingscreenprefschedule, reset_sliderscreen, finishscreenprefschedule
+from gui_files.pref_gui.pref_schedules import waitingscreenprefschedule, prefscreenschedule, reset_sliderscreen, finishscreenprefschedule
 
 from gui_files.pref_gui.continuous_dial_class import PrefDial
 
@@ -125,7 +125,8 @@ def buildsliderscreenpref(sm):
     screen.add_widget(confirm_btn)
     screen.confirm_btn = confirm_btn
 
-    screen.on_enter = partial(reset_sliderscreen, sm, screen)
+    screen.on_pre_enter = partial(reset_sliderscreen, sm, screen)
+    screen.on_enter = partial(prefscreenschedule, sm)
 
     return screen
 
@@ -206,6 +207,7 @@ def buildbtnscreenpref(sm, screen):
     screen.prev_btn = 0
 
     screen.on_pre_enter = partial(buildbtnscreenpref, sm, screen)
+    screen.on_enter = partial(prefscreenschedule, sm)
 
 def builddialscreenpref(sm):
     screen = Screen(name="dialscreen")
@@ -234,7 +236,8 @@ def builddialscreenpref(sm):
     screen.add_widget(confirm_btn)
     screen.confirm_btn = confirm_btn
 
-    screen.on_enter = partial(reset_sliderscreen, sm, screen)
+    screen.pre_on_enter = partial(reset_sliderscreen, sm, screen)
+    screen.on_enter = partial(prefscreenschedule, sm)
 
     return screen # return screen
 
