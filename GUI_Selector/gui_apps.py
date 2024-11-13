@@ -243,6 +243,7 @@ class JNDGUI(BaseGui):
     """
     def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, jnd_type, which_comparitor, usebackup=False):
         super().__init__("JND", exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
+        
         self.jnd_type = jnd_type
         self.which_comparitor = which_comparitor
         self.usebackup = usebackup
@@ -275,8 +276,20 @@ class JNDGUI(BaseGui):
             comparisonname = "{}_{}".format(self.sm.file_prefix, "comparison")
             comparisonpath = self.sm.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison")
 
-            with open(comparisonpath, 'a', newline='') as f:
-                csv.writer(f).writerow(['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
+            if self.which_comparitor == "staircase":
+                with open(comparisonpath, 'a', newline='') as f:
+                    csv.writer(f).writerow(['pres', 
+                                            'mode', 
+                                            'T_ref', 
+                                            'T_comp', 
+                                            'truth', 
+                                            'peak_torque_ind', 
+                                            'converged_flag', 
+                                            'consec_correct_counter'])
+                    
+            elif self.which_comparitor == "uniform":
+                with open(comparisonpath, 'a', newline='') as f:
+                    csv.writer(f).writerow(['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
 
         # Start Vicon
         recording_name = "{}_walk{}".format(self.sm.file_prefix, self.sm.statemachine.walknum)

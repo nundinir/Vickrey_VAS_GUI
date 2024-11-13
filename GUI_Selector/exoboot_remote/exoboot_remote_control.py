@@ -123,6 +123,12 @@ class ExobootRemoteClient:
         compmsg = pb2.comparison(pres=pres, prop=prop, T_ref=T_ref, T_comp=T_comp, truth=truth, answer=answer)
         response = self.stub.comparison_result(compmsg)
         return response
+    
+    def comparison_result_stair(self, pres, prop, T_ref, T_comp, truth, answer):
+        # TODO: modify grpc msg to server to include stair info
+        compmsg = pb2.comparison_stair(pres=pres, prop=prop, T_ref=T_ref, T_comp=T_comp, truth=truth, answer=answer)
+        response = self.stub.comparison_result_stair(compmsg)
+        return response
 
 # PREF Specific
     def pref_result(self, pres, torque):
@@ -184,6 +190,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
                     comparisonname = "{}_{}".format(self.file_prefix, "comparison")
                     comparisonpath = self.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison")
 
+                    # TODO: Add extra logging on pi here for kaernbach (check file_prefix for trial cond)
                     with open(comparisonpath, 'a', newline='') as f:
                         csv.writer(f).writerow(['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
                 
@@ -378,6 +385,23 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
 
         print("Received comparison results: {}, {}, {}, {}, {}, {}".format(pres, prop, T_ref, T_comp, truth, answer))
         datalist = [pres, prop, T_ref, T_comp, truth, answer]
+
+        comparisonpath = self.filingcabinet.getpath("comparison")
+        with open(comparisonpath, 'a', newline='') as f:
+            csv.writer(f).writerow(datalist)
+        return pb2.receipt(received=True)
+    
+    # TODO: add in custom grpc msg
+    def comparison_result_stair(self, compmsg, context):
+        pres = compmsg.pres
+        prop = compmsg.prop
+        T_ref = compmsg.T_ref
+        T_comp = compmsg.T_comp
+        truth = compmsg.truth
+        answer = compmsg.answer
+
+        print("Received comparison results: {}, {}, {}, {}, {}, {}".format(pres, prop, T_ref, T_comp, truth, answer))
+        datalist = [pres, prop, T_ref, T_comp, truth, answer]   # TODO: change data list to include stair info
 
         comparisonpath = self.filingcabinet.getpath("comparison")
         with open(comparisonpath, 'a', newline='') as f:
