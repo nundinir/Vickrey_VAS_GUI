@@ -79,7 +79,7 @@ def swap_torques(instance):
     sm = instance.parent.parent
     stma = sm.statemachine
     # Flip Flop
-    stma.peak_torque_ind = 1 - stma.peak_torque_ind
+    stma.peak_torque_ind = 1 - stma.peak_torque_ind # FROM STATEMACHINE
     # Command peak torque
     sm.exoboot_remote.set_torques(peak_torque_left=stma.peak_torques[stma.peak_torque_ind], peak_torque_right=stma.peak_torques[stma.peak_torque_ind])
 

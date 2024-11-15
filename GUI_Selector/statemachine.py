@@ -1,12 +1,18 @@
 import csv, time, random
 import numpy as np
+import math, random
 
 from constants import *
 from gui_files.vickrey_gui.Robobidders import *
 from gui_files.jnd_gui.jnd_comparitors import UniformSampler
+from gui_files.jnd_gui.jnd_comparitors import KaernbachAlgorithm
 from shared_files.SoftRTloop import FlexibleSleeper
 
-from constants import BTN_NUMS, MAX_TRIALS_DICT, MAX_PRESENTATIONS_DICT
+from constants import (
+    BTN_NUMS, MAX_TRIALS_DICT, MAX_PRESENTATIONS_DICT, REF_LIST, TORQUE_MIN, 
+    TORQUE_MAX, WRONG_LIM, RIGHT_LIM, RATIO, STEP_SIZE_RIGHT_DICT, 
+    RUN_LIMIT, INIT_STEP_MULTIPLIER, REPETITIONS, MODES
+)
 
 # Statemachine class
 class VickreyStateMachine:
@@ -255,8 +261,30 @@ class JNDStateMachine:
             case "UNIFORM":
                 self.comparitor = UniformSampler(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_list=REF_LIST, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
             case "STAIR":
-                self.comparitor = None
-                pass
+                # List of tuples with combos of reference torque, mode, and repetition
+                staircase_combinations = [(ref_torque, mode) 
+                                        for ref_torque in REF_LIST 
+                                        for mode in MODES]
+
+                # Setting seed for reproducibility & shuffling
+                seed = 2
+                random.seed(seed)
+                random.shuffle(staircase_combinations)
+                print(staircase_combinations)
+
+                # instantiate the randomly interleaved staircases
+                self.staircases = []
+                for ref_torque, mode in staircase_combinations:
+                    step_size_right = STEP_SIZE_RIGHT_DICT[ref_torque]
+                    print(f"Step Size: {step_size_right}")
+                    self.comparitor = KaernbachAlgorithm(reference_torque=ref_torque, step_size_right=step_size_right, step_ratio=RATIO,
+                                                run_limit=RUN_LIMIT, mode=mode, init_step_multiplier=INIT_STEP_MULTIPLIER,
+                                                up=WRONG_LIM, down=RIGHT_LIM)
+                    self.staircases.append((self.comparitor, ref_torque, mode))
+                    self.converged_staircases = 0
+                    self.pres = 0
+                    
+            
             case _:
                 Exception("Invalid comparitor type")
 
@@ -291,8 +319,12 @@ class JNDStateMachine:
                 self.next_screen_dict["pushtostartscreenjnd"] = "splitlegscreen"
                 self.next_screen_dict["splitlegscreen"] = "waitingscreenjnd"
             case 'SAMELEG':
-                self.next_comparison = self.next_comparison_same
-                self.report_higher = self.report_higher_same
+                if self.which_comparitor == "UNIFORM":
+                    self.next_comparison = self.next_comparison_same
+                    self.report_higher = self.report_higher_same
+                elif self.which_comparitor == "STAIR":
+                    self.next_comparison = self.next_comparison_same_stair
+                    self.report_higher = self.report_higher_same_stair
 
                 self.peak_torques = []
                 self.peak_torque_ind = 0
@@ -337,10 +369,10 @@ class JNDStateMachine:
             self.quit_flag = True
             self.next_screen()
         else:
-            self.prop, self.T_ref, self.T_comp, truth = self.comparitor.generate_comparison()
+            self.prop, self.T_ref, self.T_comp, truth = self.comparitor.generate_next_comparison()
             self.pres += 1
 
-            self.peak_torque_ind = 0
+            self.peak_torque_ind = 0 
             if random.getrandbits(1):
                 self.peak_torques = [self.T_ref, self.T_comp]
                 self.truth = int(truth)
@@ -349,6 +381,57 @@ class JNDStateMachine:
                 self.truth = int(not truth)
 
             self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torques[self.peak_torque_ind], peak_torque_right=self.peak_torques[self.peak_torque_ind])
+        
+    def next_comparison_same_stair(self):
+        """
+        Assigns torque pair to randomly selected swap button state according to kaernbach algorithm
+        """
+        if self.converged_staircases >= len(self.staircases):
+            self.quit_flag = True
+            self.next_screen()
+        else:
+            
+            # Calculate the starting index of circular roll
+            self.pres += 1          # increment presentation number
+            start_index = self.pres % len(self.staircases)
+            
+            # Circularly roll through the list of tuples containing staircase objects, refs, and modes
+            rolling_staircase_list = self.staircases[start_index:] + self.staircases[:start_index]
+            
+            # Extract the staircase object, ref_torque, and mode from the first tuple
+            self.selected_staircase, ref_torque, self.mode = rolling_staircase_list[0]
+
+            # print out components for debugging
+            print(f"Selected Stair Reference Torque: {ref_torque}")
+            print(f"Selected Stair Mode: {self.mode}")
+            
+            # if the selected_staircase hasn't converged, generate the next comparison torque
+            if not self.selected_staircase.converged_flag:
+                
+                self.T_ref = ref_torque
+                self.T_comp = self.selected_staircase.current_comparison_torque
+                truth = min(math.floor(self.T_comp/self.T_ref), 1)  # indicator for which torque is higher (0: T_comp, 1: T_ref) 
+                
+                # shuffle the peak torques for ref and comparison presentation
+                self.peak_torque_ind = 0
+                if random.getrandbits(1):
+                    self.peak_torques = [self.T_ref, self.T_comp]
+                    self.truth = int(truth)
+                else:
+                    self.peak_torques = [self.T_comp, self.T_ref]
+                    self.truth = int(not truth)
+                    
+                print(f"Currently Presented Comparison Torque: {self.T_comp}")
+                
+                # present current comparison vs ref
+                self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torques[self.peak_torque_ind], peak_torque_right=self.peak_torques[self.peak_torque_ind])
+                    
+                
+            # otherwise, roll through the list of staircases to find the next one that hasn't converged
+            else:
+                print("A staircase has converged")
+                self.staircases.remove((self.selected_staircase, ref_torque, self.mode))
+                self.converged_staircases += 1
 
     def report_higher_split(self, signature):
         """
@@ -377,6 +460,50 @@ class JNDStateMachine:
         comparisonpath = self.sm.filingcabinet.getpath("comparison")
         with open(comparisonpath, 'a', newline='') as f:
             csv.writer(f).writerow([self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind])
+
+        if not self.subtrial_limit:
+            self.next_comparison()
+        else:
+            self.next_screen()
+            
+
+    def report_higher_same_stair(self):
+        """
+        Reports result of comparison
+        """
+        # TODO Custom logging for staircase
+        self.prop = self.T_comp/self.T_ref
+        self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind)
+
+        # Save this observer response internally into KaernbachAlgorithm object
+        user_decided_torque = self.peak_torques[self.peak_torque_ind]
+        
+        # if the user_decision is the same as the truth, 
+        if self.peak_torque_ind == self.truth:
+            user_decision = True
+        else:
+            user_decision = False
+            
+        print(f"User Decision: {user_decision}")
+        
+        # generate next comparison torque based on observer response for current comparison torque
+        next_comparison_torque = self.selected_staircase.generate_next_comparison(user_decision)
+        print(f"Next Comparison Torque: {next_comparison_torque}")
+        
+        # set the current comparison torque to the next comparison torque for the selected_staircase evaluation
+        self.selected_staircase.current_comparison_torque = next_comparison_torque
+
+        # Log backup variables
+        comparisonpath = self.sm.filingcabinet.getpath("comparison")
+        with open(comparisonpath, 'a', newline='') as f:
+            csv.writer(f).writerow([self.pres, 
+                                    self.mode, 
+                                    self.T_ref, 
+                                    self.T_comp, 
+                                    self.truth, 
+                                    self.peak_torque_ind, 
+                                    self.selected_staircase.converged_flag, 
+                                    self.selected_staircase.consec_correct_counter])
 
         if not self.subtrial_limit:
             self.next_comparison()

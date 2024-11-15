@@ -217,8 +217,14 @@ def builddialscreenpref(sm):
     screen = Screen(name="dialscreen")
     screen.sm = sm
     
+    # generate a random starting torque to start the dial at
+    rand_start_torque = random.uniform(TORQUE_MIN, TORQUE_MAX/2)
+    
     # create a preference dial
-    dial = PrefDial(min_torque=TORQUE_MIN, max_torque=TORQUE_MAX, full_rotations_required=3)
+    dial = PrefDial(min_torque=TORQUE_MIN, 
+                    max_torque=TORQUE_MAX, 
+                    full_rotations_required=3, 
+                    torque_value = rand_start_torque)
     
     # set the size of the slider
     dial.size_hint = (0.65, 0.65)

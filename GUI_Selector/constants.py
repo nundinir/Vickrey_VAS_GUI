@@ -57,13 +57,27 @@ EPO_MV = -9.57
 NPO_MV = -12.00
 
 """JND SPECIFIC"""
-# comparitor settings
+TORQUE_MIN = 7
+TORQUE_MAX = 40
+
+# specific uniform sampler comparitor settings
 NUM_BINS = 21
 PROP_LOW = 0.5
 PROP_HIGH = 1.5
-REF_LIST = [15, 25]
-TORQUE_MIN = 7
-TORQUE_MAX = 40
+
+# specific staircase omparitor settings
+REF_LIST = [18, 28]
+WRONG_LIM = 1   # num of wrong(s) after which distance from ref will increase 
+RIGHT_LIM = 2   # num of consecutive right(s) after which distance from ref will decrease
+
+RATIO = 0.947   # ratio of step_down/step_up
+STEP_SIZE_RIGHT_DICT = {18: 1.7, 28: 1.7}  # step size when correct response given for each reference torque
+
+RUN_LIMIT = 12               # Number of incorrect responses before the algorithm converges
+INIT_STEP_MULTIPLIER = 5     # Initial multiplier away from reference torque for the comparison torque   
+REPETITIONS = 1               # Number of ascending and descending repetitions for each reference torque value
+MODES = ['ascending', 'descending'] # Staircase modes, either 'ascending' or 'descending' towards reference
+
 
 # Query number
 MAX_QUERIES = 150
