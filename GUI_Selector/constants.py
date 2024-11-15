@@ -24,16 +24,13 @@ MIN_WAIT_JND = 60
 # PREF timing in seconds
 MIN_WAIT_PREF = 60
 
+
 """BERTEC SETTINGS"""
 # Bertec speed
 BERTEC_SPEED_STOP = 0.0
-
-# TODO get from treadmill speed csv
-BERTEC_SPEED_LEFT = 0.7
-BERTEC_SPEED_RIGHT = 0.7
-
 BERTEC_ACC_LEFT = 0.33
 BERTEC_ACC_RIGHT = 0.33
+
 
 """VICKREY SPECIFIC"""
 # Bid settings
@@ -48,13 +45,10 @@ ROBOWALK_DUR = 2 # minutes
 
 """VAS SPECIFIC"""
 # VAS Trial/Presentation Dicts
-BTN_NUMS = [4]
-MAX_TRIALS_DICT = {1: 1, 4: 6}
-MAX_PRESENTATIONS_DICT = {1: 1, 4: 5} # without replacement
+BTN_NUMS = [4, 10]
+MAX_TRIALS_DICT = {4: 6, 10: 3}
+MAX_PRESENTATIONS_DICT = {4: 5, 10: 1} # without replacement
 
-# TODO import from csv
-EPO_MV = -9.57
-NPO_MV = -12.00
 
 """JND SPECIFIC"""
 TORQUE_MIN = 7
@@ -82,6 +76,7 @@ MODES = ['ascending', 'descending'] # Staircase modes, either 'ascending' or 'de
 # Query number
 MAX_QUERIES = 150
 
+
 """PREF SPECIFIC"""
 # Buttons
 # TODO FIX UNEVEN BUTTON SIZES
@@ -93,6 +88,7 @@ PREF_STEP = 1.0
 
 # Max Trials
 MAX_PRES_PREF = 3
+
 
 """ACCLIMATION SPECIFIC"""
 ACCL_STEP = 1.0
