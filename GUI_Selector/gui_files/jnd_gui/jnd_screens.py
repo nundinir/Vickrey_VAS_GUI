@@ -14,7 +14,7 @@ from shared_files.kivy_utils import CountDownTimer
 def startbtn_CB(instance):
     sm = instance.parent.parent
     # Set bertec speed
-    sm.bertec.write_command(BERTEC_SPEED_RIGHT, BERTEC_SPEED_LEFT, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+    sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
     # Unpause exoboots
     sm.exoboot_remote.set_pause(mybool=False)
     # Next screen
@@ -22,7 +22,7 @@ def startbtn_CB(instance):
 
 def buildpushtostartscreenjnd():
     screen = Screen(name="pushtostartscreenjnd")
-    startbttn = Button(text="Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
+    startbttn = Button(text="STOMP then Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbtn_CB)
     screen.add_widget(startbttn)
 
@@ -32,7 +32,11 @@ def buildpushtostartscreenjnd():
 def buildwaitingscreenjnd(sm):
     screen = Screen(name="waitingscreenjnd")
     screen.sm = sm
-    waitlabel = Label(text="Take a break!\nTrial resumes in 1 minute", font_size='50', color=(1, 1, 1, 1))
+    if MIN_WAIT_JND/sm.squeeze < 60:
+        waittext = "Take a break!\nTrial resumes in {} seconds".format(int(MIN_WAIT_JND/sm.squeeze))
+    else:
+        waittext = "Take a break!\nTrial resumes in {:0.1f} minutes".format(MIN_WAIT_JND/sm.squeeze/60)
+    waitlabel = Label(text=waittext, font_size='50', color=(1, 1, 1, 1))
     screen.add_widget(waitlabel)
     
     screen.on_enter = partial(waitingscreenjndschedule, screen.sm)

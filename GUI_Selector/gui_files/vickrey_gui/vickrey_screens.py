@@ -13,9 +13,9 @@ from shared_files.kivy_utils import CountDownTimer
 # push to start screen
 def startbttn_CB(instance):
     sm = instance.parent.parent
-    if sm.statemachine.auction_tally > 0 and sm.statemachine.state:        
+    if sm.statemachine.auction_tally > 0 and sm.statemachine.state:
         # Start treadmill and unpause exoboots
-        sm.bertec.write_command(BERTEC_SPEED_RIGHT, BERTEC_SPEED_LEFT, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+        sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
         sm.exoboot_remote.set_pause(mybool=False)
         sm.exoboot_remote.set_torques(peak_torque_left=sm.peak_torque, peak_torque_right=sm.peak_torque)
 
@@ -32,7 +32,7 @@ def buildpushtostartscreen(sm):
         if auction_tally == 0:
             text = "Touch to begin"
         elif state:
-            text = "Return to treadmill\n Touch to resume"
+            text = "Return to treadmill\n STOMP then Touch to walk"
             recording_name = "{}_t{}".format(sm.file_prefix, int(sm.statemachine.auction_tally * ROBOWALK_DUR))
             sm.vicon.start_recording(recording_name)
         else:

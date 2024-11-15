@@ -25,8 +25,8 @@ def numpad_schedule(sm):
     else:
         close_time = BIDDING_CLOSE
 
-    Clock.schedule_once(partial(cdt_start_event,sm, close_time-BIDDING_OPEN), BIDDING_OPEN)
-    Clock.schedule_once(partial(bidding_close_event,sm), close_time)
+    Clock.schedule_once(partial(cdt_start_event,sm, (close_time-BIDDING_OPEN)/sm.squeeze), BIDDING_OPEN/sm.squeeze)
+    Clock.schedule_once(partial(bidding_close_event,sm), close_time/sm.squeeze)
 
 
 def update_resultscreen(sm, dt):
@@ -48,13 +48,13 @@ def update_resultscreen(sm, dt):
         resultscreen.label.color =(1, 0, 0, 1)
 
     # Reset startbtntext after backup load
-    sm.startbtn.text = "Return to treadmill\n Touch to begin"
+    sm.startbtn.text = "STOMP then Touch to walk"
     
 
 def survey_schedule(sm):
     Clock.schedule_once(partial(update_resultscreen, sm), 0)
-    Clock.schedule_once(sm.statemachine.close_survey, RESULT_SHOW-BIDDING_CLOSE)
-    Clock.schedule_once(sm.statemachine.next_screen, RESULT_SHOW-BIDDING_CLOSE)
+    Clock.schedule_once(sm.statemachine.close_survey, (RESULT_SHOW-BIDDING_CLOSE)/sm.squeeze)
+    Clock.schedule_once(sm.statemachine.next_screen, (RESULT_SHOW-BIDDING_CLOSE)/sm.squeeze)
 
 
 def result_screens_event(sm, dt):
@@ -85,4 +85,4 @@ def result_screens_event(sm, dt):
         sm.current = "numpad"
 
 def result_screens_schedule(sm):
-    Clock.schedule_once(partial(result_screens_event,sm), AUCTION_CLOSE - RESULT_SHOW)
+    Clock.schedule_once(partial(result_screens_event,sm), (AUCTION_CLOSE - RESULT_SHOW)/sm.squeeze)

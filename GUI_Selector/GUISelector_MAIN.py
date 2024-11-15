@@ -1,4 +1,4 @@
-import os
+import os, json
 
 from test_server import DumbBertec, DumbVicon
 from external_devices.BertecMan import Bertec
@@ -20,6 +20,11 @@ if __name__ == "__main__":
     file_prefix = "{}_{}_{}_{}".format(subjectID, trial_type, trial_cond, description)
     print("DETAILS: ", startstamp, subjectID, trial_type, trial_cond, description)
 
+    # Load subject dictionary
+    subj_dict_file = open("subject_dictionary.json", mode="r")
+    subject_dict = json.load(subj_dict_file)
+    subject_specific_info = subject_dict["subjects"][subjectID]
+
     # FilingCabinet for backups
     filingcabinet = FilingCabinet("trial_backups", subjectID)
     if usebackup:
@@ -34,21 +39,19 @@ if __name__ == "__main__":
         bertec = Bertec()
         vicon = Vicon()
 
-    match trial_type.upper():
-        case 'VICKREY':
-            VickreyGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond, usebackup=usebackup).run()
-        case 'VAS':
-            VASGUI(startstamp, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, usebackup=usebackup).run()
-        case 'JND':
-            JNDGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond, description, usebackup=usebackup).run()
-        case 'PREF':
-            PREFGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond).run()
-        case 'ACCLIMATION':
-            AcclimationGUI(exoboot_remote, filingcabinet, file_prefix, bertec, vicon).run()
-        case'SPEEDFINDER':
-            # TODO finish speedfindergui or remove
-            # Is a WIP
-            SpeedFinderGUI(exoboot_remote, bertec).run()
-        case _:
-            print("INVALID CASE")
+    gui_kwargs = {"exoboot_remote": exoboot_remote,
+                  "filingcabinet": filingcabinet,
+                  "bertec": bertec,
+                  "vicon": vicon,
+                  "startstamp": startstamp,
+                  "trial_cond": trial_cond,
+                  "description": description,
+                  "file_prefix": file_prefix,
+                  "usebackup": usebackup,
+                  "subject_dict": subject_specific_info
+                  }
+    
+    gui_dict = {"VICKREY": VickreyGUI, "VAS": VASGUI, "JND": JNDGUI, "PREF": PREFGUI, "ACCLIMATION": AcclimationGUI, "SPEEDFINDER": SpeedFinderGUI}
 
+    # Run GUI
+    gui_dict[trial_type](**gui_kwargs).run()

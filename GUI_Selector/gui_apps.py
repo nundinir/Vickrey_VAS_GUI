@@ -25,13 +25,13 @@ from gui_files.speedfinder_gui.speedfinder_screens import buildpushtostartscreen
 from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine, AcclimationStateMachine, SpeedFinderStateMachine
 
 class BaseGui(App):
-    def __init__(self, name, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon):
+    def __init__(self, name, exoboot_remote, filingcabinet, file_prefix, bertec, vicon):
         super().__init__()
         self.sm = ScreenManager()
         self.sm.name = name
 
         # Set Exoboot remote client
-        self.sm.exoboot_remote = exoboot_remote_client
+        self.sm.exoboot_remote = exoboot_remote
 
         # Pause Exos and set torques
         self.sm.exoboot_remote.set_pause(mybool=True)
@@ -79,12 +79,16 @@ class VickreyGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, trial_cond, usebackup=False):
-        super().__init__("VICKREY", exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
+    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, trial_cond=None, usebackup=False, subject_dict=None, **kwargs):
+        super().__init__("VICKREY", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
+        self.trial_cond = trial_cond
         self.usebackup = usebackup
+        self.subject_dict = subject_dict
 
-        # Set peak_torque according to trial_cond
-        self.sm.peak_torque = VICKREY_PEAK_TORQUES[trial_cond]
+        # Get info from subject_dict
+        self.sm.peak_torque = 0 if self.trial_cond in ["WNE", "NPO"] else self.subject_dict["pref_torque"]
+        self.sm.bertec_speed = subject_dict["bertec_speed"]
+        self.sm.squeeze = subject_dict["squeeze"]
 
     def build(self):
         # Vickrey bids
@@ -167,10 +171,17 @@ class VASGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, startstamp, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, usebackup=None):
-        super().__init__("VAS", exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
+    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, startstamp=None, usebackup=None, subject_dict=None, **kwargs):
+        super().__init__("VAS", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
         self.startstamp = startstamp
         self.usebackup = usebackup
+        self.subject_dict = subject_dict
+
+        # Get info from subject_dict
+        self.sm.bertec_speed = subject_dict["bertec_speed"]
+        self.sm.squeeze = subject_dict["squeeze"]
+        self.sm.EPO_MV = subject_dict["EPO_MV"]
+        self.sm.NPO_MV = subject_dict["NPO_MV"]
 
     def build(self):
         # State machine
@@ -244,11 +255,16 @@ class JNDGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon, jnd_type, which_comparitor, usebackup=False):
-        super().__init__("JND", exoboot_remote_client, filingcabinet, file_prefix, bertec, vicon)
-        self.jnd_type = jnd_type
-        self.which_comparitor = which_comparitor
+    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, trial_cond=None, description=None, usebackup=False, subject_dict=None, **kwargs):
+        super().__init__("JND", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
+        self.jnd_type = trial_cond
+        self.which_comparitor = description.upper()
         self.usebackup = usebackup
+        self.subject_dict = subject_dict
+
+        # Get info from subject_dict
+        self.sm.bertec_speed = subject_dict["bertec_speed"]
+        self.sm.squeeze = subject_dict["squeeze"]
 
     def build(self):
         # Statemachine
@@ -316,9 +332,14 @@ class JNDGUI(BaseGui):
 
 
 class PREFGUI(BaseGui):
-    def __init__(self, exoboot_remote, filingcabinet, file_prefix, bertec, vicon, trial_cond):
+    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, trial_cond=None, subject_dict=None, **kwargs):
         super().__init__("PREFERENCE", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
         self.pref_type = trial_cond
+        self.subject_dict = subject_dict
+
+        # Get info from subject_dict
+        self.sm.bertec_speed = subject_dict["bertec_speed"]
+        self.sm.squeeze = subject_dict["squeeze"]
 
     def build(self):
         self.sm.statemachine = PrefStateMachine(self.sm, pref_type=self.pref_type)
@@ -366,8 +387,9 @@ class PREFGUI(BaseGui):
 
 
 class AcclimationGUI(BaseGui):
-    def __init__(self, exoboot_remote, filingcabinet, file_prefix, bertec, vicon):
+    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, subject_dict=None, **kwargs):
         super().__init__("ACCLIMATION", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
+        self.sm.subject_dict = subject_dict
 
     def build(self):
         self.sm.statemachine = AcclimationStateMachine(self.sm)
@@ -392,8 +414,8 @@ class AcclimationGUI(BaseGui):
 
 
 class SpeedFinderGUI(BaseGui):
-    def __init__(self, exoboot_remote_client, bertec):
-        super().__init__(name='SPEEDFINDER', exoboot_remote_client=exoboot_remote_client, bertec=bertec)
+    def __init__(self, exoboot_remote, bertec):
+        super().__init__(name='SPEEDFINDER', exoboot_remote=exoboot_remote, bertec=bertec)
 
     def build(self):
         self.sm.statemachine = SpeedFinderStateMachine(self.sm)

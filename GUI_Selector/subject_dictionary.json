@@ -1,0 +1,32 @@
+{
+    "subjects": {
+        "DUMMY": {
+            "bertec_speed": 0.765,
+            "pref_torque": 31.415,
+            "EPO_MV": 9001,
+            "NPO_MV": -404,
+            "squeeze": 10
+        },
+        "101": {
+            "bertec_speed": 1.0,
+            "pref_torque": 37.2,
+            "EPO_MV": 10,
+            "NPO_MV": -10,
+            "squeeze": 1
+        },
+        "102": {
+            "bertec_speed": 0.0,
+            "pref_torque": -100,
+            "EPO_MV": 10,
+            "NPO_MV": -10,
+            "squeeze": 1
+        },
+        "103": {
+            "bertec_speed": 0.0,
+            "pref_torque": -100,
+            "EPO_MV": 10,
+            "NPO_MV": -10,
+            "squeeze": 1
+        }
+    }
+}

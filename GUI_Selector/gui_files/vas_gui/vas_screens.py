@@ -36,7 +36,7 @@ from gui_files.vas_gui.vas_schedules import waitingscreevasschedule, finishscree
 def startbttnvas_CB(instance):
     sm = instance.parent.parent
     # Set bertec speed
-    sm.bertec.write_command(BERTEC_SPEED_RIGHT, BERTEC_SPEED_LEFT, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+    sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
     # Unpause exoboots
     sm.exoboot_remote.set_pause(mybool=False)
     # Next screen
@@ -44,7 +44,7 @@ def startbttnvas_CB(instance):
 
 def buildpushtostartscreenvas():
     screen_= Screen(name="pushtostartscreen")
-    startbttn = Button(text="Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
+    startbttn = Button(text="STOMP then Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbttnvas_CB)
     screen_.add_widget(startbttn)
 
@@ -55,11 +55,10 @@ def buildwaitingscreenvas(sm):
     screen = Screen(name="waitingscreenvas")
     screen.sm = sm
 
-    vas_wait_mins = MIN_WAIT_VAS/60
-    if vas_wait_mins < 60:
-        waittext = "Take a break!\nTrial resumes in {} seconds".format(int(MIN_WAIT_VAS))
+    if MIN_WAIT_VAS/sm.squeeze < 60:
+        waittext = "Take a break!\nTrial resumes in {} seconds".format(int(MIN_WAIT_VAS/sm.squeeze))
     else:
-        waittext = "Take a break!\nTrial resumes in {:0.1f} minutes".format(vas_wait_mins)
+        waittext = "Take a break!\nTrial resumes in {:0.1f} minutes".format(MIN_WAIT_VAS/sm.squeeze/60)
 
     waitlabel = Label(text=waittext, font_size='50', color=(1, 1, 1, 1))
     screen.add_widget(waitlabel)
@@ -234,10 +233,10 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
 
     # NPO/EPO Text
     # Label(text=f"${round(slider.value, 2)}", size_hint=(0.1, 0.1), pos_hint={'x': origin_x, 'y':origin_y}, color=(1.0,0,0))
-    npo_label = Label(text="${}".format(NPO_MV), font_size='30', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 0, 'y': 1/10})
-    epo_label = Label(text="${}".format(EPO_MV), font_size='30', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 7/10, 'y': 1/10})
+    npo_label = Label(text="${}".format(sm.NPO_MV), font_size='30', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 0, 'y': 1/10})
+    epo_label = Label(text="${}".format(sm.EPO_MV), font_size='30', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 7/10, 'y': 1/10})
 
-    buildsliders(sm, screen, sliders_origin=screen.sliders_origin, sliders_size=screen.sliders_size, ranked=ranked, slider_min=NPO_MV, slider_max=EPO_MV)
+    buildsliders(sm, screen, sliders_origin=screen.sliders_origin, sliders_size=screen.sliders_size, ranked=ranked, slider_min=sm.NPO_MV, slider_max=sm.EPO_MV)
 
     buildbtns(sm, screen, screen.buttons_origin, screen.buttons_size, ranked=ranked)
     screen.prev_btn = 0

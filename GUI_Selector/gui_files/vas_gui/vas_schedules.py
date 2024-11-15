@@ -32,7 +32,7 @@ def next_presentation(sm, dt):
 
 def waitingscreevasschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
-    Clock.schedule_once(partial(next_presentation, sm), MIN_WAIT_VAS)
+    Clock.schedule_once(partial(next_presentation, sm), MIN_WAIT_VAS/sm.squeeze)
 
 
 def finishscreenvasschedule(sm):

@@ -6,26 +6,23 @@ CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
 
 """SCHEDULE TIMINGS"""
-# Speed up auction time by squeeze factor FOR TESTING
-squeeze = 10
-
 # Vickrey timings in seconds
-AUCTION_START = 0/squeeze
-AUCTION_CLOSE = 120/squeeze
-BIDDING_OPEN = 0/squeeze
-BIDDING_CLOSE = 60/squeeze
-INITIAL_BIDDING_CLOSE = 30/squeeze
-RESULT_SHOW = 100/squeeze
+AUCTION_START = 0
+AUCTION_CLOSE = 120
+BIDDING_OPEN = 0
+BIDDING_CLOSE = 60
+INITIAL_BIDDING_CLOSE = 30
+RESULT_SHOW = 100
 
 # VAS timing in seconds
-MIN_WAIT_VAS = 60/squeeze
+MIN_WAIT_VAS = 60
 
 # JND timing in seconds
-SUBTRIAL_MAX = 240/squeeze
-MIN_WAIT_JND = 60/squeeze
+SUBTRIAL_MAX = 120
+MIN_WAIT_JND = 60
 
 # PREF timing in seconds
-MIN_WAIT_PREF = 60/squeeze
+MIN_WAIT_PREF = 60
 
 """BERTEC SETTINGS"""
 # Bertec speed
@@ -39,9 +36,6 @@ BERTEC_ACC_LEFT = 0.33
 BERTEC_ACC_RIGHT = 0.33
 
 """VICKREY SPECIFIC"""
-# Exoboot Peak torques
-VICKREY_PEAK_TORQUES = {"WNE": 0, "NPO": 0, "EPO": 23.782}
-
 # Bid settings
 MAX_BID = 100
 

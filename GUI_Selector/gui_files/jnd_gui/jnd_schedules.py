@@ -14,7 +14,7 @@ def subtrial_timelimit(sm, dt):
 
 def splitsameschedule(sm):
     Clock.schedule_once(partial(initialize_comparison, sm), 0)
-    Clock.schedule_once(partial(subtrial_timelimit, sm), SUBTRIAL_MAX)
+    Clock.schedule_once(partial(subtrial_timelimit, sm), SUBTRIAL_MAX/sm.squeeze)
 
 
 def pause_exo_bertec(sm, dt):
@@ -42,7 +42,7 @@ def trial_ready(sm, dt):
 
 def waitingscreenjndschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
-    Clock.schedule_once(partial(trial_ready, sm), MIN_WAIT_JND)
+    Clock.schedule_once(partial(trial_ready, sm), MIN_WAIT_JND/sm.squeeze)
 
 
 def finishscreenjndschedule(sm):

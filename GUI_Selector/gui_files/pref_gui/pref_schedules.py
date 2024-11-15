@@ -28,7 +28,7 @@ def trial_ready(sm, dt):
 
 def waitingscreenprefschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
-    Clock.schedule_once(partial(trial_ready, sm), MIN_WAIT_PREF)
+    Clock.schedule_once(partial(trial_ready, sm), MIN_WAIT_PREF/sm.squeeze)
 
 
 def trial_start(sm, dt):
