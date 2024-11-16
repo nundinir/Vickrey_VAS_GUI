@@ -7,22 +7,22 @@
             "NPO_MV": -404,
             "squeeze": 10
         },
-        "101": {
-            "bertec_speed": 1.0,
-            "pref_torque": 37.2,
+        "S101": {
+            "bertec_speed": 1.08,
+            "pref_torque": 20.33,
             "EPO_MV": 10,
             "NPO_MV": -10,
             "squeeze": 1
         },
-        "102": {
-            "bertec_speed": 0.0,
+        "S102": {
+            "bertec_speed": 0.96,
             "pref_torque": -100,
             "EPO_MV": 10,
             "NPO_MV": -10,
             "squeeze": 1
         },
-        "103": {
-            "bertec_speed": 0.0,
+        "S103": {
+            "bertec_speed": 1.0,
             "pref_torque": -100,
             "EPO_MV": 10,
             "NPO_MV": -10,

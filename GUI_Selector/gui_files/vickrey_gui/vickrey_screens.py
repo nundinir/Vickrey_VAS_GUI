@@ -32,7 +32,7 @@ def buildpushtostartscreen(sm):
         if auction_tally == 0:
             text = "Touch to begin"
         elif state:
-            text = "Return to treadmill\n STOMP then Touch to walk"
+            text = "STOMP then Touch to walk"
             recording_name = "{}_t{}".format(sm.file_prefix, int(sm.statemachine.auction_tally * ROBOWALK_DUR))
             sm.vicon.start_recording(recording_name)
         else:
