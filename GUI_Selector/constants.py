@@ -71,13 +71,12 @@ WRONG_LIM = 1   # num of wrong(s) after which distance from ref will increase
 RIGHT_LIM = 2   # num of consecutive right(s) after which distance from ref will decrease
 
 RATIO = 0.947   # ratio of step_down/step_up
-STEP_SIZE_RIGHT_DICT = {18: 1.7, 28: 1.7}  # step size when correct response given for each reference torque
+STEP_SIZE_RIGHT_DICT = {18: 1, 28: 1}  # step size when correct response given for each reference torque
 
-RUN_LIMIT = 12               # Number of incorrect responses before the algorithm converges
-INIT_STEP_MULTIPLIER = 5     # Initial multiplier away from reference torque for the comparison torque   
+RUN_LIMIT = 8                 # Number of reversals before the algorithm converges
+INIT_STEP_MULTIPLIER = 8      # Initial multiplier away from reference torque for the comparison torque   
 REPETITIONS = 1               # Number of ascending and descending repetitions for each reference torque value
 MODES = ['ascending', 'descending'] # Staircase modes, either 'ascending' or 'descending' towards reference
-
 
 # Query number
 MAX_QUERIES = 150

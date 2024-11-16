@@ -65,9 +65,11 @@ class PrefDial(RadialSlider):
         return (180 / pi) * -atan2(y - center_y, x - center_x) % 360
 
     def update_torque_value(self):
-        """Calculate torque based on the cumulative virtual angle."""
+        """Calculate torque based on the cumulative virtual angle.
+        factor = 0.025 for 4 dial rounds;
+        """
                 
-        dial_sensitivity_factor = 0.025
+        dial_sensitivity_factor = 0.08
         self.torque_value = self.torque_value + self.angle_diff * dial_sensitivity_factor
 
         # clamp to min and max torque values

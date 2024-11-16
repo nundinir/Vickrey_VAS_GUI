@@ -59,9 +59,11 @@ class KaernbachAlgorithm:
         """
         
         # staircasing variables
+        self.step_size_ratio = step_ratio
         self.step_size_right = step_size_right
-        self.step_size_wrong = step_size_right/step_ratio      # step size when incorrect response given (delta+/up)
+        self.step_size_wrong = step_size_right/self.step_size_ratio      # step size when incorrect response given (delta+/up)
         self.init_step_multiplier = init_step_multiplier
+        self.init_step_down_multiplier = 2
         self.consec_correct_lim = down
         self.consec_incorrect_lim = up
         self.consec_correct_counter = 0
@@ -134,31 +136,46 @@ class KaernbachAlgorithm:
         Returns:
             Tuple[float, bool]: Next comparison torque and convergence flag.
         """
-
-        if observer_input:  # True - correct response
-            self.step_size = self.step_size_right
-            self.consec_incorrect_counter = 0  # Reset incorrect counter
-            
-            # Increment the consecutive correct counter
-            self.consec_correct_counter += 1
-
-            # If the consecutive correct counter reaches the limit, decrement the comparison torque
-            if self.consec_correct_counter >= self.consec_correct_lim:
+        # if the observer has gotten their first incorrect response, switch to the proper up-down staircase
+        if self.incorrect_runs < 1:
+            if observer_input:
+                self.step_size = self.step_size_right*self.init_step_down_multiplier
                 self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (1 if self.mode == 'ascending' else -1))
-                self.consec_correct_counter = 0  # Reset correct counter after decrementing torque
-
-        else:  # False - incorrect response
-            self.incorrect_runs += 1
-            self.step_size = self.step_size_wrong
-            self.consec_correct_counter = 0  # Reset correct counter
-            
-            # Increment the consecutive incorrect counter
-            self.consec_incorrect_counter += 1
-            
-            # If the consecutive incorrect counter reaches the limit, increment the comparison torque
-            if self.consec_incorrect_counter == self.consec_incorrect_lim:
+            else:
+                # first incorrect response -- increment the next one by step_size_wrong
+                self.incorrect_runs +=1
+                self.step_size = self.step_size_wrong
                 self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (-1 if self.mode == 'ascending' else 1))
-                self.consec_incorrect_counter = 0  # Reset incorrect counter after incrementing torque
+
+        else:
+            if observer_input:  # True - correct response
+                # TODO: redefine step_size_right depending on comparison distance from reference
+                if self.incorrect_runs >= 3:
+                    self.step_size_right = 0.5
+                self.step_size = self.step_size_right
+                self.consec_incorrect_counter = 0  # Reset incorrect counter
+                
+                # Increment the consecutive correct counter
+                self.consec_correct_counter += 1
+
+                # If the consecutive correct counter reaches the limit, decrement the comparison torque
+                if self.consec_correct_counter >= self.consec_correct_lim:
+                    self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (1 if self.mode == 'ascending' else -1))
+                    self.consec_correct_counter = 0  # Reset correct counter after decrementing torque
+
+            else:  # False - incorrect response
+                self.incorrect_runs += 1
+                # redefine step_size_wrong depending on what step_size_right is
+                self.step_size = self.step_size_right/self.step_ratio  
+                self.consec_correct_counter = 0  # Reset correct counter
+                
+                # Increment the consecutive incorrect counter
+                self.consec_incorrect_counter += 1
+                
+                # If the consecutive incorrect counter reaches the limit, increment the comparison torque
+                if self.consec_incorrect_counter == self.consec_incorrect_lim:
+                    self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (-1 if self.mode == 'ascending' else 1))
+                    self.consec_incorrect_counter = 0  # Reset incorrect counter after incrementing torque
                 
                  
         if self.incorrect_runs >= 2:

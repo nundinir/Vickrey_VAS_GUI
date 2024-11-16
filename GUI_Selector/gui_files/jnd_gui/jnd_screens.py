@@ -76,9 +76,18 @@ def buildsplitlegscreen(sm):
 
 
 def swap_torques(instance):
+    # when swap button is pressed, the button color should change
+    if instance.is_blue:
+        instance.background_color = (0, 0, 1, 1)  # If it's currently blue, change to red
+    else:
+        instance.background_color = (0, 1, 1, 1)   # if it's current red, change to blue
+
+    # switch flag for button color
+    instance.is_blue = not instance.is_blue
+    
+    # flip-flop the comparison torque and reference torque stimuli
     sm = instance.parent.parent
     stma = sm.statemachine
-    # Flip Flop
     stma.peak_torque_ind = 1 - stma.peak_torque_ind # FROM STATEMACHINE
     # Command peak torque
     sm.exoboot_remote.set_torques(peak_torque_left=stma.peak_torques[stma.peak_torque_ind], peak_torque_right=stma.peak_torques[stma.peak_torque_ind])
@@ -96,7 +105,9 @@ def buildsamelegscreen(sm):
     screen.sm = sm
 
     swap_btn = Button(text="Swap Torques", font_size='70', color = (1,1,1), background_normal='', background_color= (0,1,1), size_hint=(1, 2/3), pos_hint={'x':0, 'y':1/3})
+    
     swap_btn.bind(on_press=swap_torques)
+    swap_btn.is_blue = True  # flag to keep track of the button's color state
     screen.add_widget(swap_btn)
 
     answer_btn = Button(text="Confirm", font_size='70', color = (1,1,1), background_normal='', background_color= (1,0,0), size_hint=(1, 1/3), pos_hint={'x':0, 'y':0})
