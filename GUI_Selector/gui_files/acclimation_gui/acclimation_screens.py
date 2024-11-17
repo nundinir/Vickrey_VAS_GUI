@@ -14,7 +14,7 @@ from gui_files.acclimation_gui.acclimation_schedules import finishscreenacclsche
 def startbtn_CB(instance):
     sm = instance.parent.parent
     # Set bertec speed
-    sm.bertec.write_command(BERTEC_SPEED_RIGHT, BERTEC_SPEED_LEFT, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+    sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
     # Unpause exoboots
     sm.exoboot_remote.set_pause(mybool=False)
     # Next screen

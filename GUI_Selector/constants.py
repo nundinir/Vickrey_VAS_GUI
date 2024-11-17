@@ -2,10 +2,15 @@
 SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
 LOCALHOST = "localhost:50051"    # IP address of local machine
 PI_IP = f"{'35.3.175.251'}:" f"{'50055'}"
-CLIENT_IP = "[::]:50051"   # IP address of the tablet
 
 
-"""SCHEDULE TIMINGS"""
+"""BERTEC SETTINGS"""
+BERTEC_SPEED_STOP = 0.0
+BERTEC_ACC_LEFT = 0.33
+BERTEC_ACC_RIGHT = 0.33
+
+
+"""VICKREY SPECIFIC"""
 # Vickrey timings in seconds
 AUCTION_START = 0
 AUCTION_CLOSE = 120
@@ -14,36 +19,20 @@ BIDDING_CLOSE = 60
 INITIAL_BIDDING_CLOSE = 30
 RESULT_SHOW = 100
 
-# VAS timing in seconds
-MIN_WAIT_VAS = 60
-
-# JND timing in seconds
-SUBTRIAL_MAX = 120
-MIN_WAIT_JND = 60
-
-# PREF timing in seconds
-MIN_WAIT_PREF = 60
-
-
-"""BERTEC SETTINGS"""
-# Bertec speed
-BERTEC_SPEED_STOP = 0.0
-BERTEC_ACC_LEFT = 0.33
-BERTEC_ACC_RIGHT = 0.33
-
-
-"""VICKREY SPECIFIC"""
 # Bid settings
 MAX_BID = 100
 
 # Robobidder constants
+ROBOWALK_DUR = 2 # min
 NUM_ROBOBIDDERS = 2
 k_RB = 0.4395073979128712
 b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
-ROBOWALK_DUR = 2 # minutes
 
 
 """VAS SPECIFIC"""
+# VAS timing in seconds
+MIN_WAIT_VAS = 60
+
 # VAS Trial/Presentation Dicts
 BTN_NUMS = [4, 10]
 MAX_TRIALS_DICT = {4: 6, 10: 3}
@@ -51,6 +40,10 @@ MAX_PRESENTATIONS_DICT = {4: 5, 10: 1} # without replacement
 
 
 """JND SPECIFIC"""
+# JND timing in seconds
+SUBTRIAL_MAX = 120
+MIN_WAIT_JND = 60
+
 TORQUE_MIN = 7
 TORQUE_MAX = 40
 
@@ -58,6 +51,7 @@ TORQUE_MAX = 40
 NUM_BINS = 21
 PROP_LOW = 0.5
 PROP_HIGH = 1.5
+MAX_QUERIES = 150
 
 # specific staircase omparitor settings
 REF_LIST = [18, 28]
@@ -72,18 +66,20 @@ INIT_STEP_MULTIPLIER = 8      # Initial multiplier away from reference torque fo
 REPETITIONS = 1               # Number of ascending and descending repetitions for each reference torque value
 MODES = ['ascending', 'descending'] # Staircase modes, either 'ascending' or 'descending' towards reference
 
-# Query number
-MAX_QUERIES = 150
-
 
 """PREF SPECIFIC"""
+# PREF timing in seconds
+MIN_WAIT_PREF = 60
+
 # Buttons
-# TODO FIX UNEVEN BUTTON SIZES
 PREF_ROWS = 4
 PREF_COLS = 5
 
 # Slider
 PREF_STEP = 1.0
+
+# Dial
+DIAL_SENSITIVITY_FACTOR = 0.08
 
 # Max Trials
 MAX_PRES_PREF = 3

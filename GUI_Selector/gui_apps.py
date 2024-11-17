@@ -403,6 +403,10 @@ class AcclimationGUI(BaseGui):
         super().__init__("ACCLIMATION", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
         self.sm.subject_dict = subject_dict
 
+        # Get info from subject_dict
+        self.sm.bertec_speed = subject_dict["bertec_speed"]
+        self.sm.squeeze = subject_dict["squeeze"]
+
     def build(self):
         self.sm.statemachine = AcclimationStateMachine(self.sm)
 

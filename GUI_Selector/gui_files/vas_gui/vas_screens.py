@@ -83,7 +83,7 @@ def onslidermotion(instance, mvalue):
 
     sm.statemachine.log_overtime(instance.torque, mvalue)
 
-def buildsliders(sm, screen, sliders_origin={'x':0, 'y':0}, sliders_size=(0, 0), ranked=None, slider_min=NPO_MV, slider_max=EPO_MV):
+def buildsliders(sm, screen, sliders_origin={'x':0, 'y':0}, sliders_size=(0, 0), ranked=None, slider_min=0, slider_max=100):
     num_sliders = sm.statemachine.current_btn_option
 
     if ranked:
