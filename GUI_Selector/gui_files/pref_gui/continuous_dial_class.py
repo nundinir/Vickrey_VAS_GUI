@@ -3,6 +3,8 @@ from math import atan2, pi
 from kivy.properties import NumericProperty
 from kivy_garden.radialslider import RadialSlider
 
+from constants import DIAL_SENSITIVITY_FACTOR
+
 class PrefDial(RadialSlider):
     """
     Class to handle continuous rotation of Kivy Radial dial
@@ -68,9 +70,7 @@ class PrefDial(RadialSlider):
         """Calculate torque based on the cumulative virtual angle.
         factor = 0.025 for 4 dial rounds;
         """
-                
-        dial_sensitivity_factor = 0.08
-        self.torque_value = self.torque_value + self.angle_diff * dial_sensitivity_factor
+        self.torque_value = self.torque_value + self.angle_diff * DIAL_SENSITIVITY_FACTOR
 
         # clamp to min and max torque values
         if self.torque_value < self.min_torque:
