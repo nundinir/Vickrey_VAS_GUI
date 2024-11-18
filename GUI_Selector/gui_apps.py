@@ -303,7 +303,9 @@ class JNDGUI(BaseGui):
                                             'truth', 
                                             'peak_torque_ind', 
                                             'converged_flag', 
-                                            'consec_correct_counter'])
+                                            'consec_correct_counter',
+                                            'step_size',
+                                            'convergence_attempts',])
                     
             elif self.which_comparitor == "uniform":
                 with open(comparisonpath, 'a', newline='') as f:

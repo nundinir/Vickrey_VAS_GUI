@@ -1,6 +1,6 @@
 import math, random
 import numpy as np
-from constants import REF_LIST, TORQUE_MIN, TORQUE_MAX
+from constants import REF_LIST
 
 class UniformSampler:
     def __init__(self, num_bins=21, prop_low=0.5, prop_high=1.5, ref_list=REF_LIST, torque_min = 7.0, torque_max = 40.0):
@@ -41,42 +41,38 @@ class UniformSampler:
 
 class KaernbachAlgorithm:
     def __init__(self, reference_torque: float = 20, step_size_right: float = 0.5, step_ratio: float = 1, 
-                 run_limit: int = 8, mode: str = 'ascending', init_step_multiplier: int = 10, 
-                 up: int = 1, down: int = 1) -> None:
+                 run_limit: int = 8, mode: str = 'ascending', init_step_out_size: int = 11, 
+                 consec_correct_lim: int = 2, torque_max_lim: int = 40, torque_min_lim: int = 7) -> None:
                
         """
         Initialize the KaernbachAlgorithm class.
         
         Args:
             reference_torque (float): The reference torque value (in Nm).
-            step_size_right (float): Step size for adjusting the torque when correct answer given(in Nm).
-            step_ratio (float): Ratio of step_down/step_up.
+            step_size_for_correct_resp (float): Step size for adjusting the torque when correct answer given(in Nm).
+            step_ratio (float): Ratio of step_down(correct)/step_up(incorrect).
             run_limit (int): Number of incorrect responses before algorithm convergence.
             mode (str): Staircase mode, either 'ascending' or 'descending'.
-            init_step_multiplier (int): Initial multiplier for the step size for the first comparison.
-            up (int): Number of wrong responses after which the distance from the reference will increase.
-            down (int): Number of consecutive right responses after which the distance from the reference will decrease.
+            init_step_out_size (int): Initial step size for the first comparison.
+            consec_correct_lim (int): Number of consecutive right responses after which the distance from the reference will decrease.
         """
         
         # staircasing variables
-        self.step_size_ratio = step_ratio
-        self.step_size_right = step_size_right
-        self.step_size_wrong = step_size_right/self.step_size_ratio      # step size when incorrect response given (delta+/up)
-        self.init_step_multiplier = init_step_multiplier
-        self.init_step_down_multiplier = 2
-        self.consec_correct_lim = down
-        self.consec_incorrect_lim = up
+        self.step_size_for_correct_resp = step_size_right  # step size when correct response given (delta-/down)     
+        self.step_size_ratio = step_ratio                  # ratio of step_down(correct)/step_up(incorrect)
+        self.init_step_out_size = init_step_out_size
+        
+        self.consec_correct_lim = consec_correct_lim
         self.consec_correct_counter = 0
-        self.consec_incorrect_counter = 0
         self.mode = mode
         
         # bounds for the comparison torque
-        self.lower_torque_bound = TORQUE_MIN
-        self.upper_torque_bound = TORQUE_MAX
+        self.lower_torque_bound = torque_min_lim
+        self.upper_torque_bound = torque_max_lim
         
         # setting inital stimuli
         self.reference_torque = reference_torque
-        self.current_comparison_torque = self._initialize_comparison_torque()
+        self.current_comparison_torque = self.reference_torque + self.init_step_out_size * (-1 if self.mode == 'ascending' else 1)
         self.next_comparison_torque = self.current_comparison_torque
   
         # termination/convergence criteria
@@ -88,73 +84,43 @@ class KaernbachAlgorithm:
         self.incorrect_runs = 0
         self.running_comp_torque_array = np.array([])
         
-        self.user_decision = None
-
-    def _initialize_comparison_torque(self) -> float:
-        """Initializes the starting comparison torque based on mode. Returns clamped torque 
-        between lower and upper bounds
+    def compute_step_size(self):
+        """Computes step size based on the difference between the reference and comparison torques."""
+        stim_diff = abs(self.reference_torque - self.current_comparison_torque)
         
-        If ascending to reference, nearest value to reference_torque that is lower than it will be it's lower bound.
-        If descending to reference, nearest value to reference_torque that is greater than it will be it's upper bound.
-        
-        """
-        
-        # compile and sort the list of critical torque points into ascending order
-        critical_pt_list = [TORQUE_MIN] + REF_LIST + [TORQUE_MAX]
-        critical_pt_list.sort()
-        
-        # find the idx of the reference torque in the sorted list
-        idx = critical_pt_list.index(self.reference_torque)
-        
-        # find the closest lower and upper bounds to the reference torque from the list
-        if self.mode == 'ascending':
-            closest_lower_bound = critical_pt_list[idx - 1]
-            closest_upper_bound = critical_pt_list[idx + 1]
-        elif self.mode == 'descending':
-            closest_upper_bound = critical_pt_list[idx + 1]
-            closest_lower_bound = critical_pt_list[idx - 1]
-        
-        if self.mode == 'ascending':
-            init_comp_torque = self.reference_torque - self.init_step_multiplier * self.step_size_wrong
-        elif self.mode == 'descending':
-            init_comp_torque = self.reference_torque + self.init_step_multiplier * self.step_size_wrong
-        
-        # Constrain the initial comparison torque within the closest bounds
-        self.lower_torque_bound = closest_lower_bound
-        self.upper_torque_bound = closest_upper_bound
-        
-        return max(self.lower_torque_bound, min(init_comp_torque, self.upper_torque_bound))
-
+        if stim_diff > 6:
+            self.step_size = 2 * self.step_size_for_correct_resp 
+        elif (3 <= stim_diff <= 6):
+            self.step_size = self.step_size_for_correct_resp 
+        elif(1 <= stim_diff < 3):
+            self.step_size = self.step_size_for_correct_resp / 2
+        else:
+            self.step_size = self.step_size_for_correct_resp / 4
+    
     def generate_next_comparison(self, observer_input: bool):
         """
         Generates the next torque comparison based on observer input.
         
         Args:
-            observer_input (bool): Observer's response indicating whether they perceive the difference. 
-            If they percieve the difference, assume its the correct response for the sake of simulation.
+            observer_input (bool): Observer's response indicating whether they perceive the difference.
             
         Returns:
             Tuple[float, bool]: Next comparison torque and convergence flag.
         """
-        # if the observer has gotten their first incorrect response, switch to the proper up-down staircase
+        self.compute_step_size()
+        
         if self.incorrect_runs < 1:
             if observer_input:
-                self.step_size = self.step_size_right*self.init_step_down_multiplier
                 self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (1 if self.mode == 'ascending' else -1))
             else:
                 # first incorrect response -- increment the next one by step_size_wrong
                 self.incorrect_runs +=1
-                self.step_size = self.step_size_wrong
+                self.step_size = np.round(self.step_size/self.step_size_ratio,3)
                 self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (-1 if self.mode == 'ascending' else 1))
 
         else:
-            if observer_input:  # True - correct response
-                # TODO: redefine step_size_right depending on comparison distance from reference
-                if self.incorrect_runs >= 3:
-                    self.step_size_right = 0.5
-                self.step_size = self.step_size_right
-                self.consec_incorrect_counter = 0  # Reset incorrect counter
                 
+            if observer_input:  # True - correct response
                 # Increment the consecutive correct counter
                 self.consec_correct_counter += 1
 
@@ -165,24 +131,18 @@ class KaernbachAlgorithm:
 
             else:  # False - incorrect response
                 self.incorrect_runs += 1
-                # redefine step_size_wrong depending on what step_size_right is
-                self.step_size = self.step_size_right/self.step_ratio  
+                self.step_size = np.round(self.step_size/self.step_size_ratio,3)  
                 self.consec_correct_counter = 0  # Reset correct counter
-                
-                # Increment the consecutive incorrect counter
-                self.consec_incorrect_counter += 1
-                
-                # If the consecutive incorrect counter reaches the limit, increment the comparison torque
-                if self.consec_incorrect_counter == self.consec_incorrect_lim:
-                    self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (-1 if self.mode == 'ascending' else 1))
-                    self.consec_incorrect_counter = 0  # Reset incorrect counter after incrementing torque
-                
-                 
+
+                self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (-1 if self.mode == 'ascending' else 1))
+        
         if self.incorrect_runs >= 2:
             self.comparison_torque_compiler()
         
-        self._apply_bounds()
         self._check_end_criteria()
+        self._apply_bounds()
+        
+        self.next_comparison_torque = np.round(self.next_comparison_torque, 3)
         
         return self.next_comparison_torque
     
@@ -209,22 +169,27 @@ class KaernbachAlgorithm:
         
         1) Terminate if the number of incorrect responses == run limit (8) OR
         
-        2) Terminate if we get close to the reference by the step size, but only 
+        2) Terminate if we correctly get close to the reference by the step size, but only 
         the 2nd time we reach this condition. This is done only once for each reference 
         ascending and descending condition.
 
         """
         if self.incorrect_runs >= self.run_limit:
             self.converged_flag = True
-        elif abs(self.current_comparison_torque - self.reference_torque) <= self.step_size_right:
-            if self.convergence_attempts == 0:
-                self.current_comparison_torque += (self.step_size_wrong * (-1 if self.mode == 'ascending' else 1))
-                self.convergence_attempts += 1
+        elif (abs(self.current_comparison_torque - self.reference_torque) <= self.step_size_for_correct_resp/2):
+            self.convergence_attempts += 1
+            
+            if self.convergence_attempts == 1:
+                self.step_size = np.round(self.step_size/self.step_size_ratio,3)
+                self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (-1 if self.mode == 'ascending' else 1))
+                # self.convergence_attempts += 1
+                self.converged_flag = False
+            elif self.convergence_attempts >= 2:
+                self.converged_flag = True
             else:
                 self.converged_flag = True
-                
-        print(f'converged_flag: {self.converged_flag}')
-        print(f'convergence_attempts: {self.convergence_attempts}')
+        else:
+            self.converged_flag = False
         
         if self.converged_flag:
             self.find_JND_from_runs()

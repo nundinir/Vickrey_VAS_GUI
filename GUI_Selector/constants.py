@@ -48,7 +48,8 @@ ROBOWALK_DUR = 2 # minutes
 BTN_NUMS = [4, 10]
 MAX_TRIALS_DICT = {4: 6, 10: 3}
 MAX_PRESENTATIONS_DICT = {4: 5, 10: 1} # without replacement
-
+NPO_MV = 0
+EPO_MV = 100
 
 """JND SPECIFIC"""
 TORQUE_MIN = 7
@@ -59,16 +60,13 @@ NUM_BINS = 21
 PROP_LOW = 0.5
 PROP_HIGH = 1.5
 
-# specific staircase omparitor settings
-REF_LIST = [18, 28]
-WRONG_LIM = 1   # num of wrong(s) after which distance from ref will increase 
+# specific staircase comparitor settings
+REF_LIST = [18, 29]
 RIGHT_LIM = 2   # num of consecutive right(s) after which distance from ref will decrease
-
-RATIO = 0.947   # ratio of step_down/step_up
-STEP_SIZE_RIGHT_DICT = {18: 1, 28: 1}  # step size when correct response given for each reference torque
-
-RUN_LIMIT = 8                 # Number of reversals before the algorithm converges
-INIT_STEP_MULTIPLIER = 8      # Initial multiplier away from reference torque for the comparison torque   
+RATIO = 0.947   # ratio of step_down(correct)/step_up(incorrect)
+STEP_SIZE_RIGHT_DICT = {18: 1, 29: 1}  # step size when correct response given for each reference torque
+RUN_LIMIT = 10                # Number of reversals before the algorithm converges
+INIT_STEP_OUT_SIZE = 11       # Initial multiplier away from reference torque for the comparison torque   
 REPETITIONS = 1               # Number of ascending and descending repetitions for each reference torque value
 MODES = ['ascending', 'descending'] # Staircase modes, either 'ascending' or 'descending' towards reference
 
