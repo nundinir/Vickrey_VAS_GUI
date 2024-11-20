@@ -146,6 +146,9 @@ class VASStateMachine:
 
     @staticmethod
     def evensampler(base_list):
+        """
+        Create list for evenly subsampling from base list
+        """
         base = base_list.copy()
         n = len(base)
         order = [0]
