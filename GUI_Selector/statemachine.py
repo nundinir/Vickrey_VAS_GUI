@@ -144,6 +144,36 @@ class VASStateMachine:
         # Quit flag
         self.quit_flag = False
 
+    @staticmethod
+    def evensampler(base_list):
+        base = base_list.copy()
+        n = len(base)
+        order = [0]
+        nums = [i for i in range(1, n)]
+
+        layer = [0]
+        while True:
+            nums_to_insert = []
+            try:
+                for _ in range(2 * len(layer)):
+                    nums_to_insert.append(nums.pop(0))
+            except:
+                pass
+
+            nti = nums_to_insert.copy()
+
+            try:
+                for side in range(2):
+                    for f in layer:
+                        order.insert(order.index(f) + side, nums_to_insert.pop(0))
+                layer = nti
+            except:
+                break
+
+        base_ordered = [base[order.index(i)] for i in range(n)]
+
+        return order, base_ordered
+
     def generate_btn_trial_pres_list(self):
         """
         Create list of button, trial, presentation combos
@@ -158,10 +188,17 @@ class VASStateMachine:
         Generate presentations (groups of buttons) for each trial
         Generates the same mapping every time (intended)
         """
+        num_torques = {btn_num: btn_num * MAX_PRESENTATIONS_DICT[btn_num] for btn_num in BTN_NUMS}
+        max_num = max(num_torques.values())
+
+        torque_list = list(np.linspace(TORQUE_MIN, TORQUE_MAX, max_num).round(decimals=3))
+        order, ordered_torques = self.evensampler(torque_list)
+
         for btn_num in BTN_NUMS:
             # Setting up Torque options
-            num_torques = btn_num * MAX_PRESENTATIONS_DICT[btn_num]
-            torques = list(np.linspace(TORQUE_MIN, TORQUE_MAX, num_torques))
+            num = num_torques[btn_num]
+            torques = ordered_torques[:num]
+            torques.sort()
 
             trial_mappings = {}
             for trial in range(1, MAX_TRIALS_DICT[btn_num] + 1):
