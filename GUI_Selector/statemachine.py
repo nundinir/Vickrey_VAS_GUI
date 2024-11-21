@@ -553,19 +553,20 @@ class PrefStateMachine:
 
         # Screen states dictionary
         self.next_screen_dict = {"dummy": "pushtostartscreenpref",
+                                 "walkscreenpref": "waitingscreenpref",
                                  "waitingscreenpref": "pushtostartscreenpref"}
 
         # Next screen based on pref type
         match self.pref_type:
             case 'SLIDER':
                 self.next_screen_dict["pushtostartscreenpref"] = "sliderscreen"
-                self.next_screen_dict["sliderscreen"] = "waitingscreenpref"
+                self.next_screen_dict["sliderscreen"] = "walkscreenpref"
             case 'BUTTON':
                 self.next_screen_dict["pushtostartscreenpref"] = "btnscreen"
-                self.next_screen_dict["btnscreen"] = "waitingscreenpref"
+                self.next_screen_dict["btnscreen"] = "walkscreenpref"
             case 'DIAL':
                 self.next_screen_dict["pushtostartscreenpref"] = "dialscreen"
-                self.next_screen_dict["dialscreen"] = "waitingscreenpref"
+                self.next_screen_dict["dialscreen"] = "walkscreenpref"
                 
 
     def report_pref(self, torque):
@@ -574,14 +575,16 @@ class PrefStateMachine:
         """
         self.sm.exoboot_remote.pref_result(self.pres, torque)
         self.pres += 1
-        if self.pres > MAX_PRES_PREF - 1:
+        if self.pres >= MAX_PRES_PREF:
             self.quit_flag = True
-        self.next_screen()
+            self.sm.current = "walkscreenpref"
+        else:
+            self.next_screen()
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
         if self.quit_flag:
-            self.sm.current = 'finishscreenpref'
+            self.sm.current = "finishscreenpref"
         else:
             self.sm.current = self.next_screen_dict[self.sm.current]
 

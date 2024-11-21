@@ -2,7 +2,7 @@ from functools import partial
 
 from kivy.clock import Clock
 
-from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBTRIAL_MAX, MIN_WAIT_PREF
+from constants import *
 
 
 def pause_exo_bertec(sm, dt):
@@ -29,6 +29,10 @@ def trial_ready(sm, dt):
 def waitingscreenprefschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
     Clock.schedule_once(partial(trial_ready, sm), MIN_WAIT_PREF/sm.squeeze)
+
+
+def walksreenprefschedule(sm):
+    Clock.schedule_once(sm.statemachine.next_screen, WALK_TIME_PREF/sm.squeeze)
 
 
 def trial_start(sm, dt):

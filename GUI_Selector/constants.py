@@ -68,6 +68,7 @@ MODES = ['ascending', 'descending'] # Staircase modes, either 'ascending' or 'de
 """PREF SPECIFIC"""
 # PREF timing in seconds
 MIN_WAIT_PREF = 60
+WALK_TIME_PREF = 120
 
 # Buttons
 PREF_ROWS = 4
