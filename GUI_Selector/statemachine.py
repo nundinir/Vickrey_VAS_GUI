@@ -149,33 +149,8 @@ class VASStateMachine:
         """
         Create list for evenly subsampling from base list
         """
-        base = base_list.copy()
-        n = len(base)
-        order = [0]
-        nums = [i for i in range(1, n)]
-
-        layer = [0]
-        while True:
-            nums_to_insert = []
-            try:
-                for _ in range(2 * len(layer)):
-                    nums_to_insert.append(nums.pop(0))
-            except:
-                pass
-
-            nti = nums_to_insert.copy()
-
-            try:
-                for side in range(2):
-                    for f in layer:
-                        order.insert(order.index(f) + side, nums_to_insert.pop(0))
-                layer = nti
-            except:
-                break
-
-        base_ordered = [base[order.index(i)] for i in range(n)]
-
-        return order, base_ordered
+        base_ordered = base_list[::2] + base_list[1::2]
+        return base_ordered
 
     def generate_btn_trial_pres_list(self):
         """
@@ -195,13 +170,15 @@ class VASStateMachine:
         max_num = max(num_torques.values())
 
         torque_list = list(np.linspace(TORQUE_MIN, TORQUE_MAX, max_num).round(decimals=3))
-        order, ordered_torques = self.evensampler(torque_list)
+        ordered_torques = self.evensampler(torque_list)
 
         for btn_num in BTN_NUMS:
             # Setting up Torque options
             num = num_torques[btn_num]
             torques = ordered_torques[:num]
             torques.sort()
+
+            print("{}: {}".format(btn_num, torques))
 
             trial_mappings = {}
             for trial in range(1, MAX_TRIALS_DICT[btn_num] + 1):
@@ -679,7 +656,6 @@ if __name__ == "__main__":
     Display VAS Trial/Presentation Torques
     """
     testvas = VASStateMachine(None, time.perf_counter())
-    testvas.generate_button_torque_mapping()
 
     print("B T P Torques")
     for btn, trials in testvas.button_mappings.items():
