@@ -57,32 +57,47 @@ def survey_schedule(sm):
     Clock.schedule_once(sm.statemachine.next_screen, (RESULT_SHOW-BIDDING_CLOSE)/sm.squeeze)
 
 
+def check_batteries(sm, dt):
+    battv_left = sm.exoboot_remote.getpack("exothread_left", "battery_voltage")/2
+    battv_right = sm.exoboot_remote.getpack("exothread_right", "battery_voltage")/2
+
+    print("BATTERY VOLTAGES: {}, {}".format(battv_left, battv_right))
+
+    if battv_left < BATTV_LOWER_LIM or battv_right < BATTV_LOWER_LIM:
+        sm.batteryscreen.label.text = "BATTV LEFT: {:0.2f}\nBATTV RIGHT: {:0.2f}".format(battv_left, battv_right)
+        sm.statemachine.queue_screen("batteryscreen")
+
+
 def result_screens_event(sm, dt):
     state = sm.statemachine.state
     prev_state = sm.statemachine.prev_state
     
-    if not state and prev_state:        
-        # Stop Bertec and pause exoboots
-        sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-        sm.exoboot_remote.set_pause(mybool=True)
-        sm.exoboot_remote.set_log(mybool=True)
+    if not sm.statemachine.queued_screen:
+        if not state and prev_state:        
+            # Stop Bertec and pause exoboots
+            sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+            sm.exoboot_remote.set_pause(mybool=True)
+            sm.exoboot_remote.set_log(mybool=True)
 
-        # Stop Vicon
-        sm.vicon.stop_recording()
+            # Stop Vicon
+            sm.vicon.stop_recording()
 
-    if state and not prev_state:
-        # Push to start if getting on treadmill
-        sm.current = "pushtostartscreen"
+        if state and not prev_state:
+            # Push to start if getting on treadmill
+            sm.statemachine.queue_screen("pushtostartscreen")
 
-        # Start Vicon
-        recording_name = "{}_t{}".format(sm.file_prefix, int(sm.statemachine.auction_tally * ROBOWALK_DUR))
-        sm.vicon.start_recording(recording_name)
+            # Start Vicon
+            recording_name = "{}_t{}".format(sm.file_prefix, int(sm.statemachine.auction_tally * ROBOWALK_DUR))
+            sm.vicon.start_recording(recording_name)
 
-        # Start exo logging
-        sm.exoboot_remote.set_log(mybool=False)
-    else:
-        # continue sitting/walking/sitting out
-        sm.current = "numpad"
+            # Start exo logging
+            sm.exoboot_remote.set_log(mybool=False)
+        else:
+            # continue sitting/walking/sitting out
+            sm.statemachine.queue_screen("numpad")
+
+    sm.statemachine.next_screen()
 
 def result_screens_schedule(sm):
+    Clock.schedule_once(partial(check_batteries, sm), 0)
     Clock.schedule_once(partial(result_screens_event,sm), (AUCTION_CLOSE - RESULT_SHOW)/sm.squeeze)

@@ -68,6 +68,11 @@ class ExobootRemoteClient:
         torque_msg = pb2.torques(peak_torque_left=peak_torque_left, peak_torque_right=peak_torque_right)
         receipt = self.stub.set_torque(torque_msg)
         return receipt
+    
+    def getpack(self, thread, field):
+        req_log = pb2.req_log(thread=thread, field=field)
+        ret_val = self.stub.getpack(req_log)
+        return ret_val.val
 
 # Vickrey Specific
     def call(self, t, subject_bid, user_win_flag, current_payout, total_winnings):
@@ -279,6 +284,16 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         self.mainwrapper.gse_thread.set_peak_torque_right(peak_torque_right)
 
         return pb2.receipt(received=True)
+    
+    def getpack(self, req_log, context):
+        """
+        Get value from LoggingNexus
+        """
+        thread = req_log.thread
+        field = req_log.field
+        val = self.mainwrapper.loggingnexus.get(thread, field)
+
+        return pb2.ret_val(val=val)
 
 # Vickrey Auction Specific
     def call(self, resultmsg, context):

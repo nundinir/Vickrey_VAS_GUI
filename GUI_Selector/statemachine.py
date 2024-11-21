@@ -37,6 +37,7 @@ class VickreyStateMachine:
         self.payout = 0
 
         # Screen states
+        self.queued_screen = None
         self.next_screen_dict = {"dummy": "pushtostartscreen", 
                                  "pushtostartscreen": "numpad", 
                                  "numpad": "survey",
@@ -114,9 +115,19 @@ class VickreyStateMachine:
         t = self.auction_tally * ROBOWALK_DUR
         self.sm.exoboot_remote.question(t, self.sm.enjoyment, self.sm.rpe)
 
+    def queue_screen(self, screen):
+        """
+        Queue screen on next next_screen
+        """
+        self.queued_screen = screen
+
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
-        self.sm.current = self.next_screen_dict[self.sm.current]
+        if self.queued_screen:
+            self.sm.current = self.queued_screen
+            self.queued_screen = None
+        else:
+            self.sm.current = self.next_screen_dict[self.sm.current]
 
 
 class VASStateMachine:

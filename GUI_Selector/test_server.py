@@ -1,6 +1,8 @@
-import sys, time, socket, threading
+import sys, csv, copy, time, socket, threading
 
+from typing import Type
 from random import randint
+from collections import deque
 
 from shared_files.LoggingClass import FilingCabinet
 from exoboot_remote.exoboot_remote_control import ExobootRemoteServerThread
@@ -160,6 +162,22 @@ class DumbGSE:
         print("Set Peak Torque Right: {}".format(T))
         self.peak_torque_right = T
 
+class DumbLoggingNexus:
+    def __init__(self):
+        pass
+
+    def get(self, threadname, field):
+        if threadname == "exothread_left":
+            if field == "battery_voltage":
+                return 9001
+            return -3
+        elif threadname == "exothread_right":
+            if field == "battery_voltage":
+                return 72.72
+            return 72
+        else:
+            return -1
+
 class DumbWrapper:
     def __init__(self, subjectID, trial_type, trial_cond, description, usebackup):
         self.startstamp = time.perf_counter()
@@ -191,6 +209,8 @@ class DumbWrapper:
             print("Backup Load Status: {}".format("SUCCESS" if loadstatus else "FAILURE"))
 
         self.gse_thread = DumbGSE()
+
+        self.loggingnexus = DumbLoggingNexus()
 
         self.remote_thread = ExobootRemoteServerThread(self, self.startstamp, self.filingcabinet, usebackup=self.usebackup, pause_event=self.pause_event, quit_event=self.quit_event)
         self.remote_thread.set_target_IP("[::]:50051")
