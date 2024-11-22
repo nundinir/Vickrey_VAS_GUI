@@ -5,6 +5,7 @@ from kivy.clock import Clock
 from constants import *
 
 from shared_files.utils import decimal_format
+from gui_files.shared_screens import check_batteries
 
 
 def cdt_start_event(sm, dur, dt):
@@ -55,17 +56,6 @@ def survey_schedule(sm):
     Clock.schedule_once(partial(update_resultscreen, sm), 0)
     Clock.schedule_once(sm.statemachine.close_survey, (RESULT_SHOW-BIDDING_CLOSE)/sm.squeeze)
     Clock.schedule_once(sm.statemachine.next_screen, (RESULT_SHOW-BIDDING_CLOSE)/sm.squeeze)
-
-
-def check_batteries(sm, dt):
-    battv_left = sm.exoboot_remote.getpack("exothread_left", "battery_voltage")/2
-    battv_right = sm.exoboot_remote.getpack("exothread_right", "battery_voltage")/2
-
-    print("BATTERY VOLTAGES: {}, {}".format(battv_left, battv_right))
-
-    if battv_left < BATTV_LOWER_LIM or battv_right < BATTV_LOWER_LIM:
-        sm.batteryscreen.label.text = "BATTV LEFT: {:0.2f}\nBATTV RIGHT: {:0.2f}".format(battv_left, battv_right)
-        sm.statemachine.queue_screen("batteryscreen")
 
 
 def result_screens_event(sm, dt):

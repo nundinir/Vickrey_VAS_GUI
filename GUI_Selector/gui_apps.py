@@ -15,7 +15,8 @@ from kivy.core.window import Window
 
 from constants import *
 
-from gui_files.vickrey_gui.vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen, buildbatteryscreen
+from gui_files.shared_screens import buildbatteryscreen
+from gui_files.vickrey_gui.vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen
 from gui_files.vas_gui.vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildfinishscreenvas
 from gui_files.jnd_gui.jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
 from gui_files.pref_gui.pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildwalkscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref, builddialscreenpref
@@ -233,6 +234,7 @@ class VASGUI(BaseGui):
         pushtostartscreen = buildpushtostartscreenvas()
         waitingscreen = buildwaitingscreenvas(self.sm)
         finishscreen = buildfinishscreenvas(self.sm)
+        self.sm.batteryscreen = buildbatteryscreen(self.sm)
 
         vasscreen = Screen(name='vasscreen')
         vasscreen.sm = self.sm
@@ -244,6 +246,7 @@ class VASGUI(BaseGui):
         self.sm.add_widget(vasscreen)
         self.sm.add_widget(waitingscreen)
         self.sm.add_widget(finishscreen)
+        self.sm.add_widget(self.sm.batteryscreen)
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreen"
@@ -342,12 +345,14 @@ class JNDGUI(BaseGui):
         pushtostartscreenjnd = buildpushtostartscreenjnd()
         waitingscreenjnd = buildwaitingscreenjnd(self.sm)
         finishscreenjnd = buildfinishscreenjnd(self.sm)
+        self.sm.batteryscreen = buildbatteryscreen(self.sm)
 
         # Add screens to ScreenManager
         self.sm.add_widget(dummyscreen)
         self.sm.add_widget(pushtostartscreenjnd)
         self.sm.add_widget(waitingscreenjnd)
         self.sm.add_widget(finishscreenjnd)
+        self.sm.add_widget(self.sm.batteryscreen)
 
         # Split or same trial cond
         match self.jnd_type:

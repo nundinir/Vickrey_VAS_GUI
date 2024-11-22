@@ -4,6 +4,8 @@ from kivy.clock import Clock
 
 from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBTRIAL_MAX, MIN_WAIT_JND
 
+from gui_files.shared_screens import check_batteries
+
 
 def initialize_comparison(sm, dt):
     sm.statemachine.subtrial_limit = False
@@ -14,6 +16,7 @@ def subtrial_timelimit(sm, dt):
 
 def splitsameschedule(sm):
     Clock.schedule_once(partial(initialize_comparison, sm), 0)
+    Clock.schedule_once(partial(check_batteries, sm), SUBTRIAL_MAX/sm.squeeze)
     Clock.schedule_once(partial(subtrial_timelimit, sm), SUBTRIAL_MAX/sm.squeeze)
 
 

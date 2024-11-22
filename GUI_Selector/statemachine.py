@@ -124,7 +124,10 @@ class VickreyStateMachine:
         self.queued_screen = screen
 
     def next_screen(self, *vargs):
-        # Ignore vargs. exists so next can be called by Clock.schedule_once
+        """
+        Move to next screen according to queued_screen, then next_screen_dict
+        Ignore vargs. exists so next can be called by Clock.schedule_once
+        """ 
         if self.queued_screen:
             self.sm.current = self.queued_screen
             self.queued_screen = None
@@ -148,6 +151,7 @@ class VASStateMachine:
         self.generate_button_torque_mapping()
 
         # Screen states
+        self.queued_screen = None
         self.next_screen_dict = {"dummy": "pushtostartscreen", 
                                  "pushtostartscreen": "vasscreen",
                                  "vasscreen": "waitingscreenvas",
@@ -272,10 +276,21 @@ class VASStateMachine:
         with open(vasresultspath, 'a', newline='') as f:
             csv.writer(f).writerow(datalist)
 
+    def queue_screen(self, screen):
+        """
+        Queue screen on next next_screen
+        """
+        self.queued_screen = screen
+
     def next_screen(self, *vargs):
-        # Ignore vargs. exists so next can be called by Clock.schedule_once
+        """
+        Move to next screen depending on conditions
+        """
         if self.quit_flag:
             self.sm.current = 'finishscreenvas'
+        elif self.queued_screen:
+            self.sm.current = self.queued_screen
+            self.queued_screen = None
         else:
             self.sm.current = self.next_screen_dict[self.sm.current]
 
@@ -328,6 +343,7 @@ class JNDStateMachine:
         self.quit_flag = False
 
         # Screen states dictionary
+        self.queued_screen = None
         self.next_screen_dict = {"dummy": "pushtostartscreenjnd",
                                  "waitingscreenjnd": "pushtostartscreenjnd"}
 
@@ -372,7 +388,7 @@ class JNDStateMachine:
             self.quit_flag = True
             self.next_screen()
         else:
-            self.prop, self.T_ref, self.T_comp, truth = self.comparitor.generate_comparison()
+            self.prop, self.T_ref, self.T_comp, truth = self.comparitor.generate_next_comparison()
             self.pres += 1
 
             if random.getrandbits(1):
@@ -576,10 +592,19 @@ class JNDStateMachine:
         else:
             self.next_screen()
 
+    def queue_screen(self, screen):
+        """
+        Queue screen on next next_screen
+        """
+        self.queued_screen = screen
+
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
         if self.quit_flag:
             self.sm.current = 'finishscreenjnd'
+        elif self.queued_screen:
+            self.sm.current = self.queued_screen
+            self.queued_screen = None
         else:
             self.sm.current = self.next_screen_dict[self.sm.current]
 

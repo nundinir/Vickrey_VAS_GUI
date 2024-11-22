@@ -31,7 +31,7 @@ import random
 
 from constants import *
 
-from gui_files.vas_gui.vas_schedules import waitingscreevasschedule, finishscreenvasschedule
+from gui_files.vas_gui.vas_schedules import vasscreenschedule, waitingscreevasschedule, finishscreenvasschedule
 
 def startbttnvas_CB(instance):
     sm = instance.parent.parent
@@ -245,14 +245,13 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
     screen.add_widget(npo_label)
     screen.add_widget(epo_label)
 
+    screen.on_enter = partial(vasscreenschedule, sm)
+
 
 def buildfinishscreenvas(sm):
     screen = Screen(name="finishscreenvas")
     screen.sm = sm
-
     finishlabel = Label(text="Trial Finished\nPlease step off the treadmill", font_size='50', color=(1, 0, 0, 1))
     screen.add_widget(finishlabel)
-
     screen.on_enter = partial(finishscreenvasschedule, sm)
-
     return screen

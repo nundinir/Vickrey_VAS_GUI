@@ -3,6 +3,7 @@ from functools import partial
 from kivy.clock import Clock
 
 from constants import *
+from gui_files.shared_screens import check_batteries
 
 
 def pause_exo_bertec(sm, dt):
@@ -33,6 +34,10 @@ def next_presentation(sm, dt):
 def waitingscreevasschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
     Clock.schedule_once(partial(next_presentation, sm), MIN_WAIT_VAS/sm.squeeze)
+
+
+def vasscreenschedule(sm):
+    Clock.schedule_once(partial(check_batteries, sm), 0)
 
 
 def finishscreenvasschedule(sm):
