@@ -25,7 +25,7 @@ if __name__ == "__main__":
     subject_dict = json.load(subj_dict_file)
     
     if not subjectID in subject_dict["subjects"].keys():
-        print("No subject dictionary found. EXITING")
+        print("NO SUBJECT DICTIONARY FOUND: EXITING")
         quit()
     else:
         subject_specific_info = subject_dict["subjects"][subjectID]
