@@ -1,3 +1,7 @@
+import os
+from typing import List, Tuple
+import pickle
+
 class MovingAverageFilter:
     # Use to track averages of some numerical quantity
     def __init__(self, initial_value:float = 0, size:int = 5):
@@ -81,6 +85,28 @@ class MovingAverageFilterPlus:
 
         # Step TrueAfter
         self.warm.step()
+        
+class Pickler:
+    # Pickle File Loader and Saver for JND Staircases
+    def save_staircases(self, staircases:List[Tuple[object, ...]], filepath:str):
+        """Saves the staircase objects to a pickle file."""
+        with open(filepath, 'wb') as file:
+            pickle.dump(staircases, file)
+        print(f"Staircases saved to {filepath}")
+
+    def load_staircases(self, filepath:str)-> List[Tuple[object, ...]]:
+        """Loads staircase objects from a pickle file."""
+        with open(filepath, 'rb') as file:
+            staircases = pickle.load(file)
+        print(f"Staircases loaded from {filepath}")
+            
+        return staircases
+
+    def remove_pickle_file(self, filepath:str):
+        """If all staircases have converged, delete the pickle file"""
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            print(f"Pickle file '{filepath}' deleted after successful termination.")
 
 # Other Functions
 def decimal_format(str):

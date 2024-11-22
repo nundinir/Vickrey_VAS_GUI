@@ -64,6 +64,7 @@ INIT_STEP_OUT_SIZE = 11       # Initial multiplier away from reference torque fo
 REPETITIONS = 1               # Number of ascending and descending repetitions for each reference torque value
 MODES = ['ascending', 'descending'] # Staircase modes, either 'ascending' or 'descending' towards reference
 
+PICKLE_FILE_PATH = "jnd_staircase.pkl"  # To Load/Save the staircase objects
 
 """PREF SPECIFIC"""
 # PREF timing in seconds

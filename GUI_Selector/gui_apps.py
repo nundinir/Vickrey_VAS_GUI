@@ -274,18 +274,35 @@ class JNDGUI(BaseGui):
         usebackup = self.usebackup
         try:
             if self.usebackup:
-                # Load backup into filingcabinet
-                comparisonbackup = self.sm.filingcabinet.getpath("comparison")
+                if self.which_comparitor == "UNIFORM":
+                    # Load backup into filingcabinet
+                    comparisonbackup = self.sm.filingcabinet.getpath("comparison")
 
-                # Load backup into statemachine
-                reader = csv.reader(open(comparisonbackup), delimiter=',')
-                next(reader) # Skip Header
+                    # Load backup into statemachine
+                    reader = csv.reader(open(comparisonbackup), delimiter=',')
+                    next(reader) # Skip Header
 
-                pres = 0
-                for comp in reader:
-                    pres = int(comp[0])
+                    pres = 0
+                    for comp in reader:
+                        pres = int(comp[0])
 
-                self.sm.statemachine.loadstate(pres)
+                    self.sm.statemachine.loadstate(pres)
+                
+                elif self.which_comparitor == "STAIR":  
+                    # Create new file for JND back-up logging with full details (DO THIS NO MATTER WHAT)
+                    comparisonname = "{}_{}".format(self.sm.file_prefix, "comparison")
+                    comparisonpath = self.sm.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison")
+                    with open(comparisonpath, 'a', newline='') as f:
+                        csv.writer(f).writerow(['pres', 
+                                                'mode', 
+                                                'T_ref', 
+                                                'T_comp', 
+                                                'truth', 
+                                                'peak_torque_ind', 
+                                                'converged_flag', 
+                                                'consec_correct_counter',
+                                                'step_size',
+                                                'convergence_attempts',])
         except:
             usebackup = False
 
@@ -294,7 +311,7 @@ class JNDGUI(BaseGui):
             comparisonname = "{}_{}".format(self.sm.file_prefix, "comparison")
             comparisonpath = self.sm.filingcabinet.newfile(comparisonname, "csv", dictkey="comparison")
 
-            if self.which_comparitor == "staircase":
+            if self.which_comparitor == "STAIR":
                 with open(comparisonpath, 'a', newline='') as f:
                     csv.writer(f).writerow(['pres', 
                                             'mode', 
@@ -307,7 +324,7 @@ class JNDGUI(BaseGui):
                                             'step_size',
                                             'convergence_attempts',])
                     
-            elif self.which_comparitor == "uniform":
+            elif self.which_comparitor == "UNIFORM":
                 with open(comparisonpath, 'a', newline='') as f:
                     csv.writer(f).writerow(['pres', 'prop', 'T_ref', 'T_comp', 'truth', 'higher'])
 

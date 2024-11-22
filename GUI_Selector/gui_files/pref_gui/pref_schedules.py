@@ -2,7 +2,9 @@ from functools import partial
 
 from kivy.clock import Clock
 
-from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBTRIAL_MAX, MIN_WAIT_PREF
+import random
+
+from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBTRIAL_MAX, MIN_WAIT_PREF, TORQUE_MAX, TORQUE_MIN
 
 
 def pause_exo_bertec(sm, dt):
@@ -41,6 +43,7 @@ def prefscreenschedule(sm):
 def reset_sliderscreen(sm, screen):
     screen.confirm_btn.confirmed = False
     screen.confirm_btn.text = "Confirm"
+
 
 def finishscreenprefschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)

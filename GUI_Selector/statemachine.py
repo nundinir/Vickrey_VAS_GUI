@@ -1,12 +1,14 @@
 import csv, time, random
 import numpy as np
 import math, random
+import os
 
 from constants import *
 from gui_files.vickrey_gui.Robobidders import *
 from gui_files.jnd_gui.jnd_comparitors import UniformSampler
 from gui_files.jnd_gui.jnd_comparitors import KaernbachAlgorithm
 from shared_files.SoftRTloop import FlexibleSleeper
+from shared_files.utils import Pickler
 
 from constants import (
     BTN_NUMS, MAX_TRIALS_DICT, MAX_PRESENTATIONS_DICT, REF_LIST, TORQUE_MIN, 
@@ -261,35 +263,25 @@ class JNDStateMachine:
             case "UNIFORM":
                 self.comparitor = UniformSampler(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_list=REF_LIST, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
             case "STAIR":
-                # List of tuples with combos of reference torque, mode, and repetition
-                self.staircase_combinations = [(ref_torque, mode) 
-                                        for ref_torque in REF_LIST 
-                                        for mode in MODES]
-
-                # Setting seed for reproducibility & shuffling
-                seed = 2
-                random.seed(seed)
-                random.shuffle(self.staircase_combinations)
-                print(self.staircase_combinations)
-
-                # instantiate the randomly interleaved staircases
-                self.staircases = []
-                for ref_torque, mode in self.staircase_combinations:
-                    step_size_right = STEP_SIZE_RIGHT_DICT[ref_torque]
-                    self.comparitor = KaernbachAlgorithm(reference_torque=ref_torque,
-                                                         step_size_right=step_size_right, 
-                                                         step_ratio=RATIO,
-                                                         run_limit=RUN_LIMIT, 
-                                                         mode=mode, 
-                                                         init_step_out_size=INIT_STEP_OUT_SIZE,
-                                                         consec_correct_lim=RIGHT_LIM, 
-                                                         torque_max_lim=TORQUE_MAX, 
-                                                         torque_min_lim=TORQUE_MIN)
-                    self.staircases.append((self.comparitor, ref_torque, mode))
-                    self.converged_staircases = 0
-                    self.pres = 0
-                    
-            
+                # instantiate a pickler object
+                self.pickler = Pickler()
+                
+                # Create the list of tuples with reference torques and modes
+                self.create_staircase_combos()  
+                
+                if os.path.exists(PICKLE_FILE_PATH):
+                    try:
+                        print("pickle file exists so loading it up")
+                        self.staircases = self.pickler.load_staircases(PICKLE_FILE_PATH)  # Load the staircases from the Pickle file
+                        self.converged_staircases = len(self.staircase_combinations) - len(self.staircases)
+                        self.pres = 0
+                    except:
+                        print("pickle file exists BUT FAILED to load")
+                        self.create_fresh_staircases()
+                else:   
+                    print("pickle file DNE so instantiating new staircases")
+                    self.create_fresh_staircases()      # Initialize new staircases: Kaernbach Algorithm
+                    self.pickler.save_staircases(self.staircases , PICKLE_FILE_PATH)    # save the initialized staircases to a pickle file
             case _:
                 Exception("Invalid comparitor type")
 
@@ -336,6 +328,7 @@ class JNDStateMachine:
 
                 self.next_screen_dict["pushtostartscreenjnd"] = "samelegscreen"
                 self.next_screen_dict["samelegscreen"] = "waitingscreenjnd"
+        
 
     def loadstate(self, pres):
         """
@@ -387,6 +380,41 @@ class JNDStateMachine:
 
             self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torques[self.peak_torque_ind], peak_torque_right=self.peak_torques[self.peak_torque_ind])
         
+    def create_staircase_combos(self):
+        """Creates list of tuples with combos of reference torque, mode, and repetition. 
+        Contained within staircase_combinations attribute. Sets seed for reproducibility and shuffles."""
+        
+        self.staircase_combinations = [(ref_torque, mode) 
+                        for ref_torque in REF_LIST 
+                        for mode in MODES]
+
+        # Setting seed for reproducibility & shuffling
+        seed = 2
+        random.seed(seed)
+        random.shuffle(self.staircase_combinations)
+        print(f"Staircase combos created: {self.staircase_combinations}")
+
+    def create_fresh_staircases(self):
+        """ Instantiates the randomly interleaved staircase objects and 
+        saves FOR THE FIRST TIME to a Pickle file. Sets converged_staircases and presentation to 0."""
+        self.staircases = []
+        for ref_torque, mode in self.staircase_combinations:
+            step_size_right = STEP_SIZE_RIGHT_DICT[ref_torque]
+            self.comparitor = KaernbachAlgorithm(reference_torque=ref_torque,
+                                                step_size_right=step_size_right, 
+                                                step_ratio=RATIO,
+                                                run_limit=RUN_LIMIT, 
+                                                mode=mode, 
+                                                init_step_out_size=INIT_STEP_OUT_SIZE,
+                                                consec_correct_lim=RIGHT_LIM, 
+                                                torque_max_lim=TORQUE_MAX, 
+                                                torque_min_lim=TORQUE_MIN)
+            self.staircases.append((self.comparitor, ref_torque, mode))
+            self.converged_staircases = 0
+            self.pres = 0
+            
+        print(f"Staircases instantiated: {self.staircases}")
+        
     def next_comparison_same_stair(self):
         """
         Assigns torque pair to randomly selected swap button state according to kaernbach algorithm
@@ -394,6 +422,7 @@ class JNDStateMachine:
         print(f"len of staircases: {len(self.staircases)}")
         if self.converged_staircases == len(self.staircase_combinations):
             self.quit_flag = True
+            self.pickler.remove_pickle_file(PICKLE_FILE_PATH)
             self.next_screen()
         else:
             
@@ -491,7 +520,7 @@ class JNDStateMachine:
         self.selected_staircase.current_comparison_torque = next_comparison_torque
         
         # if the selected_staircase has converged, remove the particular staircase from the list
-        if self.selected_staircase.converged_flag or self.selected_staircase.convergence_attempts >= 2:
+        if self.selected_staircase.converged_flag:
             print("A staircase has converged!")
             self.staircases.remove((self.selected_staircase, self.T_ref, self.mode))
             self.converged_staircases += 1
@@ -510,7 +539,10 @@ class JNDStateMachine:
                                     self.selected_staircase.consec_correct_counter,
                                     self.selected_staircase.step_size,
                                     self.selected_staircase.convergence_attempts,])
-
+            
+        # Update the saved pickle file
+        self.pickler.save_staircases(self.staircases, PICKLE_FILE_PATH)
+        
         if not self.subtrial_limit:
             self.next_comparison()
         else:

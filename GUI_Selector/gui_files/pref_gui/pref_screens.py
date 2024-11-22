@@ -41,7 +41,7 @@ def buildpushtostartscreenpref(sm):
     startbttn = Button(text="STOMP then Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbtn_CB)
     screen.add_widget(startbttn)
-
+    
     return screen
 
 
@@ -61,9 +61,9 @@ def buildwaitingscreenpref(sm):
 
 def disable_btn(screen, mybool, dt):
     screen.confirm_btn.disabled = mybool
-
+        
 def onslidermotion(instance, torque):
-    # Reset confirm button
+    # Reset confirm button 
     if instance.parent.confirm_btn.confirmed:
         instance.parent.confirm_btn.confirmed = False
         instance.parent.confirm_btn.background_color = (0.75,0,0)
@@ -90,12 +90,14 @@ def confirm_slider_pref(instance):
         sm = instance.parent.parent
         torque = instance.parent.tslider.value
         sm.statemachine.report_pref(torque)
+
     else:
         instance.confirmed = True
         instance.background_color = (1,0,0)
         instance.text = "ARE YOU SURE?"
 
         screen = instance.parent
+        
         disable_btn(screen, True, 0)
         Clock.schedule_once(partial(disable_btn, screen, False), 0.2)
         
@@ -105,6 +107,12 @@ def confirm_dial_pref(instance):
         torque = instance.parent.dial.torque_value
         print(f'Confirmed torque is: {torque}')
         sm.statemachine.report_pref(torque)
+        
+        # randomize the starting torque value of the preference dial during the disable period
+        screen = instance.parent
+        print("Randomizing dial start torque")
+        rand_start_torque = random.uniform(TORQUE_MIN, TORQUE_MAX/2)
+        screen.dial.torque_value = rand_start_torque
     else:
         instance.confirmed = True
         instance.background_color = (1,0,0)
@@ -113,6 +121,7 @@ def confirm_dial_pref(instance):
         screen = instance.parent
         disable_btn(screen, True, 0)
         Clock.schedule_once(partial(disable_btn, screen, False), 0.2)
+        
 
 def buildsliderscreenpref(sm):
     screen = Screen(name="sliderscreen")

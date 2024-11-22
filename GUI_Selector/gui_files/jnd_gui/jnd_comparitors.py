@@ -86,13 +86,13 @@ class KaernbachAlgorithm:
         
     def compute_step_size(self):
         """Computes step size based on the difference between the reference and comparison torques."""
-        stim_diff = abs(self.reference_torque - self.current_comparison_torque)
+        self.stim_diff = abs(self.reference_torque - self.current_comparison_torque)
         
-        if stim_diff > 6:
+        if self.stim_diff > 6:
             self.step_size = 2 * self.step_size_for_correct_resp 
-        elif (3 <= stim_diff <= 6):
+        elif (3 <= self.stim_diff <= 6):
             self.step_size = self.step_size_for_correct_resp 
-        elif(1 <= stim_diff < 3):
+        elif(1 <= self.stim_diff < 3):
             self.step_size = self.step_size_for_correct_resp / 2
         else:
             self.step_size = self.step_size_for_correct_resp / 4
@@ -109,7 +109,17 @@ class KaernbachAlgorithm:
         """
         self.compute_step_size()
         
-        if self.incorrect_runs < 1:
+        # check if the 2-down 1-up rule is engaged
+        print(f"STIM_DIFF:{self.stim_diff}")
+        print(f"DIFF:{self.stim_diff >= 5}")
+        print(f"INC_RUNS:{self.incorrect_runs < 1}")
+        cond = (self.stim_diff >= 5) and (self.incorrect_runs < 1)
+        print(f"COND:{cond}")
+        
+        self.observer_input = observer_input
+        
+        # when diff is at 4Nm, the 2-down 1-up rule is engaged
+        if (self.stim_diff >= 5) and (self.incorrect_runs < 1):
             if observer_input:
                 self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (1 if self.mode == 'ascending' else -1))
             else:
@@ -118,8 +128,7 @@ class KaernbachAlgorithm:
                 self.step_size = np.round(self.step_size/self.step_size_ratio,3)
                 self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (-1 if self.mode == 'ascending' else 1))
 
-        else:
-                
+        else:    
             if observer_input:  # True - correct response
                 # Increment the consecutive correct counter
                 self.consec_correct_counter += 1
@@ -174,20 +183,21 @@ class KaernbachAlgorithm:
         ascending and descending condition.
 
         """
+        conv_cond = (self.mode == 'ascending' and self.current_comparison_torque >= self.reference_torque) or (self.mode == 'descending' and self.current_comparison_torque <= self.reference_torque)
+        print(f"Converge Cond:{conv_cond}")
+        
         if self.incorrect_runs >= self.run_limit:
             self.converged_flag = True
-        elif (abs(self.current_comparison_torque - self.reference_torque) <= self.step_size_for_correct_resp/2):
+        elif ((abs(self.current_comparison_torque - self.reference_torque) <= self.step_size_for_correct_resp/4)) and self.observer_input:
             self.convergence_attempts += 1
             
-            if self.convergence_attempts == 1:
+            if (self.mode == 'ascending' and self.current_comparison_torque >= self.reference_torque) or (self.mode == 'descending' and self.current_comparison_torque <= self.reference_torque):
+                self.converged_flag = True
+                print("I'm here a!")
+            else:
                 self.step_size = np.round(self.step_size/self.step_size_ratio,3)
                 self.next_comparison_torque = self.current_comparison_torque + (self.step_size * (-1 if self.mode == 'ascending' else 1))
-                # self.convergence_attempts += 1
                 self.converged_flag = False
-            elif self.convergence_attempts >= 2:
-                self.converged_flag = True
-            else:
-                self.converged_flag = True
         else:
             self.converged_flag = False
         
