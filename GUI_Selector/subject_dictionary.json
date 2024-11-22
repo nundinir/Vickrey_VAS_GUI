@@ -5,7 +5,7 @@
             "pref_torque": 31.415,
             "EPO_MV": 9001,
             "NPO_MV": -404,
-            "squeeze": 10
+            "squeeze": 15
         },
         "S101": {
             "bertec_speed": 1.08,

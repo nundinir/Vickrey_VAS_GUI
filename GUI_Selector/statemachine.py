@@ -39,6 +39,7 @@ class VickreyStateMachine:
         self.payout = 0
 
         # Screen states
+        self.queued_screen = None
         self.next_screen_dict = {"dummy": "pushtostartscreen", 
                                  "pushtostartscreen": "numpad", 
                                  "numpad": "survey",
@@ -116,9 +117,19 @@ class VickreyStateMachine:
         t = self.auction_tally * ROBOWALK_DUR
         self.sm.exoboot_remote.question(t, self.sm.enjoyment, self.sm.rpe)
 
+    def queue_screen(self, screen):
+        """
+        Queue screen on next next_screen
+        """
+        self.queued_screen = screen
+
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
-        self.sm.current = self.next_screen_dict[self.sm.current]
+        if self.queued_screen:
+            self.sm.current = self.queued_screen
+            self.queued_screen = None
+        else:
+            self.sm.current = self.next_screen_dict[self.sm.current]
 
 
 class VASStateMachine:
@@ -146,6 +157,14 @@ class VASStateMachine:
         # Quit flag
         self.quit_flag = False
 
+    @staticmethod
+    def evensampler(base_list):
+        """
+        Create list for evenly subsampling from base list
+        """
+        base_ordered = base_list[::2] + base_list[1::2]
+        return base_ordered
+
     def generate_btn_trial_pres_list(self):
         """
         Create list of button, trial, presentation combos
@@ -160,10 +179,19 @@ class VASStateMachine:
         Generate presentations (groups of buttons) for each trial
         Generates the same mapping every time (intended)
         """
+        num_torques = {btn_num: btn_num * MAX_PRESENTATIONS_DICT[btn_num] for btn_num in BTN_NUMS}
+        max_num = max(num_torques.values())
+
+        torque_list = list(np.linspace(TORQUE_MIN, TORQUE_MAX, max_num).round(decimals=3))
+        ordered_torques = self.evensampler(torque_list)
+
         for btn_num in BTN_NUMS:
             # Setting up Torque options
-            num_torques = btn_num * MAX_PRESENTATIONS_DICT[btn_num]
-            torques = list(np.linspace(TORQUE_MIN, TORQUE_MAX, num_torques))
+            num = num_torques[btn_num]
+            torques = ordered_torques[:num]
+            torques.sort()
+
+            print("{}: {}".format(btn_num, torques))
 
             trial_mappings = {}
             for trial in range(1, MAX_TRIALS_DICT[btn_num] + 1):
@@ -568,19 +596,20 @@ class PrefStateMachine:
 
         # Screen states dictionary
         self.next_screen_dict = {"dummy": "pushtostartscreenpref",
+                                 "walkscreenpref": "waitingscreenpref",
                                  "waitingscreenpref": "pushtostartscreenpref"}
 
         # Next screen based on pref type
         match self.pref_type:
             case 'SLIDER':
                 self.next_screen_dict["pushtostartscreenpref"] = "sliderscreen"
-                self.next_screen_dict["sliderscreen"] = "waitingscreenpref"
+                self.next_screen_dict["sliderscreen"] = "walkscreenpref"
             case 'BUTTON':
                 self.next_screen_dict["pushtostartscreenpref"] = "btnscreen"
-                self.next_screen_dict["btnscreen"] = "waitingscreenpref"
+                self.next_screen_dict["btnscreen"] = "walkscreenpref"
             case 'DIAL':
                 self.next_screen_dict["pushtostartscreenpref"] = "dialscreen"
-                self.next_screen_dict["dialscreen"] = "waitingscreenpref"
+                self.next_screen_dict["dialscreen"] = "walkscreenpref"
                 
 
     def report_pref(self, torque):
@@ -589,14 +618,16 @@ class PrefStateMachine:
         """
         self.sm.exoboot_remote.pref_result(self.pres, torque)
         self.pres += 1
-        if self.pres > MAX_PRES_PREF - 1:
+        if self.pres >= MAX_PRES_PREF:
             self.quit_flag = True
-        self.next_screen()
+            self.sm.current = "walkscreenpref"
+        else:
+            self.next_screen()
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
         if self.quit_flag:
-            self.sm.current = 'finishscreenpref'
+            self.sm.current = "finishscreenpref"
         else:
             self.sm.current = self.next_screen_dict[self.sm.current]
 
@@ -671,7 +702,6 @@ if __name__ == "__main__":
     Display VAS Trial/Presentation Torques
     """
     testvas = VASStateMachine(None, time.perf_counter())
-    testvas.generate_button_torque_mapping()
 
     print("B T P Torques")
     for btn, trials in testvas.button_mappings.items():

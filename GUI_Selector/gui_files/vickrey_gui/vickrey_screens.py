@@ -159,3 +159,11 @@ def buildresultscreen(sm):
     screen.on_enter = partial(result_screens_schedule, sm)
 
     return screen
+
+
+def buildbatteryscreen(sm):
+    screen = Screen(name="batteryscreen")
+    screen.label = Label(text='', font_size='50', color = (1,1,1))
+    screen.add_widget(screen.label)
+
+    return screen

@@ -22,7 +22,7 @@ from kivy.uix.screenmanager import Screen
 from kivy_garden.radialslider import RadialSlider
 
 from constants import *
-from gui_files.pref_gui.pref_schedules import waitingscreenprefschedule, prefscreenschedule, reset_sliderscreen, finishscreenprefschedule
+from gui_files.pref_gui.pref_schedules import waitingscreenprefschedule, walksreenprefschedule, prefscreenschedule, reset_sliderscreen, finishscreenprefschedule
 
 from gui_files.pref_gui.continuous_dial_class import PrefDial
 
@@ -44,6 +44,19 @@ def buildpushtostartscreenpref(sm):
     
     return screen
 
+def buildwalkscreenpref(sm):
+    screen = Screen(name="walkscreenpref")
+    screen.sm = sm
+    if MIN_WAIT_PREF/sm.squeeze < 60:
+        walktext = "Continue walking for {} seconds".format(int(WALK_TIME_PREF/sm.squeeze))
+    else:
+        walktext = "Continue walking for {:0.1f} minutes".format(WALK_TIME_PREF/sm.squeeze/60)
+    walklabel = Label(text=walktext, font_size='50', color=(1, 1, 1, 1))
+    screen.add_widget(walklabel)
+
+    screen.on_enter = partial(walksreenprefschedule, sm)
+
+    return screen
 
 def buildwaitingscreenpref(sm):
     screen = Screen(name="waitingscreenpref")

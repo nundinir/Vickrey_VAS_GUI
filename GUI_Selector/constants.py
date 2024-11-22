@@ -10,6 +10,10 @@ BERTEC_ACC_LEFT = 0.33
 BERTEC_ACC_RIGHT = 0.33
 
 
+"""BATTERY SETTINGS"""
+BATTV_LOWER_LIM = 23.0
+
+
 """VICKREY SPECIFIC"""
 # Vickrey timings in seconds
 AUCTION_START = 0
@@ -69,6 +73,7 @@ PICKLE_FILE_PATH = "jnd_staircase.pkl"  # To Load/Save the staircase objects
 """PREF SPECIFIC"""
 # PREF timing in seconds
 MIN_WAIT_PREF = 60
+WALK_TIME_PREF = 120
 
 # Buttons
 PREF_ROWS = 4

@@ -15,10 +15,10 @@ from kivy.core.window import Window
 
 from constants import *
 
-from gui_files.vickrey_gui.vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen
+from gui_files.vickrey_gui.vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen, buildbatteryscreen
 from gui_files.vas_gui.vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildfinishscreenvas
 from gui_files.jnd_gui.jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
-from gui_files.pref_gui.pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref, builddialscreenpref
+from gui_files.pref_gui.pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildwalkscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref, builddialscreenpref
 from gui_files.acclimation_gui.acclimation_screens import buildpushtostartscreenaccl, buildsliderscreenaccl, buildfinishscreenaccl
 from gui_files.speedfinder_gui.speedfinder_screens import buildpushtostartscreensf, buildspeedfinderscreen, buildfinishscreensf
 
@@ -151,6 +151,7 @@ class VickreyGUI(BaseGui):
         numpadscreen = buildNumPadScreen(self.sm)
         surveyscreen = buildsurveyscreen(self.sm)
         self.sm.resultscreen = buildresultscreen(self.sm)
+        self.sm.batteryscreen = buildbatteryscreen(self.sm)
 
         # Add screens to ScreenManager
         self.sm.add_widget(dummyscreen)
@@ -158,6 +159,7 @@ class VickreyGUI(BaseGui):
         self.sm.add_widget(numpadscreen)
         self.sm.add_widget(surveyscreen)
         self.sm.add_widget(self.sm.resultscreen)
+        self.sm.add_widget(self.sm.batteryscreen)
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreen"
@@ -385,12 +387,14 @@ class PREFGUI(BaseGui):
         # Create Screens
         dummyscreen = Screen(name="dummy")
         pushtostartscreenpref = buildpushtostartscreenpref(self.sm)
+        walkscreenpref = buildwalkscreenpref(self.sm)
         waitingscreenpref = buildwaitingscreenpref(self.sm)
         finishscreenpref = buildfinishscreenpref(self.sm)
 
         # Add screens to ScreenManager
         self.sm.add_widget(dummyscreen)
         self.sm.add_widget(pushtostartscreenpref)
+        self.sm.add_widget(walkscreenpref)
         self.sm.add_widget(waitingscreenpref)
         self.sm.add_widget(finishscreenpref)
 
