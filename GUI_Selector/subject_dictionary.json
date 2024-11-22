@@ -7,6 +7,13 @@
             "NPO_MV": -404,
             "squeeze": 15
         },
+        "TESTER": {
+            "bertec_speed": 0.9,
+            "pref_torque": 25.0,
+            "EPO_MV": 9001,
+            "NPO_MV": -9001,
+            "squeeze": 15
+        },
         "S101": {
             "bertec_speed": 1.08,
             "pref_torque": 20.33,

@@ -23,7 +23,12 @@ if __name__ == "__main__":
     # Load subject dictionary
     subj_dict_file = open("subject_dictionary.json", mode="r")
     subject_dict = json.load(subj_dict_file)
-    subject_specific_info = subject_dict["subjects"][subjectID]
+    
+    if not subjectID in subject_dict["subjects"].keys():
+        print("No subject dictionary found. EXITING")
+        quit()
+    else:
+        subject_specific_info = subject_dict["subjects"][subjectID]
 
     # FilingCabinet for backups
     filingcabinet = FilingCabinet("trial_backups", subjectID)
