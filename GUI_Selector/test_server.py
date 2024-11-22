@@ -212,7 +212,7 @@ class DumbWrapper:
 
         self.loggingnexus = DumbLoggingNexus()
 
-        self.remote_thread = ExobootRemoteServerThread(self, self.startstamp, self.filingcabinet, usebackup=self.usebackup, pause_event=self.pause_event, quit_event=self.quit_event)
+        self.remote_thread = ExobootRemoteServerThread(self, self.startstamp, self.filingcabinet, usebackup=self.usebackup, quit_event=self.quit_event, pause_event=self.pause_event, log_event=self.log_event)
         self.remote_thread.set_target_IP("[::]:50051")
         self.remote_thread.start()
 

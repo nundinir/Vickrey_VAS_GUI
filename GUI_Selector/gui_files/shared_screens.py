@@ -11,7 +11,9 @@ def check_batteries(sm, dt):
 
     print("BATTERY VOLTAGES: {}, {}".format(battv_left, battv_right))
 
-    if battv_left < BATTV_LOWER_LIM or battv_right < BATTV_LOWER_LIM:
+    if battv_left == -1/2 and battv_right == -1/2:
+        pass
+    elif battv_left < BATTV_LOWER_LIM or battv_right < BATTV_LOWER_LIM:
         sm.batteryscreen.label.text = "BATTERY BREAK\nBATTV LEFT: {:0.2f}\nBATTV RIGHT: {:0.2f}".format(battv_left, battv_right)
         sm.statemachine.queue_screen("batteryscreen")
 
