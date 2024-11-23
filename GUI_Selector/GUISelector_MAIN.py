@@ -23,7 +23,6 @@ if __name__ == "__main__":
     # Load subject dictionary
     subj_dict_file = open("subject_dictionary.json", mode="r")
     subject_dict = json.load(subj_dict_file)
-    
     if not subjectID in subject_dict["subjects"].keys():
         print("NO SUBJECT DICTIONARY FOUND: EXITING")
         quit()
@@ -36,6 +35,10 @@ if __name__ == "__main__":
         loadstatus = filingcabinet.loadbackup(file_prefix, rule="newest")
         print("Backup load status: {}".format("SUCCESS" if loadstatus else "FAILURE"))
 
+    # Battery Check
+    allow_check_batteries = trial_type in ["VAS", "JND"] or (trial_type == "VICKREY" and trial_cond == "EPO")
+    print("BATTCHECK: ", allow_check_batteries)
+
     # DUMMY Check
     if subjectID == 'DUMMY':
         bertec = DumbBertec()
@@ -44,6 +47,7 @@ if __name__ == "__main__":
         bertec = Bertec()
         vicon = Vicon()
 
+    # GUI kwargs
     gui_kwargs = {"exoboot_remote": exoboot_remote,
                   "filingcabinet": filingcabinet,
                   "bertec": bertec,
@@ -53,9 +57,11 @@ if __name__ == "__main__":
                   "description": description,
                   "file_prefix": file_prefix,
                   "usebackup": usebackup,
+                  "allow_check_batteries": allow_check_batteries,
                   "subject_dict": subject_specific_info
                   }
     
+    # GUIs
     gui_dict = {"VICKREY": VickreyGUI, "VAS": VASGUI, "JND": JNDGUI, "PREF": PREFGUI, "ACCLIMATION": AcclimationGUI, "SPEEDFINDER": SpeedFinderGUI}
 
     # Run GUI

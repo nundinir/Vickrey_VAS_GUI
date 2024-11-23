@@ -16,8 +16,9 @@ def subtrial_timelimit(sm, dt):
 
 def splitsameschedule(sm):
     Clock.schedule_once(partial(initialize_comparison, sm), 0)
-    Clock.schedule_once(partial(check_batteries, sm), SUBTRIAL_MAX/sm.squeeze)
     Clock.schedule_once(partial(subtrial_timelimit, sm), SUBTRIAL_MAX/sm.squeeze)
+    if sm.allow_check_batteries:
+        Clock.schedule_once(partial(check_batteries, sm), SUBTRIAL_MAX/sm.squeeze)
 
 
 def pause_exo_bertec(sm, dt):

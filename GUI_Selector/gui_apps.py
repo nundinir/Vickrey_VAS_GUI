@@ -80,10 +80,11 @@ class VickreyGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, trial_cond=None, usebackup=False, subject_dict=None, **kwargs):
+    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, trial_cond=None, usebackup=False, allow_check_batteries=True, subject_dict=None, **kwargs):
         super().__init__("VICKREY", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
         self.trial_cond = trial_cond
         self.usebackup = usebackup
+        self.sm.allow_check_batteries = allow_check_batteries
         self.subject_dict = subject_dict
 
         # Get info from subject_dict
@@ -174,10 +175,11 @@ class VASGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, startstamp=None, usebackup=None, subject_dict=None, **kwargs):
+    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, startstamp=None, usebackup=None, allow_check_batteries=True, subject_dict=None, **kwargs):
         super().__init__("VAS", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
         self.startstamp = startstamp
         self.usebackup = usebackup
+        self.sm.allow_check_batteries = allow_check_batteries
         self.subject_dict = subject_dict
 
         # Get info from subject_dict
@@ -260,11 +262,12 @@ class JNDGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, trial_cond=None, description=None, usebackup=False, subject_dict=None, **kwargs):
+    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, trial_cond=None, description=None, usebackup=False, allow_check_batteries=True, subject_dict=None, **kwargs):
         super().__init__("JND", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
         self.jnd_type = trial_cond
         self.which_comparitor = description.upper()
         self.usebackup = usebackup
+        self.sm.allow_check_batteries = allow_check_batteries
         self.subject_dict = subject_dict
 
         # Get info from subject_dict

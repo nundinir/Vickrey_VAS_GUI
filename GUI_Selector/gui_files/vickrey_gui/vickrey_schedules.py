@@ -89,5 +89,6 @@ def result_screens_event(sm, dt):
     sm.statemachine.next_screen()
 
 def result_screens_schedule(sm):
-    Clock.schedule_once(partial(check_batteries, sm), 0)
+    if sm.allow_check_batteries:
+        Clock.schedule_once(partial(check_batteries, sm), 0)
     Clock.schedule_once(partial(result_screens_event,sm), (AUCTION_CLOSE - RESULT_SHOW)/sm.squeeze)

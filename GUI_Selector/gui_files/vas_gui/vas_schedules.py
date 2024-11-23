@@ -37,7 +37,8 @@ def waitingscreevasschedule(sm):
 
 
 def vasscreenschedule(sm):
-    Clock.schedule_once(partial(check_batteries, sm), 0)
+    if sm.allow_check_batteries:
+        Clock.schedule_once(partial(check_batteries, sm), 0)
 
 
 def finishscreenvasschedule(sm):
