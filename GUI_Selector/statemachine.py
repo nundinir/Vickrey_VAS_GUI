@@ -68,29 +68,41 @@ class VickreyStateMachine:
         else:
             subject_bid = 0
 
-        # Clamp bid
-        subject_bid = max(min(subject_bid, MAX_BID), 0)
+        # Clamp subject bid and round to 2 decimal places
+        subject_bid = round(max(min(subject_bid, MAX_BID), 0), 2)
 
-        # Get all bids from subject/robobidders
-        all_bids = [subject_bid]
-        all_bids.extend(self.robomodel.get_bids())
+        # Get robobids
+        robobids = self.robomodel.get_bids()
+        print("BIDS: ", subject_bid, robobids)
 
-        # Get winner
-        ordered_bids = sorted(all_bids)
-        self.winning_bid = ordered_bids[0]
-        winning_bid_idx = all_bids.index(self.winning_bid)
+        # Determine winning bid and all winners
+        all_bids = [subject_bid] + robobids
+        self.winning_bid = min(all_bids)
+        winners = [bid == self.winning_bid for bid in all_bids]
+        subject_win_flag = winners[0]
+        print("WINNERS", winners)
 
         # Get payout (Second price)
-        self.payout = ordered_bids[1] 
+        second_prices = sorted([i for i in all_bids if i != self.winning_bid])
+        
+        # Determine payout
+        if second_prices:
+            self.payout = second_prices[0]
+        else:
+            self.payout = self.winning_bid
 
-        # Find if subject won
-        if winning_bid_idx == 0:
+        # Determine subject auction results
+        if subject_win_flag:
             state = True
             self.total_winnings += self.payout
         else:
             state = False
-            robo_walk_time = ROBOWALK_DUR * (self.auction_tally + 1)
-            self.robomodel.robobidderlist[winning_bid_idx-1].walk(robo_walk_time, 0)
+        
+        # Robowalks
+        robo_walk_time = ROBOWALK_DUR * (self.auction_tally + 1)
+        for ind, robo_win_state in enumerate(winners[1:]):
+            if robo_win_state:
+                self.robomodel.robobidderlist[ind].walk(robo_walk_time, 0)
 
         # Update auction states
         self.prev_state = self.state

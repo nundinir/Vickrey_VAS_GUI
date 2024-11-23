@@ -14,7 +14,7 @@ class robobidder():
         self.newest_walk_end = 0
 
         # Perturbing initial k bid (representing noise in initial biding)
-        self.robovalue = self.k + np.random.normal(loc = 0, scale = 0.01) 
+        self.robovalue = self.k #+ np.random.normal(loc = 0, scale = 0.01) 
 
     def walk(self, walk_end_time, walk_start_time):
         """
@@ -42,7 +42,7 @@ class robobidder():
         """
         Return robovalue with added Gaussian noise
         """
-        return round(self.robovalue + np.random.normal(loc = 0, scale=0.01), 2)
+        return round(self.robovalue + 0, 2) #np.random.normal(loc = 0, scale=0.01)
 
 class roboModel():
     """
