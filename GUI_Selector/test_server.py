@@ -169,14 +169,14 @@ class DumbLoggingNexus:
     def get(self, threadname, field):
         if threadname == "exothread_left":
             if field == "battery_voltage":
-                return 20
+                return 20 * 1000
             return -3
         elif threadname == "exothread_right":
             if field == "battery_voltage":
-                return 72.72
+                return 72.72 * 1000
             return 72
         else:
-            return -1
+            return -11
 
 class DumbWrapper:
     def __init__(self, subjectID, trial_type, trial_cond, description, usebackup):
