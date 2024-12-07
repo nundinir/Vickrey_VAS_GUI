@@ -44,7 +44,7 @@ def startbttnvas_CB(instance):
 
 def buildpushtostartscreenvas():
     screen_= Screen(name="pushtostartscreen")
-    startbttn = Button(text="STOMP then Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
+    startbttn = Button(text="STOMP then Touch to begin", font_size='60', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbttnvas_CB)
     screen_.add_widget(startbttn)
 
@@ -60,7 +60,7 @@ def buildwaitingscreenvas(sm):
     else:
         waittext = "Take a break!\nTrial resumes in {:0.1f} minutes".format(MIN_WAIT_VAS/sm.squeeze/60)
 
-    waitlabel = Label(text=waittext, font_size='50', color=(1, 1, 1, 1))
+    waitlabel = Label(text=waittext, font_size='60', color=(1, 1, 1, 1))
     screen.add_widget(waitlabel)
 
     screen.on_enter = partial(waitingscreevasschedule, sm)
@@ -164,7 +164,7 @@ def buildbtns(sm, screen, buttons_origin, buttons_size, ranked=None):
             torque = sm.statemachine.get_torque(i)
             btntext = chr(65 + num_buttons - i - 1)
 
-        btn = Button(text='', font_size='50', color=(1,1,1), background_normal='', background_color= (0,0.5,0), size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y': origin_y})
+        btn = Button(text='', font_size='60', color=(1,1,1), background_normal='', background_color= (0,0.5,0), size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y': origin_y})
         btn.text = btntext
         btn.bind(on_press=btnpress)
         btn.torque = torque
@@ -223,7 +223,7 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
     mv_label_size = (1/10, 9/10)
 
     # Confirm Button
-    confirm_btn = Button(text='', font_size='50', color=(1,1,1), background_normal='', background_color=get_color_from_hex('#004B8D'), size_hint=confirm_btn_size, pos_hint=confirm_btn_origin)
+    confirm_btn = Button(text='', font_size='60', color=(1,1,1), background_normal='', background_color=get_color_from_hex('#004B8D'), size_hint=confirm_btn_size, pos_hint=confirm_btn_origin)
     confirm_btn.text = "Confirm" if not confirmed else "Finish"
     confirm_btn.signature = 1
     confirm_btn.confirmed = confirmed
@@ -231,19 +231,23 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
     confirm_btn.bind(on_press=confirmranking)
     screen.confirm_btn = confirm_btn
 
-    # NPO/EPO Text
-    # Label(text=f"${round(slider.value, 2)}", size_hint=(0.1, 0.1), pos_hint={'x': origin_x, 'y':origin_y}, color=(1.0,0,0))
-    npo_label = Label(text="${}".format(sm.NPO_MV), font_size='30', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 0, 'y': 1/10})
-    epo_label = Label(text="${}".format(sm.EPO_MV), font_size='30', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 7/10, 'y': 1/10})
+    # Get EPO/NPO MVs and use min/max for slider
+    mv_endpoints = [sm.NPO_MV, sm.EPO_MV]
+    slider_min = min(mv_endpoints)
+    slider_max = max(mv_endpoints)
 
-    buildsliders(sm, screen, sliders_origin=screen.sliders_origin, sliders_size=screen.sliders_size, ranked=ranked, slider_min=sm.NPO_MV, slider_max=sm.EPO_MV)
+    # Add Labels
+    min_label = Label(text="${}".format(slider_min), font_size='50', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 0, 'y': 1/10})
+    max_label = Label(text="${}".format(slider_max), font_size='50', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 7/10, 'y': 1/10})
+
+    buildsliders(sm, screen, sliders_origin=screen.sliders_origin, sliders_size=screen.sliders_size, ranked=ranked, slider_min=slider_min, slider_max=slider_max)
 
     buildbtns(sm, screen, screen.buttons_origin, screen.buttons_size, ranked=ranked)
     screen.prev_btn = 0
 
     screen.add_widget(confirm_btn)
-    screen.add_widget(npo_label)
-    screen.add_widget(epo_label)
+    screen.add_widget(min_label)
+    screen.add_widget(max_label)
 
     screen.on_enter = partial(vasscreenschedule, sm)
 
@@ -251,7 +255,7 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
 def buildfinishscreenvas(sm):
     screen = Screen(name="finishscreenvas")
     screen.sm = sm
-    finishlabel = Label(text="Trial Finished\nPlease step off the treadmill", font_size='50', color=(1, 0, 0, 1))
+    finishlabel = Label(text="Trial Finished\nPlease step off the treadmill", font_size='60', color=(1, 0, 0, 1))
     screen.add_widget(finishlabel)
     screen.on_enter = partial(finishscreenvasschedule, sm)
     return screen
