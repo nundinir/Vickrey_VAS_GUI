@@ -481,7 +481,6 @@ class JNDStateMachine:
             self.pickler.remove_pickle_file(PICKLE_FILE_PATH)
             self.next_screen()
         else:
-            
             # Calculate the starting index of circular roll
             self.pres += 1          # increment presentation number
             start_index = self.pres % len(self.staircases)
@@ -532,7 +531,6 @@ class JNDStateMachine:
         if not self.subtrial_limit:
             self.next_comparison()
         else:
-            self.walknum += 1
             self.next_screen()
 
     def report_higher_same(self):
