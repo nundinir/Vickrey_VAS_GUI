@@ -52,8 +52,7 @@ def walksreenprefschedule(sm):
     else:
         print("NOT A VALID in walkscreenprefschedule")
 
-    print("{}: {}".format(pref_type, torque))
-    Clock.schedule_once(partial(sm.statemachine.report_pref, torque), WALK_TIME_PREF/sm.squeeze)
+    Clock.schedule_once(partial(sm.statemachine.report_pref, torque), MANDATORY_WALK_PREF/sm.squeeze)
 
 
 def prefmandatorywalk(sm):
@@ -61,10 +60,10 @@ def prefmandatorywalk(sm):
     Start mandatory walk period after subject has chosen their preferred torque for the round
     """
     def setmandatorywalktext(sm ,dt):
-        if MIN_WAIT_PREF/sm.squeeze < 60:
-            walktext = "Continue walking for {} seconds".format(int(MIN_WAIT_PREF/sm.squeeze))
+        if MANDATORY_WALK_PREF/sm.squeeze < 60:
+            walktext = "Continue walking for {} seconds".format(int(MANDATORY_WALK_PREF/sm.squeeze))
         else:
-            walktext = "Continue walking for {:0.1f} minutes".format(MIN_WAIT_PREF/sm.squeeze/60)
+            walktext = "Continue walking for {:0.1f} minutes".format(MANDATORY_WALK_PREF/sm.squeeze/60)
         sm.prefscreen.confirm_btn.text = walktext
         sm.prefscreen.confirm_btn.background_color = (0, 1, 1)
 
@@ -81,7 +80,7 @@ def prefmandatorywalk(sm):
 
     # Kivy Clock Scheduling
     Clock.schedule_once(partial(setmandatorywalktext, sm), 0) 
-    Clock.schedule_once(partial(reportprefandcleanup, sm), WALK_TIME_PREF/sm.squeeze)
+    Clock.schedule_once(partial(reportprefandcleanup, sm), MANDATORY_WALK_PREF/sm.squeeze)
 
 
 def prefscreenschedule(sm):
@@ -90,7 +89,6 @@ def prefscreenschedule(sm):
     Unpauses exoboots to begin
     """
     def reset_prefscreen(sm, dt):
-        print("RESETTING")
         sm.prefscreen.confirm_btn.confirmed = False
         if sm.statemachine.pref_type == "DIAL":
             sm.prefscreen.confirm_btn.lock = False
@@ -101,7 +99,6 @@ def prefscreenschedule(sm):
         sm.exoboot_remote.set_pause(mybool=False)
     
     # Kivy Clock Scheduling
-    print("QWERT: 1")
     Clock.schedule_once(partial(reset_prefscreen, sm), 0)
     Clock.schedule_once(partial(trial_start, sm), 0)
 

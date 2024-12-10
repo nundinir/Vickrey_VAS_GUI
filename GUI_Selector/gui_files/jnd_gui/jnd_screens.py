@@ -11,16 +11,20 @@ from gui_files.jnd_gui.jnd_schedules import splitsameschedule, waitingscreenjnds
 from shared_files.kivy_utils import CountDownTimer
 
 
-def startbtn_CB(instance):
-    sm = instance.parent.parent
-    # Set bertec speed
-    sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-    # Unpause exoboots
-    sm.exoboot_remote.set_pause(mybool=False)
-    # Next screen
-    sm.statemachine.next_screen()
-
 def buildpushtostartscreenjnd():
+    """
+    Push to start screen for jnd
+    """
+    def startbtn_CB(instance):
+        sm = instance.parent.parent
+        # Set bertec speed
+        sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+        # Unpause exoboots
+        sm.exoboot_remote.set_pause(mybool=False)
+        # Next screen
+        sm.statemachine.next_screen()
+
+    # Build screen
     screen = Screen(name="pushtostartscreenjnd")
     startbttn = Button(text="STOMP then Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbtn_CB)
@@ -30,6 +34,9 @@ def buildpushtostartscreenjnd():
 
 
 def buildwaitingscreenjnd(sm):
+    """
+    Enforced minimum waiting period between jnd rounds
+    """
     screen = Screen(name="waitingscreenjnd")
     screen.sm = sm
     if MIN_WAIT_JND/sm.squeeze < 60:
@@ -48,15 +55,21 @@ def disable_btns(screen, mybool, dt):
     for btn in screen.children:
         btn.disabled = mybool
 
-def report_higher(instance):
-    screen = instance.parent
-    disable_btns(screen, True, 0)
-    Clock.schedule_once(partial(disable_btns, screen, False), 0.1)
-
-    sm = instance.parent.parent
-    sm.statemachine.report_higher(instance.signature)
 
 def buildsplitlegscreen(sm):
+    """
+    Splitleg screen for JND
+    Left and Right button
+    """
+    def report_higher(instance):
+        screen = instance.parent
+        disable_btns(screen, True, 0)
+        Clock.schedule_once(partial(disable_btns, screen, False), 0.1)
+
+        sm = instance.parent.parent
+        sm.statemachine.report_higher(instance.signature)
+
+    # Build screen
     screen = Screen(name="splitlegscreen")
     screen.sm = sm
 
@@ -75,32 +88,37 @@ def buildsplitlegscreen(sm):
     return screen
 
 
-def swap_torques(instance):
-    # when swap button is pressed, the button color should change
-    if instance.is_blue:
-        instance.background_color = (0, 0, 1, 1)  # If it's currently blue, change to red
-    else:
-        instance.background_color = (0, 1, 1, 1)   # if it's current red, change to blue
-
-    # switch flag for button color
-    instance.is_blue = not instance.is_blue
-    
-    # flip-flop the comparison torque and reference torque stimuli
-    sm = instance.parent.parent
-    stma = sm.statemachine
-    stma.peak_torque_ind = 1 - stma.peak_torque_ind # FROM STATEMACHINE
-    # Command peak torque
-    sm.exoboot_remote.set_torques(peak_torque_left=stma.peak_torques[stma.peak_torque_ind], peak_torque_right=stma.peak_torques[stma.peak_torque_ind])
-
-def confirm_answer(instance):
-    screen = instance.parent
-    disable_btns(screen, True, 0)
-    Clock.schedule_once(partial(disable_btns, screen, False), 0.1)
-
-    sm = instance.parent.parent
-    sm.statemachine.report_higher()
-
 def buildsamelegscreen(sm):
+    """
+    Same leg screen for JND
+    Swap and confirm button
+    """
+    def swap_torques(instance):
+        # Toggle swap button colors
+        if instance.is_blue:
+            instance.background_color = (0, 0, 1, 1)
+        else:
+            instance.background_color = (0, 1, 1, 1)
+
+        instance.is_blue = not instance.is_blue
+        
+        # Toggle between torques
+        sm = instance.parent.parent
+        stma = sm.statemachine
+        stma.peak_torque_ind = 1 - stma.peak_torque_ind # FROM STATEMACHINE
+
+        # Command peak torque
+        sm.exoboot_remote.set_torques(peak_torque_left=stma.peak_torques[stma.peak_torque_ind], peak_torque_right=stma.peak_torques[stma.peak_torque_ind])
+
+    def confirm_answer(instance):
+        screen = instance.parent
+        disable_btns(screen, True, 0)
+        Clock.schedule_once(partial(disable_btns, screen, False), 0.1)
+
+        sm = instance.parent.parent
+        sm.statemachine.report_higher()
+
+    # Build screen
     screen = Screen(name="samelegscreen")
     screen.sm = sm
 
@@ -120,6 +138,9 @@ def buildsamelegscreen(sm):
 
 
 def buildfinishscreenjnd(sm):
+    """
+    Finish screen for JND
+    """
     screen = Screen(name="finishscreenjnd")
     screen.sm = sm
     finishlabel = Label(text="Trial Finished\nPlease step off the treadmill", font_size='50', color=(1, 0, 0, 1))

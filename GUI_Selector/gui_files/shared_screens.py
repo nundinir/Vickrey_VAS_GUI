@@ -18,7 +18,12 @@ def pause_exo_bertec(sm, dt):
     # Stop Vicon
     sm.vicon.stop_recording()
 
+
 def check_batteries(sm, dt):
+    """
+    Check battery voltages
+    If lower than BATTV_LOWEr_LIM, interrupts gui for battery replacement break
+    """
     battv_left = sm.exoboot_remote.getpack("exothread_left", "battery_voltage")/2
     battv_right = sm.exoboot_remote.getpack("exothread_right", "battery_voltage")/2
 
@@ -30,7 +35,11 @@ def check_batteries(sm, dt):
         sm.batteryscreen.label.text = "BATTERY BREAK\nBATTV LEFT: {:0.2f}\nBATTV RIGHT: {:0.2f}".format(battv_left, battv_right)
         sm.statemachine.queue_screen("batteryscreen")
 
+
 def buildbatteryscreen(sm):
+    """
+    Shows battery voltages for each exoboot
+    """
     screen = Screen(name="batteryscreen")
     screen.label = Label(text='', font_size='50', color = (1,1,1))
     screen.add_widget(screen.label)

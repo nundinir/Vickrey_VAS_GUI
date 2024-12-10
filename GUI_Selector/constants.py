@@ -24,10 +24,10 @@ INITIAL_BIDDING_CLOSE = 30
 RESULT_SHOW = 100
 
 # Bid settings
-MAX_BID = 100
+MAX_BID = 100 # $s
 
 # Robobidder constants
-ROBOWALK_DUR = 2 # min
+ROBOWALK_DUR = 2 # mins
 NUM_ROBOBIDDERS = 2
 k_RB = 0.4395073979128712
 b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
@@ -49,16 +49,17 @@ EPO_MV = 100
 SUBTRIAL_MAX = 120
 MIN_WAIT_JND = 60
 
+# Torque limits
 TORQUE_MIN = 7
 TORQUE_MAX = 40
 
-# specific uniform sampler comparitor settings
+# Uniform sampler comparitor settings
 NUM_BINS = 21
 PROP_LOW = 0.5
 PROP_HIGH = 1.5
 MAX_QUERIES = 150
 
-# specific staircase comparitor settings
+# Staircase comparitor settings
 REF_LIST = [18, 29]
 RIGHT_LIM = 2   # num of consecutive right(s) after which distance from ref will decrease
 RATIO = 0.947   # ratio of step_down(correct)/step_up(incorrect)
@@ -73,20 +74,20 @@ PICKLE_FILE_PATH = "jnd_staircase.pkl"  # To Load/Save the staircase objects
 """PREF SPECIFIC"""
 # PREF timing in seconds
 MIN_WAIT_PREF = 60
-WALK_TIME_PREF = 120
+MANDATORY_WALK_PREF = 120
 
-# Buttons
-PREF_ROWS = 4
-PREF_COLS = 5
+# Max Trials
+MAX_PRES_PREF = 3
 
 # Slider
 PREF_STEP = 1.0
 
+# Button
+PREF_ROWS = 4
+PREF_COLS = 5
+
 # Dial
 DIAL_SENSITIVITY_FACTOR = 0.08
-
-# Max Trials
-MAX_PRES_PREF = 3
 
 
 """ACCLIMATION SPECIFIC"""
@@ -94,6 +95,7 @@ ACCL_STEP = 1.0
 
 
 """SPEEDFINDER SPECIFIC"""
+# TODO remove
 F_TARGET = 105.0 # spm
 V_INITIAL = 1.0 # m/s
 ERROR_THRESHOLD = 0.005

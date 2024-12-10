@@ -10,18 +10,22 @@ from constants import *
 from gui_files.vickrey_gui.vickrey_schedules import *
 from shared_files.kivy_utils import CountDownTimer
 
-# push to start screen
-def startbttn_CB(instance):
-    sm = instance.parent.parent
-    if sm.statemachine.auction_tally > 0 and sm.statemachine.state:
-        # Start treadmill and unpause exoboots
-        sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-        sm.exoboot_remote.set_pause(mybool=False)
-        sm.exoboot_remote.set_torques(peak_torque_left=sm.peak_torque, peak_torque_right=sm.peak_torque)
-
-    sm.statemachine.next_screen()
 
 def buildpushtostartscreen(sm):
+    """
+    Push to start screen for VICKREY
+    """
+    def startbttn_CB(instance):
+        sm = instance.parent.parent
+        if sm.statemachine.auction_tally > 0 and sm.statemachine.state:
+            # Start treadmill and unpause exoboots
+            sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+            sm.exoboot_remote.set_pause(mybool=False)
+            sm.exoboot_remote.set_torques(peak_torque_left=sm.peak_torque, peak_torque_right=sm.peak_torque)
+
+        sm.statemachine.next_screen()
+
+    # Build screen
     screen = Screen(name="pushtostartscreen")
 
     backupflag = sm.statemachine.backupflag
@@ -49,24 +53,26 @@ def buildpushtostartscreen(sm):
     return screen, startbttn
 
 
-# numpad screen
-def numpad_cb(instance):
-    sm = instance.parent.parent
-    sm.bid += instance.val
-    sm.bid_input.text = decimal_format(sm.bid)
-
-def BCKSPC_CB(instance):
-    sm = instance.parent.parent
-    sm.bid = sm.bid[:-1]
-    sm.bid_input.text = decimal_format(sm.bid)
-
-def CLEAR_CB(instance):
-    sm = instance.parent.parent
-    sm.bid = ''
-    sm.bid_input.text = decimal_format(sm.bid)
-
-
 def buildNumPadScreen(sm):
+    """
+    Numpad for entering bids
+    """
+    def numpad_cb(instance):
+        sm = instance.parent.parent
+        sm.bid += instance.val
+        sm.bid_input.text = decimal_format(sm.bid)
+
+    def BCKSPC_CB(instance):
+        sm = instance.parent.parent
+        sm.bid = sm.bid[:-1]
+        sm.bid_input.text = decimal_format(sm.bid)
+
+    def CLEAR_CB(instance):
+        sm = instance.parent.parent
+        sm.bid = ''
+        sm.bid_input.text = decimal_format(sm.bid)
+
+    # Build screen
     screen = Screen(name="numpad")
     screen.sm = sm
 
@@ -112,16 +118,20 @@ def buildNumPadScreen(sm):
 
     return screen
 
-# survey screen
-def enjoyment_cb(instance):
-    sm = instance.parent.parent
-    sm.enjoyment = instance.val
-
-def rpe_cb(instance):
-    sm = instance.parent.parent
-    sm.rpe = instance.val
 
 def buildsurveyscreen(sm):
+    """
+    Get subjects enjoyment out of 5 and rpe from 6 to 20
+    """
+    def enjoyment_cb(instance):
+        sm = instance.parent.parent
+        sm.enjoyment = instance.val
+
+    def rpe_cb(instance):
+        sm = instance.parent.parent
+        sm.rpe = instance.val
+
+    # Build screen
     screen = Screen(name="survey")
     screen.sm = sm
 
@@ -152,7 +162,11 @@ def buildsurveyscreen(sm):
 
     return screen
 
+
 def buildresultscreen(sm):
+    """
+    Show result of auction
+    """
     screen = Screen(name="resultscreen")
     screen.label = Label(text='', font_size='50')
     screen.add_widget(screen.label)

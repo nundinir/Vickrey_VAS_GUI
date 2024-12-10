@@ -26,32 +26,41 @@ from gui_files.pref_gui.pref_schedules import waitingscreenprefschedule, walksre
 
 from gui_files.pref_gui.continuous_dial_class import PrefDial
 
-def startbtn_CB(instance):
-    sm = instance.parent.parent
-    # Set bertec speed
-    sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-    # Unpause exoboots
-    sm.exoboot_remote.set_pause(mybool=False)
-    # Next screen
-    sm.statemachine.next_screen()
 
 def buildpushtostartscreenpref(sm):
+    """
+    Push to start screen
+    """
+    def startbtn_CB(instance):
+        sm = instance.parent.parent
+        # Set bertec speed
+        sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+        # Unpause exoboots
+        sm.exoboot_remote.set_pause(mybool=False)
+        # Next screen
+        sm.statemachine.next_screen()
+
+    # Build screen
     screen = Screen(name="pushtostartscreenpref")
     screen.sm = sm
     startbttn = Button(text="STOMP then Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbtn_CB)
     screen.add_widget(startbttn)
-    
+
     return screen
 
 
 def buildwalkscreenpref(sm):
+    """
+    Mandatory walk screen
+    """
     screen = Screen(name="walkscreenpref")
     screen.sm = sm
+
     if MIN_WAIT_PREF/sm.squeeze < 60:
-        walktext = "Continue walking for {} seconds".format(int(WALK_TIME_PREF/sm.squeeze))
+        walktext = "Continue walking for {} seconds".format(int(MANDATORY_WALK_PREF/sm.squeeze))
     else:
-        walktext = "Continue walking for {:0.1f} minutes".format(WALK_TIME_PREF/sm.squeeze/60)
+        walktext = "Continue walking for {:0.1f} minutes".format(MANDATORY_WALK_PREF/sm.squeeze/60)
     walklabel = Label(text=walktext, font_size='50', color=(1, 1, 1, 1))
     screen.add_widget(walklabel)
 
@@ -60,8 +69,12 @@ def buildwalkscreenpref(sm):
     return screen
 
 def buildwaitingscreenpref(sm):
+    """
+    Mandatory waiting screen
+    """
     screen = Screen(name="waitingscreenpref")
     screen.sm = sm
+
     if MIN_WAIT_PREF/sm.squeeze < 60:
         waittext = "Take a break!\nTrial resumes in {} seconds".format(int(MIN_WAIT_PREF/sm.squeeze))
     else:
@@ -76,32 +89,37 @@ def buildwaitingscreenpref(sm):
 def disable_btn(screen, mybool, dt):
     screen.confirm_btn.disabled = mybool
         
-def onslidermotion(instance, torque):
-    # Reset confirm button 
-    if instance.parent.confirm_btn.confirmed:
-        instance.parent.confirm_btn.confirmed = False
-        instance.parent.confirm_btn.background_color = (0.75,0,0)
-        instance.parent.confirm_btn.text = "Confirm"
-
-    sm = instance.parent.parent
-    torque = instance.parent.tslider.value
-    sm.exoboot_remote.set_torques(peak_torque_left=torque, peak_torque_right=torque)
-
-def confirm_slider_pref(instance):
-    if instance.confirmed:
-        sm = instance.parent.parent
-        sm.statemachine.next_screen()
-    else:
-        instance.confirmed = True
-        instance.background_color = (1,0,0)
-        instance.text = "ARE YOU SURE?"
-
-        screen = instance.parent
-        
-        disable_btn(screen, True, 0)
-        Clock.schedule_once(partial(disable_btn, screen, False), 0.2)
-        
 def buildsliderscreenpref(sm):
+    """
+    Pref slider screen with confirm button
+    """ 
+    def onslidermotion(instance, torque):
+        if instance.parent.confirm_btn.confirmed:
+            # Reset confirm button if slider moved
+            instance.parent.confirm_btn.confirmed = False
+            instance.parent.confirm_btn.background_color = (0.75,0,0)
+            instance.parent.confirm_btn.text = "Confirm"
+
+        # Report torque
+        sm = instance.parent.parent
+        torque = instance.parent.tslider.value
+        sm.exoboot_remote.set_torques(peak_torque_left=torque, peak_torque_right=torque)
+
+    def confirm_slider_pref(instance):
+        if instance.confirmed:
+            sm = instance.parent.parent
+            sm.statemachine.next_screen()
+        else:
+            instance.confirmed = True
+            instance.background_color = (1,0,0)
+            instance.text = "ARE YOU SURE?"
+
+            screen = instance.parent
+            
+            disable_btn(screen, True, 0)
+            Clock.schedule_once(partial(disable_btn, screen, False), 0.2)
+    
+    # Build screen
     screen = Screen(name="sliderscreen")
     screen.sm = sm
 
@@ -116,56 +134,61 @@ def buildsliderscreenpref(sm):
     screen.add_widget(confirm_btn)
     screen.confirm_btn = confirm_btn
 
-    screen.on_enter = partial(prefscreenschedule, sm)
+    screen.on_pre_enter = partial(prefscreenschedule, sm)
 
     return screen
 
 
-def map_btnnum_to_torque(btnnum, max_btn, t_min=TORQUE_MIN, t_max=TORQUE_MAX):
-    return (t_max - t_min) / (max_btn - 1) * btnnum + t_min
-
-def btnpress(instance):
-    sm = instance.parent.parent
-    screen = instance.parent
-
-    # Current instance
-    torque = instance.torque
-    sm.exoboot_remote.set_torques(peak_torque_left=torque, peak_torque_right=torque)
-    instance.visited = True
-    instance.color = (1, 1, 1)
-    instance.background_color = (0, 0, 0.9)
-
-    # Unconfirm confirm_btn
-    screen.confirm_btn.text = "Confirm"
-    screen.confirm_btn.confirmed = False
-    screen.confirm_btn.background_color = (0.75, 0, 0)
-
-    # Recolor previous button
-    if screen.prev_btn and instance != screen.prev_btn:
-        screen.prev_btn.background_color = (0, 0.75, 0)
-    screen.prev_btn = instance
-
-    # Activate confirm button if all btns visited
-    if screen.confirm_btn.disabled:
-        for btn in screen.children:
-            if btn.signature and not btn.visited:
-                return
-        screen.confirm_btn.disabled = False
-
-def confirm_btn_pref(instance):
-    sm = instance.parent.parent
-    screen = instance.parent
-    if instance.confirmed:
-        sm.statemachine.next_screen()
-    else:
-        instance.confirmed = True
-        instance.background_color = (1,0,0)
-        instance.text = "ARE YOU SURE?"
-
-        disable_btn(screen, True, 0)
-        Clock.schedule_once(partial(disable_btn, screen, False), 0.1)
-
 def buildbtnscreenpref(sm, screen):
+    """
+    Button screen formatter
+    Clear screen then add button grid and confirm button
+    """
+    def map_btnnum_to_torque(btnnum, max_btn, t_min=TORQUE_MIN, t_max=TORQUE_MAX):
+        return (t_max - t_min) / (max_btn - 1) * btnnum + t_min
+
+    def btnpress(instance):
+        sm = instance.parent.parent
+        screen = instance.parent
+
+        # Current instance
+        torque = instance.torque
+        sm.exoboot_remote.set_torques(peak_torque_left=torque, peak_torque_right=torque)
+        instance.visited = True
+        instance.color = (1, 1, 1)
+        instance.background_color = (0, 0, 0.9)
+
+        # Unconfirm confirm_btn
+        screen.confirm_btn.text = "Confirm"
+        screen.confirm_btn.confirmed = False
+        screen.confirm_btn.background_color = (0.75, 0, 0)
+
+        # Recolor previous button
+        if screen.prev_btn and instance != screen.prev_btn:
+            screen.prev_btn.background_color = (0, 0.75, 0)
+        screen.prev_btn = instance
+
+        # Activate confirm button if all btns visited
+        if screen.confirm_btn.disabled:
+            for btn in screen.children:
+                if btn.signature and not btn.visited:
+                    return
+            screen.confirm_btn.disabled = False
+
+    def confirm_btn_pref(instance):
+        sm = instance.parent.parent
+        screen = instance.parent
+        if instance.confirmed:
+            sm.statemachine.next_screen()
+        else:
+            instance.confirmed = True
+            instance.background_color = (1,0,0)
+            instance.text = "ARE YOU SURE?"
+
+            disable_btn(screen, True, 0)
+            Clock.schedule_once(partial(disable_btn, screen, False), 0.1)
+
+    # Build screen
     screen.clear_widgets()
 
     confirm_btn_height = 1/5
@@ -180,7 +203,7 @@ def buildbtnscreenpref(sm, screen):
     btnnums = [i for i in range(PREF_ROWS * PREF_COLS)]
     random.shuffle(btnnums)
 
-    # Build Prefence Buttons
+    # Build Preference Buttons
     for row in range(PREF_ROWS):
         for col in range(PREF_COLS):
             xpos = col/PREF_COLS
@@ -196,51 +219,52 @@ def buildbtnscreenpref(sm, screen):
 
     screen.prev_btn = 0
 
+    # Call itself to reset the screen
     screen.on_pre_enter = partial(buildbtnscreenpref, sm, screen)
     screen.on_enter = partial(prefscreenschedule, sm)
 
-
-def confirm_dial_pref(instance):
-    """
-    Allows subject to start mandatory walk by confirming twice
-    Once mandatory walk is started button is locked and round ends automatically by timer
-    Subject can still alter selected torque during mandatory walk period
-    """
-    if not instance.lock:
-        if instance.confirmed:
-            instance.lock = True
-            sm = instance.parent.parent
-            prefmandatorywalk(sm)
-        else:
-            instance.confirmed = True
-            instance.background_color = (1,0,0)
-            instance.text = "ARE YOU SURE?"
-
-            screen = instance.parent
-            disable_btn(screen, True, 0)
-            Clock.schedule_once(partial(disable_btn, screen, False), 0.2)
-
-def ondialmotion(instance, torque):
-    """
-    Report torques during dial motion
-    Reset confirm button if not fully confirmed
-    Does not reset confirm button if button is fully confirmed/locked
-    """
-    if instance.parent.confirm_btn.confirmed and not instance.parent.confirm_btn.lock:
-        instance.parent.confirm_btn.confirmed = False
-        instance.parent.confirm_btn.background_color = (0.75,0,0)
-        instance.parent.confirm_btn.text = "Confirm"
-
-    sm = instance.parent.parent
-    torque = instance.parent.dial.torque_value
-    sm.exoboot_remote.set_torques(peak_torque_left=torque, peak_torque_right=torque)
 
 def builddialscreenpref(sm):
     """
     Preference Dial screen.
     Dial has no defined limits but has max and min torques
-    
     """
+    def confirm_dial_pref(instance):
+        """
+        Allows subject to start mandatory walk by confirming twice
+        Once mandatory walk is started button is locked and round ends automatically by timer
+        Subject can still alter selected torque during mandatory walk period
+        """
+        if not instance.lock:
+            if instance.confirmed:
+                instance.lock = True
+                sm = instance.parent.parent
+                prefmandatorywalk(sm)
+            else:
+                instance.confirmed = True
+                instance.background_color = (1,0,0)
+                instance.text = "ARE YOU SURE?"
+
+                screen = instance.parent
+                disable_btn(screen, True, 0)
+                Clock.schedule_once(partial(disable_btn, screen, False), 0.2)
+
+    def ondialmotion(instance, torque):
+        """
+        Report torques during dial motion
+        Reset confirm button if not fully confirmed
+        Does not reset confirm button if button is fully confirmed/locked
+        """
+        if instance.parent.confirm_btn.confirmed and not instance.parent.confirm_btn.lock:
+            instance.parent.confirm_btn.confirmed = False
+            instance.parent.confirm_btn.background_color = (0.75,0,0)
+            instance.parent.confirm_btn.text = "Confirm"
+
+        sm = instance.parent.parent
+        torque = instance.parent.dial.torque_value
+        sm.exoboot_remote.set_torques(peak_torque_left=torque, peak_torque_right=torque)
+
+    # Build screen
     screen = Screen(name="dialscreen")
     screen.sm = sm
     
@@ -251,7 +275,7 @@ def builddialscreenpref(sm):
     dial = PrefDial(min_torque=TORQUE_MIN, 
                     max_torque=TORQUE_MAX, 
                     full_rotations_required=3, 
-                    torque_value = rand_start_torque)
+                    torque_value=rand_start_torque)
     
     # Set the size of the slider
     dial.size_hint = (0.65, 0.65)
@@ -278,7 +302,11 @@ def builddialscreenpref(sm):
 
     return screen
 
+
 def buildfinishscreenpref(sm):
+    """
+    Trial finished screen
+    """
     screen = Screen(name="finishscreenpref")
     screen.sm = sm
 
