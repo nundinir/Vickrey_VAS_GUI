@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import exoboot_remote.exoboot_remote_pb2 as exoboot__remote__pb2
+import exoboot_remote_pb2 as exoboot__remote__pb2
 
 GRPC_GENERATED_VERSION = '1.64.1'
 GRPC_VERSION = grpc.__version__
@@ -115,6 +115,11 @@ class exoboot_over_networkStub(object):
                 request_serializer=exoboot__remote__pb2.preference.SerializeToString,
                 response_deserializer=exoboot__remote__pb2.receipt.FromString,
                 _registered_method=True)
+        self.gen_msg_test = channel.unary_unary(
+                '/exoboot_over_network/gen_msg_test',
+                request_serializer=exoboot__remote__pb2.gen_msg.SerializeToString,
+                response_deserializer=exoboot__remote__pb2.receipt.FromString,
+                _registered_method=True)
 
 
 class exoboot_over_networkServicer(object):
@@ -217,6 +222,13 @@ class exoboot_over_networkServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def gen_msg_test(self, request, context):
+        """General Message
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_exoboot_over_networkServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -293,6 +305,11 @@ def add_exoboot_over_networkServicer_to_server(servicer, server):
             'pref_result': grpc.unary_unary_rpc_method_handler(
                     servicer.pref_result,
                     request_deserializer=exoboot__remote__pb2.preference.FromString,
+                    response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
+            ),
+            'gen_msg_test': grpc.unary_unary_rpc_method_handler(
+                    servicer.gen_msg_test,
+                    request_deserializer=exoboot__remote__pb2.gen_msg.FromString,
                     response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
             ),
     }
@@ -701,6 +718,33 @@ class exoboot_over_network(object):
             target,
             '/exoboot_over_network/pref_result',
             exoboot__remote__pb2.preference.SerializeToString,
+            exoboot__remote__pb2.receipt.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def gen_msg_test(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/exoboot_over_network/gen_msg_test',
+            exoboot__remote__pb2.gen_msg.SerializeToString,
             exoboot__remote__pb2.receipt.FromString,
             options,
             channel_credentials,

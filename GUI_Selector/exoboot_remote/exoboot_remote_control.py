@@ -1,6 +1,9 @@
-import os, csv, time, grpc, threading
+import os, sys, csv, time, grpc, threading
 from typing import Type
 from concurrent import futures
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 import exoboot_remote.exoboot_remote_pb2 as pb2
 import exoboot_remote.exoboot_remote_pb2_grpc as pb2_grpc
@@ -15,6 +18,10 @@ class ExobootRemoteClient:
         self.channel = grpc.insecure_channel(server_IP)
         self.stub = pb2_grpc.exoboot_over_networkStub(self.channel)
         self.startstamp = 0
+
+    # @staticmethod
+    # def gen_msg_encoder(datadict):
+    #     return pb2.gen_msg()
 
 # General Methods    
     def testconnection(self, guiname='none'):
@@ -139,6 +146,11 @@ class ExobootRemoteClient:
     def pref_result(self, pres, torque):
         prefmsg = pb2.preference(pres=pres, torque=torque)
         response = self.stub.pref_result(prefmsg)
+        return response
+    
+    def gen_msg_test(self, datadict):
+        msg = self.gen_msg_encoder(datadict)
+        response = self.stub.gen_msg_test(msg)
         return response
 
 
@@ -436,6 +448,10 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
             csv.writer(f).writerow(datalist)
         return pb2.receipt(received=True)
 
+    def gen_msg_test(self, gen_msg, context):
+        print("GEN_MSG_TEST NOT FOR PROD USE")
+
+        return pb2.receipt(received=True)
 
 class ExobootRemoteServerThread(BaseThread):
     """
@@ -464,3 +480,62 @@ class ExobootRemoteServerThread(BaseThread):
     def run(self):
         while self.quit_event.is_set():
             self.start_server()
+
+
+def gen_msg_encoder(datadict):
+    """
+    Encode a gen_msg with datadicts contents
+    Only accepts string, float, and bool vecs
+    """
+    mygenmsg = pb2.gen_msg()
+    for field, value in datadict.items():
+        if value or isinstance(value, bool):
+            if isinstance(value, list):
+                exampleval = value[0]
+                if isinstance(exampleval, str):
+                    mygenmsg.stringvecs.add(field=field, value=value)
+                elif isinstance(exampleval, bool):
+                    mygenmsg.boolvecs.add(field=field, value=value)
+                elif isinstance(exampleval, float) or isinstance(exampleval, int):
+                    mygenmsg.floatvecs.add(field=field, value=value)
+            elif isinstance(value, str):
+                mygenmsg.stringsingles.add(field=field, value=value)
+            elif isinstance(value, bool):
+                mygenmsg.boolsingles.add(field=field, value=value)
+            elif isinstance(value, float) or isinstance(value, int):
+                mygenmsg.floatsingles.add(field=field, value=value)
+            else:
+                print("BAD: ", field, value)
+                pass
+    return mygenmsg
+
+def gen_msg_decoder(genmsg):
+    """
+    Recreate dict from gen_msg
+    """
+    datadict = {}
+    for instances in [genmsg.stringsingles, genmsg.stringvecs, genmsg.floatsingles, genmsg.floatvecs, genmsg.boolsingles, genmsg.boolvecs]:
+        if instances:
+            for instance in instances:
+                datadict[instance.field] = instance.value
+    return datadict
+
+
+if __name__ == "__main__":
+    very_important_data = { "empty": [], "listoflists": [[], [], []], "mystring": "singleton", "necessary_strings": ['a', 'b', 'c'], "mynum": -37, "secret_numbers": [1, 2, 3, 4], "mybool": False, "important_bools": [True, False, True]}
+    print("ORIGINAL: {}".format(very_important_data))
+
+    # Encode dict into gen_msg
+    msg = gen_msg_encoder(very_important_data)
+
+    # Decode gen_msg back into dict
+    recreated_dict = gen_msg_decoder(msg)
+    print("\nRECREATION: {}".format(recreated_dict))
+
+    print("\nCheck Recreation...")
+    print("Should include only string, float, and bool vecs")
+    for field in very_important_data.keys():
+        try:
+            assert recreated_dict[field] == very_important_data[field]
+        except:
+            print("\tMissing: {}".format(field))
