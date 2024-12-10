@@ -644,10 +644,10 @@ class PrefStateMachine:
                 self.next_screen_dict["btnscreen"] = "walkscreenpref"
             case 'DIAL':
                 self.next_screen_dict["pushtostartscreenpref"] = "dialscreen"
-                self.next_screen_dict["dialscreen"] = "walkscreenpref"
+                self.next_screen_dict["dialscreen"] = "waitingscreenpref"
                 
 
-    def report_pref(self, torque):
+    def report_pref(self, torque, *vargs):
         """
         Sends preferred torque to pi
         """
@@ -655,9 +655,7 @@ class PrefStateMachine:
         self.pres += 1
         if self.pres >= MAX_PRES_PREF:
             self.quit_flag = True
-            self.sm.current = "walkscreenpref"
-        else:
-            self.next_screen()
+        self.next_screen()
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
@@ -679,6 +677,7 @@ class AcclimationStateMachine:
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
         self.sm.current = self.next_screen_dict[self.sm.current]
+
 
 class SpeedFinderStateMachine:
     # TODO implement way to get steps from exoboot_remote???

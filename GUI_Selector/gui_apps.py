@@ -421,7 +421,7 @@ class PREFGUI(BaseGui):
             case "DIAL":
                 dialscreenpref = builddialscreenpref(self.sm)
                 self.sm.add_widget(dialscreenpref)
-                self.sm.dialscreenpref = dialscreenpref
+                self.sm.prefscreen = dialscreenpref
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenpref"

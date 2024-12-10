@@ -5,7 +5,7 @@
             "pref_torque": 31.415,
             "EPO_MV": 9001,
             "NPO_MV": -404,
-            "squeeze": 15
+            "squeeze": 20
         },
         "TESTER": {
             "bertec_speed": 0.9,

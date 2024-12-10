@@ -46,7 +46,7 @@ def trial_ready(sm, dt):
 
 def waitingscreenjndschedule(sm):
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
-    
+
     # Increment walknum
     sm.statemachine.walknum += 1
 

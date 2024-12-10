@@ -35,7 +35,7 @@ class ExobootRemoteClient:
         Synchronize logging using startstamp reference from rpi
         """
         startstampmsg = self.stub.set_startstamp(pb2.null)
-        self.startstamp = startstampmsg.time 
+        self.startstamp = startstampmsg.time
 
     def get_subject_info(self):
         """

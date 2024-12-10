@@ -22,7 +22,7 @@ from kivy.uix.screenmanager import Screen
 from kivy_garden.radialslider import RadialSlider
 
 from constants import *
-from gui_files.pref_gui.pref_schedules import waitingscreenprefschedule, walksreenprefschedule, prefscreenschedule, reset_sliderscreen, finishscreenprefschedule
+from gui_files.pref_gui.pref_schedules import waitingscreenprefschedule, walksreenprefschedule, prefscreenschedule, finishscreenprefschedule, prefmandatorywalk
 
 from gui_files.pref_gui.continuous_dial_class import PrefDial
 
@@ -43,6 +43,7 @@ def buildpushtostartscreenpref(sm):
     screen.add_widget(startbttn)
     
     return screen
+
 
 def buildwalkscreenpref(sm):
     screen = Screen(name="walkscreenpref")
@@ -86,24 +87,10 @@ def onslidermotion(instance, torque):
     torque = instance.parent.tslider.value
     sm.exoboot_remote.set_torques(peak_torque_left=torque, peak_torque_right=torque)
 
-def ondialmotion(instance, torque):
-    # Reset confirm button
-    if instance.parent.confirm_btn.confirmed:
-        instance.parent.confirm_btn.confirmed = False
-        instance.parent.confirm_btn.background_color = (0.75,0,0)
-        instance.parent.confirm_btn.text = "Confirm"
-
-    sm = instance.parent.parent
-    torque = instance.parent.dial.torque_value
-    # print(f'Current torque is: {torque}')
-    sm.exoboot_remote.set_torques(peak_torque_left=torque, peak_torque_right=torque)
-
 def confirm_slider_pref(instance):
     if instance.confirmed:
         sm = instance.parent.parent
-        torque = instance.parent.tslider.value
-        sm.statemachine.report_pref(torque)
-
+        sm.statemachine.next_screen()
     else:
         instance.confirmed = True
         instance.background_color = (1,0,0)
@@ -114,28 +101,6 @@ def confirm_slider_pref(instance):
         disable_btn(screen, True, 0)
         Clock.schedule_once(partial(disable_btn, screen, False), 0.2)
         
-def confirm_dial_pref(instance):
-    if instance.confirmed:
-        sm = instance.parent.parent
-        torque = instance.parent.dial.torque_value
-        print(f'Confirmed torque is: {torque}')
-        sm.statemachine.report_pref(torque)
-        
-        # randomize the starting torque value of the preference dial during the disable period
-        screen = instance.parent
-        print("Randomizing dial start torque")
-        rand_start_torque = random.uniform(TORQUE_MIN, TORQUE_MAX/2)
-        screen.dial.torque_value = rand_start_torque
-    else:
-        instance.confirmed = True
-        instance.background_color = (1,0,0)
-        instance.text = "ARE YOU SURE?"
-
-        screen = instance.parent
-        disable_btn(screen, True, 0)
-        Clock.schedule_once(partial(disable_btn, screen, False), 0.2)
-        
-
 def buildsliderscreenpref(sm):
     screen = Screen(name="sliderscreen")
     screen.sm = sm
@@ -151,7 +116,6 @@ def buildsliderscreenpref(sm):
     screen.add_widget(confirm_btn)
     screen.confirm_btn = confirm_btn
 
-    screen.on_pre_enter = partial(reset_sliderscreen, sm, screen)
     screen.on_enter = partial(prefscreenschedule, sm)
 
     return screen
@@ -192,7 +156,7 @@ def confirm_btn_pref(instance):
     sm = instance.parent.parent
     screen = instance.parent
     if instance.confirmed:
-        sm.statemachine.report_pref(screen.prev_btn.torque)
+        sm.statemachine.next_screen()
     else:
         instance.confirmed = True
         instance.background_color = (1,0,0)
@@ -235,20 +199,61 @@ def buildbtnscreenpref(sm, screen):
     screen.on_pre_enter = partial(buildbtnscreenpref, sm, screen)
     screen.on_enter = partial(prefscreenschedule, sm)
 
+
+def confirm_dial_pref(instance):
+    """
+    Allows subject to start mandatory walk by confirming twice
+    Once mandatory walk is started button is locked and round ends automatically by timer
+    Subject can still alter selected torque during mandatory walk period
+    """
+    if not instance.lock:
+        if instance.confirmed:
+            instance.lock = True
+            sm = instance.parent.parent
+            prefmandatorywalk(sm)
+        else:
+            instance.confirmed = True
+            instance.background_color = (1,0,0)
+            instance.text = "ARE YOU SURE?"
+
+            screen = instance.parent
+            disable_btn(screen, True, 0)
+            Clock.schedule_once(partial(disable_btn, screen, False), 0.2)
+
+def ondialmotion(instance, torque):
+    """
+    Report torques during dial motion
+    Reset confirm button if not fully confirmed
+    Does not reset confirm button if button is fully confirmed/locked
+    """
+    if instance.parent.confirm_btn.confirmed and not instance.parent.confirm_btn.lock:
+        instance.parent.confirm_btn.confirmed = False
+        instance.parent.confirm_btn.background_color = (0.75,0,0)
+        instance.parent.confirm_btn.text = "Confirm"
+
+    sm = instance.parent.parent
+    torque = instance.parent.dial.torque_value
+    sm.exoboot_remote.set_torques(peak_torque_left=torque, peak_torque_right=torque)
+
 def builddialscreenpref(sm):
+    """
+    Preference Dial screen.
+    Dial has no defined limits but has max and min torques
+    
+    """
     screen = Screen(name="dialscreen")
     screen.sm = sm
     
-    # generate a random starting torque to start the dial at
+    # Generate a random starting torque to start the dial at
     rand_start_torque = random.uniform(TORQUE_MIN, TORQUE_MAX/2)
     
-    # create a preference dial
+    # Create a preference dial
     dial = PrefDial(min_torque=TORQUE_MIN, 
                     max_torque=TORQUE_MAX, 
                     full_rotations_required=3, 
                     torque_value = rand_start_torque)
     
-    # set the size of the slider
+    # Set the size of the slider
     dial.size_hint = (0.65, 0.65)
     dial.pos_hint = {'center_x': 0.5, 'center_y': 0.6}
     # dial.size = (500, 500)
@@ -257,21 +262,21 @@ def builddialscreenpref(sm):
     # Bind the dial change to a callback function
     dial.bind(value=ondialmotion)
     
-    # add dial to the screen
+    # Add dial to the screen
     screen.add_widget(dial)
     screen.dial = dial
 
-    # create a confirm button
+    # Create confirm button
     confirm_btn = Button(text="Confirm", font_size='70', color = (1,1,1), background_normal='', background_color= (0.75,0,0), size_hint=(1, 1/6), pos_hint={'x':0, 'y':0})
     confirm_btn.confirmed = False
+    confirm_btn.lock = False
     confirm_btn.bind(on_press=confirm_dial_pref)
     screen.add_widget(confirm_btn)
     screen.confirm_btn = confirm_btn
 
-    screen.pre_on_enter = partial(reset_sliderscreen, sm, screen)
-    screen.on_enter = partial(prefscreenschedule, sm)
+    screen.on_pre_enter = partial(prefscreenschedule, sm)
 
-    return screen # return screen
+    return screen
 
 def buildfinishscreenpref(sm):
     screen = Screen(name="finishscreenpref")
