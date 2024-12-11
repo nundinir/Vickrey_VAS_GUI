@@ -570,6 +570,17 @@ def gen_msg_decode(genmsg):
 
 
 if __name__ == "__main__":
+    """
+    IMPORTANT REMINDER
+    
+    Make sure to convert types back into basic python types
+
+    Example: numpy.int32 will not register in gen_msg_encode
+
+    Need to convert back into python int
+
+    TODO read this reminder
+    """
     very_important_data = {"pres": 2, "prop": 2, "T_ref": 29, "T_comp": 40, "truth": 1, "answer": 0}
     print("ORIGINAL: {}".format(very_important_data))
 
