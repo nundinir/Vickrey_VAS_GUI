@@ -22,7 +22,7 @@ def pause_exo_bertec(sm, dt):
 def check_batteries(sm, dt):
     """
     Check battery voltages
-    If lower than BATTV_LOWEr_LIM, interrupts gui for battery replacement break
+    If lower than BATTV_LOWER_LIM, interrupts gui for battery replacement break
     """
     battv_left = sm.exoboot_remote.getpack("exothread_left", "battery_voltage")/2
     battv_right = sm.exoboot_remote.getpack("exothread_right", "battery_voltage")/2

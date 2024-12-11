@@ -82,37 +82,37 @@ class exoboot_over_networkStub(object):
                 _registered_method=True)
         self.call = channel.unary_unary(
                 '/exoboot_over_network/call',
-                request_serializer=exoboot__remote__pb2.result.SerializeToString,
+                request_serializer=exoboot__remote__pb2.gen_msg.SerializeToString,
                 response_deserializer=exoboot__remote__pb2.receipt.FromString,
                 _registered_method=True)
         self.question = channel.unary_unary(
                 '/exoboot_over_network/question',
-                request_serializer=exoboot__remote__pb2.survey.SerializeToString,
+                request_serializer=exoboot__remote__pb2.gen_msg.SerializeToString,
                 response_deserializer=exoboot__remote__pb2.receipt.FromString,
                 _registered_method=True)
         self.update_vas_info = channel.unary_unary(
                 '/exoboot_over_network/update_vas_info',
-                request_serializer=exoboot__remote__pb2.vas_info.SerializeToString,
+                request_serializer=exoboot__remote__pb2.gen_msg.SerializeToString,
                 response_deserializer=exoboot__remote__pb2.receipt.FromString,
                 _registered_method=True)
         self.slider_update = channel.unary_unary(
                 '/exoboot_over_network/slider_update',
-                request_serializer=exoboot__remote__pb2.slider.SerializeToString,
+                request_serializer=exoboot__remote__pb2.gen_msg.SerializeToString,
                 response_deserializer=exoboot__remote__pb2.receipt.FromString,
                 _registered_method=True)
         self.presentation_result = channel.unary_unary(
                 '/exoboot_over_network/presentation_result',
-                request_serializer=exoboot__remote__pb2.presentation.SerializeToString,
+                request_serializer=exoboot__remote__pb2.gen_msg.SerializeToString,
                 response_deserializer=exoboot__remote__pb2.receipt.FromString,
                 _registered_method=True)
         self.comparison_result = channel.unary_unary(
                 '/exoboot_over_network/comparison_result',
-                request_serializer=exoboot__remote__pb2.comparison.SerializeToString,
+                request_serializer=exoboot__remote__pb2.gen_msg.SerializeToString,
                 response_deserializer=exoboot__remote__pb2.receipt.FromString,
                 _registered_method=True)
         self.pref_result = channel.unary_unary(
                 '/exoboot_over_network/pref_result',
-                request_serializer=exoboot__remote__pb2.preference.SerializeToString,
+                request_serializer=exoboot__remote__pb2.gen_msg.SerializeToString,
                 response_deserializer=exoboot__remote__pb2.receipt.FromString,
                 _registered_method=True)
         self.gen_msg_test = channel.unary_unary(
@@ -274,37 +274,37 @@ def add_exoboot_over_networkServicer_to_server(servicer, server):
             ),
             'call': grpc.unary_unary_rpc_method_handler(
                     servicer.call,
-                    request_deserializer=exoboot__remote__pb2.result.FromString,
+                    request_deserializer=exoboot__remote__pb2.gen_msg.FromString,
                     response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
             ),
             'question': grpc.unary_unary_rpc_method_handler(
                     servicer.question,
-                    request_deserializer=exoboot__remote__pb2.survey.FromString,
+                    request_deserializer=exoboot__remote__pb2.gen_msg.FromString,
                     response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
             ),
             'update_vas_info': grpc.unary_unary_rpc_method_handler(
                     servicer.update_vas_info,
-                    request_deserializer=exoboot__remote__pb2.vas_info.FromString,
+                    request_deserializer=exoboot__remote__pb2.gen_msg.FromString,
                     response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
             ),
             'slider_update': grpc.unary_unary_rpc_method_handler(
                     servicer.slider_update,
-                    request_deserializer=exoboot__remote__pb2.slider.FromString,
+                    request_deserializer=exoboot__remote__pb2.gen_msg.FromString,
                     response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
             ),
             'presentation_result': grpc.unary_unary_rpc_method_handler(
                     servicer.presentation_result,
-                    request_deserializer=exoboot__remote__pb2.presentation.FromString,
+                    request_deserializer=exoboot__remote__pb2.gen_msg.FromString,
                     response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
             ),
             'comparison_result': grpc.unary_unary_rpc_method_handler(
                     servicer.comparison_result,
-                    request_deserializer=exoboot__remote__pb2.comparison.FromString,
+                    request_deserializer=exoboot__remote__pb2.gen_msg.FromString,
                     response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
             ),
             'pref_result': grpc.unary_unary_rpc_method_handler(
                     servicer.pref_result,
-                    request_deserializer=exoboot__remote__pb2.preference.FromString,
+                    request_deserializer=exoboot__remote__pb2.gen_msg.FromString,
                     response_serializer=exoboot__remote__pb2.receipt.SerializeToString,
             ),
             'gen_msg_test': grpc.unary_unary_rpc_method_handler(
@@ -555,7 +555,7 @@ class exoboot_over_network(object):
             request,
             target,
             '/exoboot_over_network/call',
-            exoboot__remote__pb2.result.SerializeToString,
+            exoboot__remote__pb2.gen_msg.SerializeToString,
             exoboot__remote__pb2.receipt.FromString,
             options,
             channel_credentials,
@@ -582,7 +582,7 @@ class exoboot_over_network(object):
             request,
             target,
             '/exoboot_over_network/question',
-            exoboot__remote__pb2.survey.SerializeToString,
+            exoboot__remote__pb2.gen_msg.SerializeToString,
             exoboot__remote__pb2.receipt.FromString,
             options,
             channel_credentials,
@@ -609,7 +609,7 @@ class exoboot_over_network(object):
             request,
             target,
             '/exoboot_over_network/update_vas_info',
-            exoboot__remote__pb2.vas_info.SerializeToString,
+            exoboot__remote__pb2.gen_msg.SerializeToString,
             exoboot__remote__pb2.receipt.FromString,
             options,
             channel_credentials,
@@ -636,7 +636,7 @@ class exoboot_over_network(object):
             request,
             target,
             '/exoboot_over_network/slider_update',
-            exoboot__remote__pb2.slider.SerializeToString,
+            exoboot__remote__pb2.gen_msg.SerializeToString,
             exoboot__remote__pb2.receipt.FromString,
             options,
             channel_credentials,
@@ -663,7 +663,7 @@ class exoboot_over_network(object):
             request,
             target,
             '/exoboot_over_network/presentation_result',
-            exoboot__remote__pb2.presentation.SerializeToString,
+            exoboot__remote__pb2.gen_msg.SerializeToString,
             exoboot__remote__pb2.receipt.FromString,
             options,
             channel_credentials,
@@ -690,7 +690,7 @@ class exoboot_over_network(object):
             request,
             target,
             '/exoboot_over_network/comparison_result',
-            exoboot__remote__pb2.comparison.SerializeToString,
+            exoboot__remote__pb2.gen_msg.SerializeToString,
             exoboot__remote__pb2.receipt.FromString,
             options,
             channel_credentials,
@@ -717,7 +717,7 @@ class exoboot_over_network(object):
             request,
             target,
             '/exoboot_over_network/pref_result',
-            exoboot__remote__pb2.preference.SerializeToString,
+            exoboot__remote__pb2.gen_msg.SerializeToString,
             exoboot__remote__pb2.receipt.FromString,
             options,
             channel_credentials,

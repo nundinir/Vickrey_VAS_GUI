@@ -153,7 +153,7 @@ class KaernbachAlgorithm:
         
         self.next_comparison_torque = np.round(self.next_comparison_torque, 3)
         
-        return self.next_comparison_torque
+        return float(self.next_comparison_torque)
     
     def comparison_torque_compiler(self):
         """Compiles all the comparison torques from the last 6 runs."""
