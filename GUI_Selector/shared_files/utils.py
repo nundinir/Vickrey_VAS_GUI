@@ -88,19 +88,26 @@ class MovingAverageFilterPlus:
         
 class Pickler:
     # Pickle File Loader and Saver for JND Staircases
-    def save_staircases(self, staircases:List[Tuple[object, ...]], filepath:str):
-        """Saves the staircase objects to a pickle file."""
+    def save_staircases_and_vars(self, staircases:List[Tuple[object, ...]], walknum:float, pres:float, filepath:str):
+        """Saves the staircase objects to a pickle file. 
+        Also saves the walknum and presentation number variables to a pickle file.
+        Keep in mind, pickling is sequential, so the order of the variables is important."""
+        
         with open(filepath, 'wb') as file:
-            pickle.dump(staircases, file)
+            pickle.dump(staircases, file, protocol=-1)
+            pickle.dump((walknum, pres), file, protocol=-1)
         print(f"Staircases saved to {filepath}")
+        print(f"Variables saved to {filepath}")
 
-    def load_staircases(self, filepath:str)-> List[Tuple[object, ...]]:
+    def load_staircases_and_vars(self, filepath:str)-> List[Tuple[object, ...]]:
         """Loads staircase objects from a pickle file."""
         with open(filepath, 'rb') as file:
             staircases = pickle.load(file)
+            last_walknum, last_pres = pickle.load(file)
         print(f"Staircases loaded from {filepath}")
+        print(f"Vars loaded from {filepath}")
             
-        return staircases
+        return staircases, last_walknum, last_pres
 
     def remove_pickle_file(self, filepath:str):
         """If all staircases have converged, delete the pickle file"""

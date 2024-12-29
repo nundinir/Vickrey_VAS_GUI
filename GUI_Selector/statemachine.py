@@ -317,6 +317,8 @@ class JNDStateMachine:
         match self.which_comparitor:
             case "UNIFORM":
                 self.comparitor = UniformSampler(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_list=REF_LIST, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
+                self.walknum = 0
+                self.pres = 0
             case "STAIR":
                 # instantiate a pickler object
                 self.pickler = Pickler()
@@ -327,22 +329,22 @@ class JNDStateMachine:
                 if os.path.exists(PICKLE_FILE_PATH):
                     try:
                         print("pickle file exists so loading it up")
-                        self.staircases = self.pickler.load_staircases(PICKLE_FILE_PATH)  # Load the staircases from the Pickle file
+                        self.staircases, last_walknum, self.pres = self.pickler.load_staircases_and_vars(PICKLE_FILE_PATH)  # Load the staircases from the Pickle file
+                        self.walknum = last_walknum + 1
                         self.converged_staircases = len(self.staircase_combinations) - len(self.staircases)
-                        self.pres = 0
                     except:
                         print("pickle file exists BUT FAILED to load")
-                        self.create_fresh_staircases()
                 else:   
                     print("pickle file DNE so instantiating new staircases")
                     self.create_fresh_staircases()      # Initialize new staircases: Kaernbach Algorithm
-                    self.pickler.save_staircases(self.staircases , PICKLE_FILE_PATH)    # save the initialized staircases to a pickle file
+                    self.walknum = 0
+                    self.pres = 0
+                    self.pickler.save_staircases_and_vars(self.staircases, self.walknum, self.pres, PICKLE_FILE_PATH)    # save the initialized staircases and other vars to a pickle file
+                    
             case _:
                 Exception("Invalid comparitor type")
 
         # State tracking
-        self.walknum = 0
-        self.pres = 0
         self.prop = 0
         self.T_ref = 0
         self.T_comp = 0
@@ -595,7 +597,7 @@ class JNDStateMachine:
                                     self.selected_staircase.convergence_attempts,])
             
         # Update the saved pickle file
-        self.pickler.save_staircases(self.staircases, PICKLE_FILE_PATH)
+        self.pickler.save_staircases_and_vars(self.staircases, self.walknum, self.pres, PICKLE_FILE_PATH) 
         
         if not self.subtrial_limit:
             self.next_comparison()
