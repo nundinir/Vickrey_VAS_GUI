@@ -323,22 +323,23 @@ class JNDStateMachine:
                 # instantiate a pickler object
                 self.pickler = Pickler()
                 
-                # Create the list of tuples with reference torques and modes
-                self.create_staircase_combos()  
+                # Creates initial list of tuples with reference torques and modes for random interleaving & instantiation
+                self.set_base_staircase_combos()
                 
                 if os.path.exists(PICKLE_FILE_PATH):
                     try:
                         print("pickle file exists so loading it up")
                         self.staircases, last_walknum, self.pres = self.pickler.load_staircases_and_vars(PICKLE_FILE_PATH)  # Load the staircases from the Pickle file
                         self.walknum = last_walknum + 1
-                        self.converged_staircases = len(self.staircase_combinations) - len(self.staircases)
+                        self.converged_staircases = len(self.base_staircase_combinations) - len(self.staircases)
                     except:
                         print("pickle file exists BUT FAILED to load")
                 else:   
                     print("pickle file DNE so instantiating new staircases")
-                    self.create_fresh_staircases()      # Initialize new staircases: Kaernbach Algorithm
+                    self.instantiate_fresh_staircases()      # Initialize new staircases: Kaernbach Algorithm
                     self.walknum = 0
                     self.pres = 0
+                    self.converged_staircases = 0
                     self.pickler.save_staircases_and_vars(self.staircases, self.walknum, self.pres, PICKLE_FILE_PATH)    # save the initialized staircases and other vars to a pickle file
                     
             case _:
@@ -437,26 +438,37 @@ class JNDStateMachine:
                 self.truth = int(not truth)
 
             self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torques[self.peak_torque_ind], peak_torque_right=self.peak_torques[self.peak_torque_ind])
-        
-    def create_staircase_combos(self):
-        """Creates list of tuples with combos of reference torque, mode, and repetition. 
-        Contained within staircase_combinations attribute. Sets seed for reproducibility and shuffles."""
-        
-        self.staircase_combinations = [(ref_torque, mode) 
+            
+    def set_base_staircase_combos(self):
+        """Sets the base staircase combinations for the Kaernbach Algorithm"""
+        self.base_staircase_combinations = [(ref_torque, mode) 
                         for ref_torque in REF_LIST 
                         for mode in MODES]
-
-        # Setting seed for reproducibility & shuffling
+        
+        print(f"Base staircase combos created: {self.base_staircase_combinations}")
+        
+    def create_staircase_combo_list(self):
+        """Creates initial list of tuples with combos of reference torque, mode, and repetition. 
+        Contained within staircase_combinations attribute. Sets seed for reproducibility and shuffles."""
+        
+        self.set_base_staircase_combos()
+        
+        # generate list of 1000 tuples with reference torques and modes (setting seed for reproducibility)
         seed = 2
         random.seed(seed)
-        random.shuffle(self.staircase_combinations)
-        print(f"Staircase combos created: {self.staircase_combinations}")
-
-    def create_fresh_staircases(self):
-        """ Instantiates the randomly interleaved staircase objects and 
-        saves FOR THE FIRST TIME to a Pickle file. Sets converged_staircases and presentation to 0."""
+        
+        num_of_combos = 10000
+        self.staircase_combinations = random.choices(self.base_staircase_combinations, k=num_of_combos)
+        
+        # save them to a csv file
+        with open("staircase_combinations_2.csv", 'w', newline='') as f:
+            csv.writer(f).writerows(self.staircase_combinations)
+    
+    def instantiate_fresh_staircases(self):
+        """ Instantiates the base set of staircase objects and 
+        saves the list FOR THE FIRST TIME to a Pickle file."""
         self.staircases = []
-        for ref_torque, mode in self.staircase_combinations:
+        for ref_torque, mode in self.base_staircase_combinations:
             step_size_right = STEP_SIZE_RIGHT_DICT[ref_torque]
             self.comparitor = KaernbachAlgorithm(reference_torque=ref_torque,
                                                 step_size_right=step_size_right, 
@@ -468,38 +480,45 @@ class JNDStateMachine:
                                                 torque_max_lim=TORQUE_MAX, 
                                                 torque_min_lim=TORQUE_MIN)
             self.staircases.append((self.comparitor, ref_torque, mode))
-            self.converged_staircases = 0
-            self.pres = 0
             
         print(f"Staircases instantiated: {self.staircases}")
         
+    def circular_roll_staircases(self):
+        """Circularly rolls through base list of staircases and returns the next staircase object"""
+        # Calculate the starting index of circular roll
+        self.pres += 1          # increment presentation number
+        start_index = self.pres % len(self.staircases)
+        
+        # Circularly roll through the list of tuples containing staircase objects, refs, and modes
+        rolling_staircase_list = self.staircases[start_index:] + self.staircases[:start_index]
+        
+        # Extract the staircase object, ref_torque, and mode from the first tuple
+        self.selected_staircase, ref_torque, self.mode = rolling_staircase_list[0]
+
+        return rolling_staircase_list, ref_torque
+    
     def next_comparison_same_stair(self):
         """
         Assigns torque pair to randomly selected swap button state according to kaernbach algorithm
         """
         print(f"len of staircases: {len(self.staircases)}")
-        if self.converged_staircases == len(self.staircase_combinations):
+        print(f"Pres: {self.pres}")
+        if self.converged_staircases == len(self.base_staircase_combinations):
             self.quit_flag = True
             self.pickler.remove_pickle_file(PICKLE_FILE_PATH)
             self.next_screen()
         else:
-            # Calculate the starting index of circular roll
-            self.pres += 1          # increment presentation number
-            start_index = self.pres % len(self.staircases)
+            # increment presentation number
+            self.pres += 1   
             
-            # Circularly roll through the list of tuples containing staircase objects, refs, and modes
-            rolling_staircase_list = self.staircases[start_index:] + self.staircases[:start_index]
+            # randomly select one of the staircases from self.staircases
+            self.selected_staircase, ref_torque, self.mode = random.choice(self.staircases)
             
-            # Extract the staircase object, ref_torque, and mode from the first tuple
-            self.selected_staircase, ref_torque, self.mode = rolling_staircase_list[0]
-
-            # print out components for debugging
             print(f"Selected Stair Reference Torque: {ref_torque}")
             print(f"Selected Stair Mode: {self.mode}")
-            
+                    
             # if the selected_staircase hasn't converged, generate the next comparison torque
-            if not self.selected_staircase.converged_flag:
-                
+            if not self.selected_staircase.converged_flag:                
                 self.T_ref = ref_torque
                 self.T_comp = self.selected_staircase.current_comparison_torque
                 truth = min(math.floor(self.T_comp/self.T_ref), 1)  # indicator for which torque is higher (0: T_comp, 1: T_ref) 
@@ -518,6 +537,8 @@ class JNDStateMachine:
                 
                 # present current comparison vs ref
                 self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torques[self.peak_torque_ind], peak_torque_right=self.peak_torques[self.peak_torque_ind])
+            
+       
                 
     def report_higher_split(self, signature):
         """
@@ -565,17 +586,14 @@ class JNDStateMachine:
             user_decision = True
         else:
             user_decision = False
-            
-        # print(f"User Decision: {user_decision}")
         
         # generate next comparison torque based on observer response for current comparison torque
         next_comparison_torque = self.selected_staircase.generate_next_comparison(user_decision)
-        # print(f"Next Comparison Torque: {next_comparison_torque}")
         
         # set the current comparison torque to the next comparison torque for the selected_staircase evaluation
         self.selected_staircase.current_comparison_torque = next_comparison_torque
         
-        # if the selected_staircase has converged, remove the particular staircase from the list
+        # if the selected_staircase has converged, remove all instances of the particular staircase from the staircase_combinations list
         if self.selected_staircase.converged_flag:
             print("A staircase has converged!")
             self.staircases.remove((self.selected_staircase, self.T_ref, self.mode))
