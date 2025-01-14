@@ -339,7 +339,7 @@ class JNDGUI(BaseGui):
         # Start Vicon
         recording_name = "{}_walk{}".format(self.sm.file_prefix, self.sm.statemachine.walknum)
         self.sm.vicon.start_recording(recording_name)
-
+ 
         # Start exo logging
         self.sm.exoboot_remote.set_log(mybool=False)
 
