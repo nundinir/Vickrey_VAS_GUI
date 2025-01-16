@@ -1,4 +1,4 @@
-import os, sys, csv, time, grpc, threading
+import os, sys, csv, time, grpc, datetime, threading
 from typing import Type
 from concurrent import futures
 
@@ -384,8 +384,8 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         trial = int(datadict["trial"])
         pres = int(datadict["pres"])
 
-        print("Received updated vas info: ", btn_num, trial, pres)
-        overtimename = "{}_T{}_P{}_vas_overtime".format(self.file_prefix, trial, pres)
+        print("\nSTARTING PRESENTATION: {} {} {}\n{}\n".format(btn_num, trial, pres, str(datetime.datetime.now())))
+        overtimename = "B{}_T{}_P{}_vas_overtime".format(self.file_prefix, trial, pres)
         overtimepath = self.filingcabinet.newfile(overtimename, "csv", dictkey="overtime")
 
         header = ['pitime']
@@ -429,7 +429,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         torques = datadict["torques"]
         values = datadict["values"]
 
-        print("Received presentation results: {}, {}, {}, {}, {}".format(btn_option, trial, pres, torques, values))
+        print("\nFINISHED PRESENTATION: {} {} {}\n{}\n".format(btn_option, trial, pres, str(datetime.datetime.now())))
         datalist = [btn_option, trial, pres]
         for t, mv in zip(torques, values):
             datalist.append(t)

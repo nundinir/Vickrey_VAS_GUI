@@ -1,4 +1,4 @@
-import sys, csv, copy, time, socket, threading
+import sys, csv, copy, time, socket, datetime, threading
 
 from typing import Type
 from random import randint
@@ -92,13 +92,12 @@ class DumbVicon:
             fileNameIn: File name to be used on the vicon PC
             fileDescription: Any notes you want to add to your file. Fills the description field on vicon 
         """
-        print("VICON_START: {}".format(fileNameIn))
+        print("VICON_START: {}, {}".format(fileNameIn, fileDescription))
         # msg = self._assemble_payload_start(fileNameIn, fileDescription)
         # self.sock.sendto(msg, (self.destinationIP, self.destinationPort))
         pass
 
     def stop_recording(self):
-        print("VICON_STOP")
         # msg = self._assemble_payload_stop()
         # self.sock.sendto(msg, (self.destinationIP, self.destinationPort))
         pass

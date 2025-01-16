@@ -1,3 +1,5 @@
+import datetime
+
 from functools import partial
 
 from kivy.clock import Clock
@@ -14,13 +16,14 @@ def pause_exo_bertec(sm, dt):
     # Stop exo logging
     sm.exoboot_remote.set_log(mybool=True)
     # Stop Vicon
+    print("VICON STOP: {}".format(datetime.datetime.now()))
     sm.vicon.stop_recording()
 
 def next_presentation(sm, dt):
     # Start Vicon
     b, t, p = sm.statemachine.peak_btp()
     recording_name = "{}_B{}_T{}_P{}".format(sm.file_prefix, b, t, p)
-    sm.vicon.start_recording(recording_name)
+    sm.vicon.start_recording(recording_name, str(datetime.datetime.now()))
 
     # Start exo logging
     sm.exoboot_remote.set_log(mybool=False)
