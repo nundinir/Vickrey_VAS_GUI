@@ -8,7 +8,7 @@ from kivy.uix.screenmanager import Screen
 from constants import *
 
 
-def pause_exo_bertec(sm, dt):
+def pause_exo_bertec(sm):
     # Stop bertec
     sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
     # Pause exoboots

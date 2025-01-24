@@ -1,7 +1,7 @@
 """IP ADDRESSES"""
 SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
 LOCALHOST = "localhost:50051"    # IP address of local machine
-PI_IP = f"{'35.3.175.251'}:" f"{'50055'}"
+PI_IP = f"{'35.3.192.197'}:" f"{'50055'}"
 
 
 """BERTEC SETTINGS"""
@@ -11,7 +11,7 @@ BERTEC_ACC_RIGHT = 0.33
 
 
 """BATTERY SETTINGS"""
-BATTV_LOWER_LIM = 23000 # mV
+BATTV_LOWER_LIM = 22000 # mV
 
 
 """VICKREY SPECIFIC"""
@@ -35,11 +35,11 @@ b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
 
 """VAS SPECIFIC"""
 # VAS timing in seconds
-MIN_WAIT_VAS = 60
+MIN_WAIT_VAS = 120
 
 # VAS Trial/Presentation Dicts
 BTN_NUMS = [4, 10]
-MAX_TRIALS_DICT = {4: 6, 10: 3}
+MAX_TRIALS_DICT = {4: 6, 10: 2}
 MAX_PRESENTATIONS_DICT = {4: 5, 10: 1} # without replacement
 NPO_MV = 0
 EPO_MV = 100
@@ -63,7 +63,7 @@ REF_LIST = [18, 29]
 RIGHT_LIM = 2   # num of consecutive right(s) after which distance from ref will decrease
 RATIO = 0.947   # ratio of step_down(correct)/step_up(incorrect)
 STEP_SIZE_RIGHT_DICT = {18: 1, 29: 1}  # step size when correct response given for each reference torque
-RUN_LIMIT = 10                # Number of reversals before the algorithm converges
+RUN_LIMIT = 6                 # Number of reversals before the algorithm converges
 INIT_STEP_OUT_SIZE = 11       # Initial multiplier away from reference torque for the comparison torque   
 REPETITIONS = 1               # Number of ascending and descending repetitions for each reference torque value
 MODES = ['ascending', 'descending'] # Staircase modes, either 'ascending' or 'descending' towards reference
@@ -86,7 +86,7 @@ PREF_STEP = 1.0
 DIAL_SENSITIVITY_FACTOR = 0.08
 
 # Max Trials
-MAX_PRES_PREF = 3
+MAX_PRES_PREF = 10
 
 
 """ACCLIMATION SPECIFIC"""
