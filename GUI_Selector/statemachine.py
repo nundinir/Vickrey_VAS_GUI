@@ -148,14 +148,23 @@ class VickreyStateMachine:
 
 
 class VASStateMachine:
-    def __init__(self, screenmanager, startstamp):
+    def __init__(self, screenmanager, subject_dict):
         self.sm = screenmanager
-        self.startstamp = startstamp
+        self.subject_dict = subject_dict
         
         # Trial/Presentation States
         self.current_btn_option = 0
         self.current_trial = 0
         self.current_presentation = 0
+
+        # Set effective seed and shuffle btn_nums
+        effective_seed = 4513*self.sm.vas_seed + 47*self.sm.cond_num + 599*self.sm.desc_num
+        random.seed(effective_seed)
+        print("SUBJECT SEED: {}\nCOND_MUTATOR: {}\nDESC_MUTATOR: {}\nEFFECTIVE_SEED: {}\n".format(self.sm.vas_seed, self.sm.cond_num, self.sm.desc_num, effective_seed))
+
+        # Shuffle btn_nums
+        self.btn_nums = BTN_NUMS[:]
+        random.shuffle(self.btn_nums)
 
         self.button_mappings = {}
         self.vas_btn_trial_pres = []
@@ -177,6 +186,8 @@ class VASStateMachine:
     def evensampler(base_list):
         """
         Create list for evenly subsampling from base list
+        First 10 torques are every other torque (even indices)
+        Second 10 torques are the rest (odd indices)
         """
         base_ordered = base_list[::2] + base_list[1::2]
         return base_ordered
@@ -185,7 +196,7 @@ class VASStateMachine:
         """
         Create list of button, trial, presentation combos
         """
-        for btn in BTN_NUMS:
+        for btn in self.btn_nums:
             for trial in range(1, MAX_TRIALS_DICT[btn] + 1):
                 for presentation in range(1, MAX_PRESENTATIONS_DICT[btn] + 1):
                     self.vas_btn_trial_pres.append([btn, trial, presentation])
@@ -193,7 +204,7 @@ class VASStateMachine:
     def generate_button_torque_mapping(self):
         """
         Generate presentations (groups of buttons) for each trial
-        Generates the same mapping every time (intended)
+        Seeded mapping generation using vas_seed
         """
         num_torques = {btn_num: btn_num * MAX_PRESENTATIONS_DICT[btn_num] for btn_num in BTN_NUMS}
         max_num = max(num_torques.values())
@@ -201,7 +212,10 @@ class VASStateMachine:
         torque_list = list(np.linspace(TORQUE_MIN, TORQUE_MAX, max_num).round(decimals=3))
         ordered_torques = self.evensampler(torque_list)
 
-        for btn_num in BTN_NUMS:
+        # Set current_btn to first btn in shuffled btn list
+        self.current_btn_option = self.btn_nums[0]
+
+        for btn_num in self.btn_nums:
             # Setting up Torque options
             num = num_torques[btn_num]
             torques = ordered_torques[:num]
@@ -210,8 +224,8 @@ class VASStateMachine:
             print("{}: {}".format(btn_num, torques))
 
             trial_mappings = {}
+        
             for trial in range(1, MAX_TRIALS_DICT[btn_num] + 1):
-                random.seed(trial)
                 available_torques = torques[:]
                 random.shuffle(available_torques)
 
@@ -267,7 +281,7 @@ class VASStateMachine:
         """
         Log slider movements when moving
         """
-        pitime = time.perf_counter() - self.startstamp
+        pitime = time.time()
         self.overtime_dict[torque] = mv
         self.sm.exoboot_remote.slider_update(pitime, self.overtime_dict)
 
@@ -738,9 +752,16 @@ if __name__ == "__main__":
     """
     Display VAS Trial/Presentation Torques
     """
-    testvas = VASStateMachine(None, time.perf_counter())
+    class blank_sm:
+        def __init__(self):
+            self.vas_seed = 1
+            self.cond_num = 1
+            self.desc_num = 1
 
-    print("B T P Torques")
+    sm = blank_sm()
+    testvas = VASStateMachine(sm, None)
+
+    print("\nTRIAL SCHEDULE")
     for btn, trials in testvas.button_mappings.items():
         trial_torques = []
         for t, trial in trials.items():

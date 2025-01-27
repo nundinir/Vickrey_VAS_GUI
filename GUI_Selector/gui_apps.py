@@ -1,4 +1,4 @@
-import csv
+import re, csv
 import numpy as np
 from functools import partial
 
@@ -175,22 +175,26 @@ class VASGUI(BaseGui):
     exoboot_remote  - GRPC communication with exoboot_wrapper on rpi
     bertec          - Remote control of Bertec treadmill
     """
-    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, startstamp=None, usebackup=None, allow_check_batteries=True, subject_dict=None, **kwargs):
+    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, usebackup=None, allow_check_batteries=True, subject_dict=None, **kwargs):
         super().__init__("VAS", exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
-        self.startstamp = startstamp
         self.usebackup = usebackup
         self.sm.allow_check_batteries = allow_check_batteries
         self.subject_dict = subject_dict
+
+        # Parse trial condition and description
+        self.sm.cond_num = int("".join(re.findall(r'\d+', kwargs["trial_cond"])))
+        self.sm.desc_num = int("".join(re.findall(r'\d+', kwargs["description"])))
 
         # Get info from subject_dict
         self.sm.bertec_speed = subject_dict["bertec_speed"]
         self.sm.squeeze = subject_dict["squeeze"]
         self.sm.EPO_MV = subject_dict["EPO_MV"]
         self.sm.NPO_MV = subject_dict["NPO_MV"]
+        self.sm.vas_seed = subject_dict["vas_seed"]
 
     def build(self):
         # State machine
-        self.sm.statemachine = VASStateMachine(self.sm, self.startstamp)
+        self.sm.statemachine = VASStateMachine(self.sm, self.subject_dict)
 
         # Load existing or create new backup
         usebackup = self.usebackup
@@ -234,7 +238,7 @@ class VASGUI(BaseGui):
         # Create Screens
         dummyscreen = Screen(name="dummy")
         pushtostartscreen = buildpushtostartscreenvas()
-        waitingscreen = buildwaitingscreenvas(self.sm)
+        self.sm.waitingscreen = buildwaitingscreenvas(self.sm)
         finishscreen = buildfinishscreenvas(self.sm)
         self.sm.batteryscreen = buildbatteryscreen(self.sm)
 
@@ -246,7 +250,7 @@ class VASGUI(BaseGui):
         self.sm.add_widget(dummyscreen)
         self.sm.add_widget(pushtostartscreen)
         self.sm.add_widget(vasscreen)
-        self.sm.add_widget(waitingscreen)
+        self.sm.add_widget(self.sm.waitingscreen)
         self.sm.add_widget(finishscreen)
         self.sm.add_widget(self.sm.batteryscreen)
 

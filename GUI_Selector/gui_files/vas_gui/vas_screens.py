@@ -44,7 +44,7 @@ def startbttnvas_CB(instance):
 
 def buildpushtostartscreenvas():
     screen_= Screen(name="pushtostartscreen")
-    startbttn = Button(text="STOMP then Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
+    startbttn = Button(text="STOMP then Touch to begin", font_size='80', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbttnvas_CB)
     screen_.add_widget(startbttn)
 
@@ -55,15 +55,10 @@ def buildwaitingscreenvas(sm):
     screen = Screen(name="waitingscreenvas")
     screen.sm = sm
 
-    if MIN_WAIT_VAS/sm.squeeze < 60:
-        waittext = "Take a break!\nTrial resumes in {} seconds".format(int(MIN_WAIT_VAS/sm.squeeze))
-    else:
-        waittext = "Take a break!\nTrial resumes in {:0.1f} minutes".format(MIN_WAIT_VAS/sm.squeeze/60)
+    screen.waitlabel = Label(text="", font_size='80', color=(1, 1, 1, 1))
+    screen.add_widget(screen.waitlabel)
 
-    waitlabel = Label(text=waittext, font_size='50', color=(1, 1, 1, 1))
-    screen.add_widget(waitlabel)
-
-    screen.on_enter = partial(waitingscreevasschedule, sm)
+    screen.on_pre_enter = partial(waitingscreevasschedule, sm)
 
     return screen
 
@@ -110,7 +105,7 @@ def buildsliders(sm, screen, sliders_origin={'x':0, 'y':0}, sliders_size=(0, 0),
         slider.bind(value=onslidermotion)
 
         # Create the cursor label and initially set the opacity to 0
-        label = Label(text=f"${round(slider.value, 2)}", size_hint=(0.1, 0.1), pos_hint={'x': origin_x, 'y':origin_y}, color=(1.0,0,0))
+        label = Label(text=f"${round(slider.value, 2)}", font_size='50', size_hint=(0.1, 0.1), pos_hint={'x': origin_x + size_x * (mv-slider_min)/(slider_max-slider_min), 'y': origin_y + size_y/2}, color=(1.0,0,0))
         slider.label = label
 
         # Add the labels and the slider to the BoxLayout
@@ -164,7 +159,7 @@ def buildbtns(sm, screen, buttons_origin, buttons_size, ranked=None):
             torque = sm.statemachine.get_torque(i)
             btntext = chr(65 + num_buttons - i - 1)
 
-        btn = Button(text='', font_size='50', color=(1,1,1), background_normal='', background_color= (0,0.5,0), size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y': origin_y})
+        btn = Button(text='', font_size='120', color=(1,1,1), background_normal='', background_color= (0,0.5,0), size_hint=(size_x, size_y), pos_hint={'x': origin_x, 'y': origin_y})
         btn.text = btntext
         btn.bind(on_press=btnpress)
         btn.torque = torque
@@ -223,7 +218,7 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
     mv_label_size = (1/10, 9/10)
 
     # Confirm Button
-    confirm_btn = Button(text='', font_size='50', color=(1,1,1), background_normal='', background_color=get_color_from_hex('#004B8D'), size_hint=confirm_btn_size, pos_hint=confirm_btn_origin)
+    confirm_btn = Button(text='', font_size='100', color=(1,1,1), background_normal='', background_color=get_color_from_hex('#004B8D'), size_hint=confirm_btn_size, pos_hint=confirm_btn_origin)
     confirm_btn.text = "Confirm" if not confirmed else "Finish"
     confirm_btn.signature = 1
     confirm_btn.confirmed = confirmed
@@ -233,8 +228,8 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
 
     # NPO/EPO Text
     # Label(text=f"${round(slider.value, 2)}", size_hint=(0.1, 0.1), pos_hint={'x': origin_x, 'y':origin_y}, color=(1.0,0,0))
-    npo_label = Label(text="${}".format(sm.NPO_MV), font_size='30', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 0, 'y': 1/10})
-    epo_label = Label(text="${}".format(sm.EPO_MV), font_size='30', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 7/10, 'y': 1/10})
+    npo_label = Label(text="${}".format(sm.NPO_MV), font_size='80', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 0, 'y': 1/10})
+    epo_label = Label(text="${}".format(sm.EPO_MV), font_size='80', color=(1, 1, 1), size_hint=mv_label_size, pos_hint={'x': 7/10, 'y': 1/10})
 
     buildsliders(sm, screen, sliders_origin=screen.sliders_origin, sliders_size=screen.sliders_size, ranked=ranked, slider_min=sm.NPO_MV, slider_max=sm.EPO_MV)
 
@@ -251,7 +246,7 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
 def buildfinishscreenvas(sm):
     screen = Screen(name="finishscreenvas")
     screen.sm = sm
-    finishlabel = Label(text="Trial Finished\nPlease step off the treadmill", font_size='50', color=(1, 0, 0, 1))
+    finishlabel = Label(text="Trial Finished\nPlease step off the treadmill", font_size='100', color=(1, 0, 0, 1))
     screen.add_widget(finishlabel)
     screen.on_enter = partial(finishscreenvasschedule, sm)
     return screen

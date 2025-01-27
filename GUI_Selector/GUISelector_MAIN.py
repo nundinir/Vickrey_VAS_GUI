@@ -13,12 +13,12 @@ from constants import PI_IP, LOCALHOST
 
 if __name__ == "__main__":
     # Connect to Exoboot
-    exoboot_remote = ExobootRemoteClient(PI_IP)
+    exoboot_remote = ExobootRemoteClient(LOCALHOST)
 
     # Get subject info
-    startstamp, subjectID, trial_type, trial_cond, description, usebackup = exoboot_remote.get_subject_info()
+    _, subjectID, trial_type, trial_cond, description, usebackup = exoboot_remote.get_subject_info()
     file_prefix = "{}_{}_{}_{}".format(subjectID, trial_type, trial_cond, description)
-    print("DETAILS: ", startstamp, subjectID, trial_type, trial_cond, description)
+    print("DETAILS: ", subjectID, trial_type, trial_cond, description)
 
     # Load subject dictionary
     subj_dict_file = open("subject_dictionary.json", mode="r")
@@ -52,7 +52,6 @@ if __name__ == "__main__":
                   "filingcabinet": filingcabinet,
                   "bertec": bertec,
                   "vicon": vicon,
-                  "startstamp": startstamp,
                   "trial_cond": trial_cond,
                   "description": description,
                   "file_prefix": file_prefix,

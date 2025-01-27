@@ -35,14 +35,12 @@ b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
 
 """VAS SPECIFIC"""
 # VAS timing in seconds
-MIN_WAIT_VAS = 120
+MIN_WAIT_VAS = {1: 10, 4: 60, 10:120}
 
 # VAS Trial/Presentation Dicts
-BTN_NUMS = [4, 10]
-MAX_TRIALS_DICT = {4: 6, 10: 2}
-MAX_PRESENTATIONS_DICT = {4: 5, 10: 1} # without replacement
-NPO_MV = 0
-EPO_MV = 100
+BTN_NUMS = [1, 4, 10]
+MAX_TRIALS_DICT = {1:2, 4:2, 10:2}
+MAX_PRESENTATIONS_DICT = {1:10, 4:5, 10:1} # without replacement
 
 """JND SPECIFIC"""
 # JND timing in seconds
