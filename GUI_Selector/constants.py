@@ -35,7 +35,7 @@ b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
 
 """VAS SPECIFIC"""
 # VAS timing in seconds
-MIN_WAIT_VAS = {1: 10, 4: 60, 10:120}
+MIN_WAIT_VAS = {1: 10, 4: 10, 10:10}
 
 # VAS Trial/Presentation Dicts
 BTN_NUMS = [1]

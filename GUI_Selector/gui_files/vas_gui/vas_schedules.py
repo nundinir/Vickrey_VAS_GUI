@@ -10,7 +10,8 @@ def pause_exo_bertec(sm, dt):
     # Stop bertec
     sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
     
-    # Pause exoboots
+    # Zero and pause exoboots
+    sm.exoboot_remote.set_torques(peak_torque_left=0, peak_torque_right=0)
     sm.exoboot_remote.set_pause(mybool=True)
 
     # Stop exo logging
