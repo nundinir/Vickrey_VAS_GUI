@@ -182,7 +182,6 @@ class VASGUI(BaseGui):
         self.subject_dict = subject_dict
 
         # Parse trial condition and description
-        self.sm.cond_num = int("".join(re.findall(r'\d+', kwargs["trial_cond"])))
         self.sm.desc_num = int("".join(re.findall(r'\d+', kwargs["description"])))
 
         # Get info from subject_dict

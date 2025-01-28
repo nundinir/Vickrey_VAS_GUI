@@ -171,7 +171,8 @@ def confirmranking(instance):
     sm = instance.parent.parent
     screen = instance.parent
 
-    if instance.confirmed:
+    # Skips confirmation for 1btn
+    if instance.confirmed or sm.statemachine.current_btn_option == 1:
         torques = []
         values = []
         for slider in screen.children:

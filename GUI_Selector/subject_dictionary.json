@@ -22,7 +22,7 @@
             "EPO_MV": 742.84,
             "NPO_MV": 353.73,
             "squeeze": 1,
-            "vas_seed": 1
+            "vas_seed": 101
         },
         "S102": {
             "bertec_speed": 0.96,
@@ -30,7 +30,7 @@
             "EPO_MV": -14.20,
             "NPO_MV": -30.23,
             "squeeze": 1,
-            "vas_seed": 1
+            "vas_seed": 102
         },
         "S103": {
             "bertec_speed": 1.02,
@@ -38,7 +38,7 @@
             "EPO_MV": 39.08,
             "NPO_MV": -610.68,
             "squeeze": 1,
-            "vas_seed": 1
+            "vas_seed": 103
         },
 
         "S104": {
@@ -47,7 +47,7 @@
             "EPO_MV": 10,
             "NPO_MV": -10,
             "squeeze": 1,
-            "vas_seed": 1
+            "vas_seed": 104
         },
 
         "S105": {
@@ -56,7 +56,7 @@
             "EPO_MV": 10,
             "NPO_MV": -10,
             "squeeze": 1,
-            "vas_seed": 1
+            "vas_seed": 105
         }
     }
 }

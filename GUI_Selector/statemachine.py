@@ -158,9 +158,9 @@ class VASStateMachine:
         self.current_presentation = 0
 
         # Set effective seed and shuffle btn_nums
-        effective_seed = 4513*self.sm.vas_seed + 47*self.sm.cond_num + 599*self.sm.desc_num
+        effective_seed = 4513*self.sm.vas_seed + 599*self.sm.desc_num
         random.seed(effective_seed)
-        print("SUBJECT SEED: {}\nCOND_MUTATOR: {}\nDESC_MUTATOR: {}\nEFFECTIVE_SEED: {}\n".format(self.sm.vas_seed, self.sm.cond_num, self.sm.desc_num, effective_seed))
+        print("SUBJECT SEED: {}\nDESC_MUTATOR: {}\nEFFECTIVE_SEED: {}\n".format(self.sm.vas_seed, self.sm.desc_num, effective_seed))
 
         # Shuffle btn_nums
         self.btn_nums = BTN_NUMS[:]
@@ -755,7 +755,7 @@ if __name__ == "__main__":
     class blank_sm:
         def __init__(self):
             self.vas_seed = 1
-            self.cond_num = 1
+            self.cond_num = 2
             self.desc_num = 1
 
     sm = blank_sm()
