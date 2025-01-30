@@ -144,6 +144,7 @@ class VickreyStateMachine:
             self.sm.current = self.queued_screen
             self.queued_screen = None
         else:
+            print(self.next_screen_dict)
             self.sm.current = self.next_screen_dict[self.sm.current]
 
 

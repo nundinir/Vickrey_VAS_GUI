@@ -150,6 +150,10 @@ class DumbVicon:
         return bytes(fullPayloadString, "utf-8")
 
 class DumbGSE:
+    """
+    Dumb gait state estimator
+    Report torques set over GRPC
+    """
     def __init__(self):
         self.peak_torque_left = 0
         self.peak_torque_right = 0
@@ -163,6 +167,10 @@ class DumbGSE:
         self.peak_torque_right = T
 
 class DumbLoggingNexus:
+    """
+    Dumb Logging Nexus
+    Set battery voltages to test battery check routine
+    """
     def __init__(self):
         pass
 
@@ -179,6 +187,9 @@ class DumbLoggingNexus:
             return -11
 
 class DumbWrapper:
+    """
+    Minimally functioning "exoboot"
+    """
     def __init__(self, subjectID, trial_type, trial_cond, description, usebackup):
         self.startstamp = time.perf_counter()
         self.quit_event = threading.Event()

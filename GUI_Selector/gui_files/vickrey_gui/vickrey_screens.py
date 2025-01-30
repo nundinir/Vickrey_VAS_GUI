@@ -10,20 +10,23 @@ from constants import *
 from gui_files.vickrey_gui.vickrey_schedules import *
 from shared_files.kivy_utils import CountDownTimer
 
-# push to start screen
-def startbttn_CB(instance):
-    sm = instance.parent.parent
-    if sm.statemachine.auction_tally > 0 and sm.statemachine.state:
-        # Start treadmill and unpause exoboots
-        sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-        sm.exoboot_remote.set_pause(mybool=False)
-        sm.exoboot_remote.set_torques(peak_torque_left=sm.peak_torque, peak_torque_right=sm.peak_torque)
-
-    sm.statemachine.next_screen()
 
 def buildpushtostartscreen(sm):
-    screen = Screen(name="pushtostartscreen")
+    """
+    Push to start screen
+    """
+    def startbttn_CB(instance):
+        sm = instance.parent.parent
+        if sm.statemachine.auction_tally > 0 and sm.statemachine.state:
+            # Start treadmill and unpause exoboots
+            sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+            sm.exoboot_remote.set_pause(mybool=False)
+            sm.exoboot_remote.set_torques(peak_torque_left=sm.peak_torque, peak_torque_right=sm.peak_torque)
 
+        sm.statemachine.next_screen()
+
+
+    screen = Screen(name="pushtostartscreen")
     backupflag = sm.statemachine.backupflag
 
     if backupflag:
@@ -49,28 +52,30 @@ def buildpushtostartscreen(sm):
     return screen, startbttn
 
 
-# numpad screen
-def numpad_cb(instance):
-    sm = instance.parent.parent
-    sm.bid += instance.val
-    sm.bid_input.text = decimal_format(sm.bid)
-
-def BCKSPC_CB(instance):
-    sm = instance.parent.parent
-    sm.bid = sm.bid[:-1]
-    sm.bid_input.text = decimal_format(sm.bid)
-
-def CLEAR_CB(instance):
-    sm = instance.parent.parent
-    sm.bid = ''
-    sm.bid_input.text = decimal_format(sm.bid)
-
-
 def buildNumPadScreen(sm):
+    """
+    Returns Screen for collecting user bids during Vickrey auction
+    """
+    def numpad_cb(instance):
+        sm = instance.parent.parent
+        sm.bid += instance.val
+        sm.bid_input.text = decimal_format(sm.bid)
+
+    def BCKSPC_CB(instance):
+        sm = instance.parent.parent
+        sm.bid = sm.bid[:-1]
+        sm.bid_input.text = decimal_format(sm.bid)
+
+    def CLEAR_CB(instance):
+        sm = instance.parent.parent
+        sm.bid = ''
+        sm.bid_input.text = decimal_format(sm.bid)
+
+
     screen = Screen(name="numpad")
     screen.sm = sm
 
-    # Grid num
+    # Numpad grid dimensions
     gn_x = 4
     gn_y = 6
 
@@ -98,6 +103,7 @@ def buildNumPadScreen(sm):
     screen.add_widget(sm.cdt)
     screen.add_widget(timerlabel)
 
+    # Add numeric buttons to screen
     for i in range(1, 10):
         x_p = ((i-1) % 3) / gn_x
         y_p = ((i-1) // 3 + 1) / gn_y
@@ -112,22 +118,24 @@ def buildNumPadScreen(sm):
 
     return screen
 
-# survey screen
-def enjoyment_cb(instance):
-    sm = instance.parent.parent
-    sm.enjoyment = instance.val
-
-def rpe_cb(instance):
-    sm = instance.parent.parent
-    sm.rpe = instance.val
 
 def buildsurveyscreen(sm):
+    def enjoyment_cb(instance):
+        sm = instance.parent.parent
+        sm.enjoyment = instance.val
+
+    def rpe_cb(instance):
+        sm = instance.parent.parent
+        sm.rpe = instance.val
+
+
     screen = Screen(name="survey")
     screen.sm = sm
 
     enjoyment_label = Label(text="Rate your enjoyment", font_size='70', size_hint=(1/3, 1/6), pos_hint={'x':1/3, 'y':8.5/10}, halign='center')
     screen.add_widget(enjoyment_label)
 
+    # Add enjoyment buttons
     enjoyment_levels = ['skull', 'frown', 'neutral', 'smile', 'sunglasses']
     for i, level in enumerate(enjoyment_levels):
         btn_ = Button(background_normal='images/{}.png'.format(level), size_hint=(1/6, 1/6), pos_hint={'x':i/5, 'y':2/3})
@@ -138,6 +146,7 @@ def buildsurveyscreen(sm):
     rpe_label = Label(text="Rate your exertion (RPE)", font_size='70', size_hint=(1/3, 1/6), pos_hint={'x':1/3, 'y':1/3}, halign='center')
     screen.add_widget(rpe_label)
 
+    # Add rpe buttons
     for i in range(6, 21):
         i_ = i-6
         x_p = i_ / 15
@@ -149,10 +158,12 @@ def buildsurveyscreen(sm):
         screen.add_widget(btn)
 
     screen.on_enter = partial(survey_schedule,sm)
-
     return screen
 
 def buildresultscreen(sm):
+    """
+    Displays Vickrey auction results to user after bidding completion
+    """
     screen = Screen(name="resultscreen")
     screen.label = Label(text='', font_size='50')
     screen.add_widget(screen.label)

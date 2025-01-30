@@ -60,9 +60,6 @@ if __name__ == "__main__":
                   "subject_dict": subject_specific_info
                   }
     
-    # GUIs
-    gui_dict = {"VICKREY": VickreyGUI, "VAS": VASGUI, "JND": JNDGUI, "PREF": PREFGUI, "ACCLIMATION": AcclimationGUI, "SPEEDFINDER": SpeedFinderGUI}
-
     # Run GUI
     match trial_type:
         case "VICKREY":
