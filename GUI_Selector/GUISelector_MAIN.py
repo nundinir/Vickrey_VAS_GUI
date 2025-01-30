@@ -64,4 +64,19 @@ if __name__ == "__main__":
     gui_dict = {"VICKREY": VickreyGUI, "VAS": VASGUI, "JND": JNDGUI, "PREF": PREFGUI, "ACCLIMATION": AcclimationGUI, "SPEEDFINDER": SpeedFinderGUI}
 
     # Run GUI
-    gui_dict[trial_type](**gui_kwargs).run()
+    match trial_type:
+        case "VICKREY":
+            VickreyGUI(**gui_kwargs).run()
+        case "VAS":
+            VASGUI(**gui_kwargs).run()
+        case "JND":
+            JNDGUI(**gui_kwargs).run()
+        case "PREF":
+            PREFGUI(**gui_kwargs).run()
+        case "ACCLIMATION":
+            AcclimationGUI(**gui_kwargs).run()
+        # case "SPEEDFINDER":
+        #     SpeedFinderGUI(**gui_kwargs).run()
+        case _:
+            print("INVALID GUI TYPE")
+            quit()
