@@ -36,6 +36,7 @@ b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
 """VAS SPECIFIC"""
 # MV text offsets
 MV_TEXT_OFFSETS = {1:0.42, 4:0.1, 10: 0.03}
+SLIDER_JUSTIFICATION = 0.15
 
 # VAS timing in seconds
 MIN_WAIT_VAS = {1: 10, 4: 60, 10: 120}

@@ -78,7 +78,7 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None, *vargs):
         size_x, _ = instance.size_hint
 
         frac = (mvalue - instance.min) / (instance.max - instance.min)
-        x_pos = frac * size_x + instance.pos_hint['x'] - frac * 0.1
+        x_pos = frac * (1 - SLIDER_JUSTIFICATION) * size_x + instance.pos_hint['x']
         y_pos = instance.label.pos_hint['y']
         instance.label.pos_hint = {'x': x_pos, 'y':y_pos}
         instance.label.text = f"${round(mvalue, 2)}"
@@ -113,7 +113,7 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None, *vargs):
 
             # Create the cursor label and initially set the opacity to 0
             label_offset_y = MV_TEXT_OFFSETS[num_sliders]
-            label = Label(text=f"${round(slider.value, 2)}", font_size='60', size_hint=(0.1, 0.1), pos_hint={'x': origin_x + size_x * (mv-slider_min)/(slider_max-slider_min), 'y': origin_y + label_offset_y}, color=(1,1,1))
+            label = Label(text=f"${round(slider.value, 2)}", font_size='60', size_hint=(0.1, 0.1), pos_hint={'x': origin_x + size_x * (1 - SLIDER_JUSTIFICATION) * (mv-slider_min)/(slider_max-slider_min), 'y': origin_y + label_offset_y}, color=(1,1,1))
             slider.label = label
 
             # Add the labels and the slider to the BoxLayout
