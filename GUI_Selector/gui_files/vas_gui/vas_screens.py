@@ -77,7 +77,8 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None, *vargs):
         sm = instance.parent.parent
         size_x, _ = instance.size_hint
 
-        x_pos = (mvalue - instance.min) / (instance.max - instance.min) * size_x + instance.pos_hint['x']
+        frac = (mvalue - instance.min) / (instance.max - instance.min)
+        x_pos = frac * size_x + instance.pos_hint['x'] - frac * 0.1
         y_pos = instance.label.pos_hint['y']
         instance.label.pos_hint = {'x': x_pos, 'y':y_pos}
         instance.label.text = f"${round(mvalue, 2)}"
