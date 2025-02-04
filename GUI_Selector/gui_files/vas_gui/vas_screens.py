@@ -111,7 +111,8 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None, *vargs):
             slider.bind(value=onslidermotion)
 
             # Create the cursor label and initially set the opacity to 0
-            label = Label(text=f"${round(slider.value, 2)}", font_size='60', size_hint=(0.1, 0.1), pos_hint={'x': origin_x + size_x * (mv-slider_min)/(slider_max-slider_min), 'y': origin_y + size_y/3}, color=(1,1,1))
+            label_offset_y = MV_TEXT_OFFSETS[num_sliders]
+            label = Label(text=f"${round(slider.value, 2)}", font_size='60', size_hint=(0.1, 0.1), pos_hint={'x': origin_x + size_x * (mv-slider_min)/(slider_max-slider_min), 'y': origin_y + label_offset_y}, color=(1,1,1))
             slider.label = label
 
             # Add the labels and the slider to the BoxLayout
@@ -217,7 +218,7 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None, *vargs):
                 # Fake waiting screen for 10 btn
                 pause_exo_bertec_no_vicon(sm, None)
 
-                # Create fake waiting screen
+                # Intermission screen
                 screen.clear_widgets()
                 min_wait = VAS_10BTN_BREAK/sm.squeeze
                 if min_wait/sm.squeeze < 60:

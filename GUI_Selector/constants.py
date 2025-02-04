@@ -34,12 +34,15 @@ b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
 
 
 """VAS SPECIFIC"""
+# MV text offsets
+MV_TEXT_OFFSETS = {1:0.42, 4:0.1, 10: 0.03}
+
 # VAS timing in seconds
 MIN_WAIT_VAS = {1: 10, 4: 60, 10: 120}
 VAS_10BTN_BREAK = 60
 
 # VAS Trial/Presentation Dicts
-BTN_NUMS = [10]
+BTN_NUMS = [1]
 MAX_TRIALS_DICT = {1:1, 4:1, 10:1}
 MAX_PRESENTATIONS_DICT = {1:20, 4:5, 10:1} # without replacement
 
