@@ -221,9 +221,9 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None, *vargs):
                 screen.clear_widgets()
                 min_wait = VAS_10BTN_BREAK/sm.squeeze
                 if min_wait/sm.squeeze < 60:
-                    waittext = "Take quick break!\nTrial resumes in {} seconds".format(int(min_wait/sm.squeeze))
+                    waittext = "Take quick break!\nTrial resumes in {} seconds".format(int(min_wait))
                 else:
-                    waittext = "Take quick break!\nTrial resumes in {:0.1f} minutes".format(min_wait/sm.squeeze/60)
+                    waittext = "Take quick break!\nTrial resumes in {:0.1f} minutes".format(min_wait/60)
 
                 breaklabel = Label(text=waittext, font_size='100', color=(0, 0.2, 1, 1))
                 screen.add_widget(breaklabel)
