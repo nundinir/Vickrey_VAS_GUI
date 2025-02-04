@@ -31,7 +31,7 @@ import random
 
 from constants import *
 
-from gui_files.vas_gui.vas_schedules import vasscreenschedule, waitingscreevasschedule, finishscreenvasschedule
+from gui_files.vas_gui.vas_schedules import vasscreenschedule, waitingscreevasschedule, breakscreenvasschedule, finishscreenvasschedule, pause_exo_bertec_no_vicon, start_exo_bertec_only
 
 
 def buildpushtostartscreenvas():
@@ -65,7 +65,7 @@ def buildwaitingscreenvas(sm):
     return screen
 
 
-def buildvasscreen(sm, screen, confirmed=False, ranked=None):
+def buildvasscreen(sm, screen, confirmed=False, ranked=None, *vargs):
     """
     Returns vas screen Screen object
     """
@@ -111,7 +111,7 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
             slider.bind(value=onslidermotion)
 
             # Create the cursor label and initially set the opacity to 0
-            label = Label(text=f"${round(slider.value, 2)}", font_size='50', size_hint=(0.1, 0.1), pos_hint={'x': origin_x + size_x * (mv-slider_min)/(slider_max-slider_min), 'y': origin_y + size_y/2}, color=(1.0,0,0))
+            label = Label(text=f"${round(slider.value, 2)}", font_size='60', size_hint=(0.1, 0.1), pos_hint={'x': origin_x + size_x * (mv-slider_min)/(slider_max-slider_min), 'y': origin_y + size_y/3}, color=(1,1,1))
             slider.label = label
 
             # Add the labels and the slider to the BoxLayout
@@ -213,7 +213,26 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
 
             ranked = [[t, mv, txt] for mv, t, txt in sorted(zip(unranked_mvs, unranked_torques, unranked_text))]
 
-            buildvasscreen(sm, screen, confirmed=True, ranked=ranked)
+            if sm.statemachine.current_btn_option == 10:
+                # Fake waiting screen for 10 btn
+                pause_exo_bertec_no_vicon(sm, None)
+
+                # Create fake waiting screen
+                screen.clear_widgets()
+                min_wait = VAS_10BTN_BREAK/sm.squeeze
+                if min_wait/sm.squeeze < 60:
+                    waittext = "Take quick break!\nTrial resumes in {} seconds".format(int(min_wait/sm.squeeze))
+                else:
+                    waittext = "Take quick break!\nTrial resumes in {:0.1f} minutes".format(min_wait/sm.squeeze/60)
+
+                breaklabel = Label(text=waittext, font_size='100', color=(0, 0.2, 1, 1))
+                screen.add_widget(breaklabel)
+
+                # Resume 10 Btn presentation
+                Clock.schedule_once(partial(buildvasscreen, sm, screen, True, ranked), min_wait)
+                Clock.schedule_once(partial(start_exo_bertec_only, sm), min_wait)
+            else:
+                buildvasscreen(sm, screen, confirmed=True, ranked=ranked)
 
 
     screen.clear_widgets()
@@ -223,10 +242,10 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
 
     # Layout params
     screen.sliders_origin = (1/10, 1/10)
-    screen.sliders_size = (6/10, 9/10)
+    screen.sliders_size = (6/10, 8.5/10)
 
     screen.buttons_origin = (8/10, 1/10)
-    screen.buttons_size = (2/10, 9/10)
+    screen.buttons_size = (2/10, 8.5/10)
 
     confirm_btn_origin = {'x': 0, 'y': 0}
     confirm_btn_size = (1, 1/10)
@@ -256,6 +275,25 @@ def buildvasscreen(sm, screen, confirmed=False, ranked=None):
     screen.add_widget(epo_label)
 
     screen.on_enter = partial(vasscreenschedule, sm)
+
+
+def buildbreakscreenvas(sm):
+    """
+    Finish screen
+    """
+    screen = Screen(name="breakscreenvas")
+    screen.sm = sm
+
+    min_wait = VAS_10BTN_BREAK/sm.squeeze
+    if min_wait/sm.squeeze < 60:
+        waittext = "Take quick break!\nTrial resumes in {} seconds".format(int(min_wait/sm.squeeze))
+    else:
+        waittext = "Take quick break!\nTrial resumes in {:0.1f} minutes".format(min_wait/sm.squeeze/60)
+
+    breaklabel = Label(text=waittext, font_size='100', color=(0, 0.2, 1, 1))
+    screen.add_widget(breaklabel)
+    screen.on_enter = partial(breakscreenvasschedule, sm)
+    return screen
 
 
 def buildfinishscreenvas(sm):

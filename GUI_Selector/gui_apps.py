@@ -17,7 +17,7 @@ from constants import *
 
 from gui_files.shared_screens import buildbatteryscreen
 from gui_files.vickrey_gui.vickrey_screens import buildpushtostartscreen, buildNumPadScreen, buildsurveyscreen, buildresultscreen
-from gui_files.vas_gui.vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildfinishscreenvas
+from gui_files.vas_gui.vas_screens import buildpushtostartscreenvas, buildwaitingscreenvas, buildvasscreen, buildbreakscreenvas, buildfinishscreenvas
 from gui_files.jnd_gui.jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
 from gui_files.pref_gui.pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildwalkscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref, builddialscreenpref
 from gui_files.acclimation_gui.acclimation_screens import buildpushtostartscreenaccl, buildsliderscreenaccl, buildfinishscreenaccl
@@ -239,9 +239,10 @@ class VASGUI(BaseGui):
         pushtostartscreen = buildpushtostartscreenvas()
         self.sm.waitingscreen = buildwaitingscreenvas(self.sm)
         finishscreen = buildfinishscreenvas(self.sm)
+        breakscreen = buildbreakscreenvas(self.sm)
         self.sm.batteryscreen = buildbatteryscreen(self.sm)
 
-        vasscreen = Screen(name='vasscreen')
+        vasscreen = Screen(name="vasscreen")
         vasscreen.sm = self.sm
         vasscreen.on_pre_enter = partial(buildvasscreen, self.sm, vasscreen, False, None)
 
@@ -250,6 +251,7 @@ class VASGUI(BaseGui):
         self.sm.add_widget(pushtostartscreen)
         self.sm.add_widget(vasscreen)
         self.sm.add_widget(self.sm.waitingscreen)
+        self.sm.add_widget(breakscreen)
         self.sm.add_widget(finishscreen)
         self.sm.add_widget(self.sm.batteryscreen)
 

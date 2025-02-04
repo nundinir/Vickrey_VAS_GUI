@@ -177,7 +177,8 @@ class VASStateMachine:
         self.next_screen_dict = {"dummy": "pushtostartscreen", 
                                  "pushtostartscreen": "vasscreen",
                                  "vasscreen": "waitingscreenvas",
-                                 "waitingscreenvas": "pushtostartscreen"
+                                 "waitingscreenvas": "pushtostartscreen",
+                                 "breakscreenvas": "pushtostartscreen"
                                  }
 
         # Quit flag

@@ -6,6 +6,22 @@ from constants import *
 from gui_files.shared_screens import check_batteries
 
 
+def pause_exo_bertec_no_vicon(sm, dt):
+    # Stop bertec
+    sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+    
+    # Zero and pause exoboots
+    sm.exoboot_remote.set_torques(peak_torque_left=0, peak_torque_right=0)
+    sm.exoboot_remote.set_pause(mybool=True)
+
+    # Stop exo logging
+    # sm.exoboot_remote.set_log(mybool=True)
+
+def start_exo_bertec_only(sm, dt):
+    sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
+    sm.exoboot_remote.set_pause(mybool=False)
+    # sm.exoboot_remote.set_log(mybool=False)
+
 def pause_exo_bertec(sm, dt):
     # Stop bertec
     sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
@@ -57,6 +73,14 @@ def waitingscreevasschedule(sm):
 def vasscreenschedule(sm):
     if sm.allow_check_batteries:
         Clock.schedule_once(partial(check_batteries, sm), 0)
+
+
+def breakscreenvasschedule(sm):
+    def resume_vas(sm, dt):
+        sm.current = "vasscreen"
+
+    Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
+    Clock.schedule_once(partial(resume_vas, sm), VAS_10BTN_BREAK/sm.squeeze)
 
 
 def finishscreenvasschedule(sm):
