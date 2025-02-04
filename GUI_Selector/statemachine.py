@@ -165,6 +165,7 @@ class VASStateMachine:
 
         # Shuffle btn_nums
         self.btn_nums = BTN_NUMS[:]
+        self.btn_nums.sort()
         random.shuffle(self.btn_nums)
 
         self.button_mappings = {}
