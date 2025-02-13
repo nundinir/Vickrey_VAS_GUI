@@ -155,7 +155,5 @@ def buildcontrolpanel(sm):
     screen.viconfilenameinput = TextInput(text="Vicon file name here", size_hint=(1/3, 1/8), pos_hint={"x":1/3*1/4, "y": 1/6-1/16} )
     # build_sls_buttons(screen, screen.bertecslider, (1/8, 1/3), {"x":1/2, "y":0}, None, None)
     screen.add_widget(screen.viconfilenameinput)
-    
-    # print(sm.linked_buttons)
 
     return screen
