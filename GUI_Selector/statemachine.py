@@ -699,6 +699,18 @@ class AcclimationStateMachine:
         # Ignore vargs. exists so next can be called by Clock.schedule_once
         self.sm.current = self.next_screen_dict[self.sm.current]
 
+
+class ControlPanelStateMachine:
+    def __init__(self, screenmanager):
+        self.sm = screenmanager
+
+        # Screen states dictionary
+        self.next_screen_dict = {"pushtostartscreencontrolpanel": "controlpanel"}
+
+    def next_screen(self, *vargs):
+        self.sm.current = self.next_screen_dict[self.sm.current]
+
+
 class SpeedFinderStateMachine:
     # TODO implement way to get steps from exoboot_remote???
     # TODO

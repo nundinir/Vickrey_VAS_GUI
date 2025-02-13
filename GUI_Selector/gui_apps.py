@@ -21,9 +21,10 @@ from gui_files.vas_gui.vas_screens import buildpushtostartscreenvas, buildwaitin
 from gui_files.jnd_gui.jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
 from gui_files.pref_gui.pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildwalkscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref, builddialscreenpref
 from gui_files.acclimation_gui.acclimation_screens import buildpushtostartscreenaccl, buildsliderscreenaccl, buildfinishscreenaccl
+from gui_files.controlpanel_gui.controlpanel_screens import buildpushtostartscreencontrolpanel, buildcontrolpanel
 from gui_files.speedfinder_gui.speedfinder_screens import buildpushtostartscreensf, buildspeedfinderscreen, buildfinishscreensf
 
-from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine, AcclimationStateMachine, SpeedFinderStateMachine
+from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine, AcclimationStateMachine, ControlPanelStateMachine, SpeedFinderStateMachine
 
 class BaseGui(App):
     def __init__(self, name, exoboot_remote, filingcabinet, file_prefix, bertec, vicon):
@@ -465,26 +466,53 @@ class AcclimationGUI(BaseGui):
         return self.sm
 
 
-class SpeedFinderGUI(BaseGui):
-    def __init__(self, exoboot_remote, bertec):
-        super().__init__(name='SPEEDFINDER', exoboot_remote=exoboot_remote, bertec=bertec)
+class ControlPanelGUI(BaseGui):
+    def __init__(self, exoboot_remote=None, filingcabinet=None, file_prefix=None, bertec=None, vicon=None, subject_dict=None, **kwargs):
+        super().__init__('CONTROLPANEL', exoboot_remote, filingcabinet, file_prefix, bertec, vicon)
+        self.sm.subject_dict = subject_dict
+
+        self.sm.bertec_speed = subject_dict["bertec_speed"]
+        self.sm.squeeze = subject_dict["squeeze"]
 
     def build(self):
-        self.sm.statemachine = SpeedFinderStateMachine(self.sm)
+        self.sm.statemachine = ControlPanelStateMachine(self.sm)
 
-        # Create Screens
+        # Create screens
         dummyscreen = Screen(name="dummy")
-        pushtostartscreensf = buildpushtostartscreensf()
-        speedfinderscreen = buildspeedfinderscreen(self.sm)
-        finishscreensf = buildfinishscreensf(self.sm)
+        pushtostartscreencontrolpanel = buildpushtostartscreencontrolpanel(self.sm)
+        self.sm.controlpanel = buildcontrolpanel(self.sm)
 
         # Add screens to ScreenManager
         self.sm.add_widget(dummyscreen)
-        self.sm.add_widget(pushtostartscreensf)
-        self.sm.add_widget(speedfinderscreen)
-        self.sm.add_widget(finishscreensf)
+        self.sm.add_widget(pushtostartscreencontrolpanel)
+        self.sm.add_widget(self.sm.controlpanel)
 
-        # Switch from dummy to startscreen to run on_enter
-        self.sm.current = "pushtostartscreensf"
+        self.sm.current = "pushtostartscreencontrolpanel"
 
         return self.sm
+
+
+class SpeedFinderGUI(BaseGui):
+    pass
+    # def __init__(self, exoboot_remote, bertec):
+    #     super().__init__(name='SPEEDFINDER', exoboot_remote=exoboot_remote, bertec=bertec)
+
+    # def build(self):
+    #     self.sm.statemachine = SpeedFinderStateMachine(self.sm)
+
+    #     # Create Screens
+    #     dummyscreen = Screen(name="dummy")
+    #     pushtostartscreensf = buildpushtostartscreensf()
+    #     speedfinderscreen = buildspeedfinderscreen(self.sm)
+    #     finishscreensf = buildfinishscreensf(self.sm)
+
+    #     # Add screens to ScreenManager
+    #     self.sm.add_widget(dummyscreen)
+    #     self.sm.add_widget(pushtostartscreensf)
+    #     self.sm.add_widget(speedfinderscreen)
+    #     self.sm.add_widget(finishscreensf)
+
+    #     # Switch from dummy to startscreen to run on_enter
+    #     self.sm.current = "pushtostartscreensf"
+
+    #     return self.sm

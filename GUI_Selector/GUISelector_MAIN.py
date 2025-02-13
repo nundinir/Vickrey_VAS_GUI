@@ -7,7 +7,7 @@ from external_devices.ViconMan import Vicon
 from shared_files.LoggingClass import FilingCabinet
 from exoboot_remote.exoboot_remote_control import ExobootRemoteClient
 
-from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI, AcclimationGUI, SpeedFinderGUI
+from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI, AcclimationGUI, SpeedFinderGUI, ControlPanelGUI
 from constants import PI_IP, LOCALHOST
 
 
@@ -74,6 +74,8 @@ if __name__ == "__main__":
             AcclimationGUI(**gui_kwargs).run()
         # case "SPEEDFINDER":
         #     SpeedFinderGUI(**gui_kwargs).run()
+        case "CONTROLPANEL":
+            ControlPanelGUI(**gui_kwargs).run()
         case _:
             print("INVALID GUI TYPE")
             quit()
