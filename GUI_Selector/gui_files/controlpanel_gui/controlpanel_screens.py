@@ -156,6 +156,6 @@ def buildcontrolpanel(sm):
     # build_sls_buttons(screen, screen.bertecslider, (1/8, 1/3), {"x":1/2, "y":0}, None, None)
     screen.add_widget(screen.viconfilenameinput)
     
-    print(sm.linked_buttons)
+    # print(sm.linked_buttons)
 
     return screen
