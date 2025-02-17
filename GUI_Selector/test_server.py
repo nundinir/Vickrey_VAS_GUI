@@ -57,7 +57,7 @@ class DumbBertec:
         pass
 
     def write_command(self, speedR, speedL, incline = None, accR = 0.2, accL = 0.2, maxVel = 9001, minVel = -0):
-        print("BERTEC WRITE: ", speedR, speedL)
+        print("BERTEC WRITE: ", speedR, speedL, "ACCELS: ", accR, accL)
         pass
 
 class DumbVicon:

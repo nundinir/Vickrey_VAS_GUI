@@ -48,23 +48,25 @@ def buildpushtostartscreencontrolpanel(sm):
 
 
 def bertecspeed_start(instance):
+    screen = instance.parent
     sm = instance.parent.parent
 
     bertecspeed = instance.source.value
-    bertecacc = 0.33 # TODO GET FROM ACC ADJUSTER
+    bertec_acc = screen.bertec_acc_slider.value
 
     # Command Bertec
     if instance.state == "down":
-        sm.bertec.write_command(bertecspeed, bertecspeed, incline=None, accR=bertecacc, accL=bertecacc)
+        sm.bertec.write_command(bertecspeed, bertecspeed, incline=None, accR=bertec_acc, accL=bertec_acc)
     else:
         # Remove ability to toggle, force use of STOP button
         instance.state = "down"
 
 def bertecspeed_stop(instance):
+    screen = instance.parent
     sm = instance.parent.parent
 
-    bertecacc = 0.33 # TODO GET FROM ACC ADJUSTER
-    sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=bertecacc, accL=bertecacc)
+    bertec_acc = screen.bertec_acc_slider.value
+    sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=bertec_acc, accL=bertec_acc)
 
     instance.source.startbtn.state = "normal"
 
@@ -111,12 +113,14 @@ def bind_link(instance):
         instance.background_color = [0.5, 0.5, 0, 1]
 
 
-def bertecslider_onmotion(instance, treadmill_speed):
-    pass
+def bertecslider_onmotion(instance, bertec_speed):
+    instance.label.text = "Bertec SPEED: {:.2f}".format(round(bertec_speed, 2))
+
+def bertec_acc_slider_onmotion(instance, bertec_acc):
+    instance.label.text = "Bertec ACC: {:.2f}".format(round(bertec_acc, 2))
 
 def torqueslider_onmotion(instance, peak_torque):
-    pass
-
+    instance.label.text = "EXO Peak Torque : {:.2f}".format(round(peak_torque, 2))
 
 def build_sls_buttons(screen, source, size_hint, pos_hint, bindstart, bindstop):
     sm = screen.sm
@@ -190,28 +194,40 @@ def buildcontrolpanel(sm):
 
     sm.control_sectors = []
 
-    screen.bertecslider = Slider(min=BERTEC_SPEED_MIN, max=BERTEC_SPEED_MAX, value=BERTEC_SPEED_MIN, step=BERTEC_SPEED_STEP, value_track=True, size_hint=(1/2, 1/3), pos_hint={"x":0, "y": 2/3})
+    screen.bertecslider = Slider(min=BERTEC_SPEED_MIN, max=BERTEC_SPEED_MAX, value=BERTEC_SPEED_MIN, step=BERTEC_SPEED_STEP, value_track=True, size_hint=(1/2-1/8, 1/3), pos_hint={"x":1/8, "y": 2/3})
     screen.bertecslider.bind(value=bertecslider_onmotion)
     build_sls_buttons(screen, screen.bertecslider, (1/8, 1/3), {"x":1/2, "y":2/3}, bertecspeed_start, bertecspeed_stop)
-    screen.add_widget(screen.bertecslider)
+    screen.bertecslider.label = Label(text="Bertec SPEED: {:.2f}".format(round(BERTEC_SPEED_MIN, 2)), font_size="60", size_hint=(0.1,0.1), pos_hint={'x': (1/2-1/8)*1/2+3/40, 'y': 2/3+1/5})
+
+    screen.bertec_acc_slider = Slider(orientation='vertical', min=0, max=1.0, value=0, step=0.05, value_track=True, size_hint=(1/8, 1/3-1/10), pos_hint={'x':0, 'y':2/3+1/20})
+    screen.bertec_acc_slider.bind(value=bertec_acc_slider_onmotion)
+    screen.bertec_acc_slider.label = Label(text="Bertec ACC: {:.2f}".format(round(0, 2)), color=(1, 1, 0, 1), font_size="60", size_hint=(1/8, 1/20), pos_hint={'x': 0, 'y': 1-1/20})
 
     screen.torqueslider = Slider(min=TORQUE_MIN, max=TORQUE_MAX, value=TORQUE_MIN, step=TORQUE_STEP, value_track=True, size_hint=(1/2, 1/3), pos_hint={"x":0, "y": 1/3})
     screen.torqueslider.bind(value=torqueslider_onmotion)
     build_sls_buttons(screen, screen.torqueslider, (1/8, 1/3), {"x":1/2, "y":1/3}, torqueslider_start, torqueslider_stop)
-    screen.add_widget(screen.torqueslider)
-
-    screen.viconfilenameinput = TextInput(text="Vicon file name here", size_hint=(1/3, 1/8), pos_hint={"x":1/3*1/4, "y": 1/6-1/16})
+    screen.torqueslider.label = Label(text="EXO Peak Torque : {:.2f}".format(round(TORQUE_MIN, 2)), font_size="60", size_hint=(0.1,0.1), pos_hint={'x': 1/4-1/20, 'y': 1/3+1/5})
+    
+    screen.viconfilenameinput = TextInput(text="Vicon file name here", font_size="40", size_hint=(1/3, 1/8), pos_hint={"x":1/3*1/4, "y": 1/6-1/16})
     build_sls_buttons(screen, screen.viconfilenameinput, (1/8, 1/3), {"x":1/2, "y":0}, vicon_start, vicon_stop)
-    screen.add_widget(screen.viconfilenameinput)
-
+    
     screen.start_linked_btn = ToggleButton(text="Start Linked", font_size="80", color=(1,1,1), background_normal='', background_color=[0,1,0,1], size_hint=(3/8, 1/4), pos_hint={"x":5/8, "y": 3/4})
     screen.start_linked_btn.background_normal = 'atlas://data/images/defaulttheme/button_pressed'
     screen.start_linked_btn.background_down = ''
     screen.start_linked_btn.bind(on_press=bind_start_linked)
-    screen.add_widget(screen.start_linked_btn)
-
+    
     screen.stop_linked_btn = Button(text="STOP Linked", font_size="80", color=(1,1,1), background_normal='', background_color=[1,0,0,1], size_hint=(3/8, 1/4), pos_hint={"x":5/8, "y": 0})
     screen.stop_linked_btn.bind(on_press=bind_stop_linked)
+    
+    # Add widgets
+    screen.add_widget(screen.bertecslider)
+    screen.add_widget(screen.bertecslider.label)
+    screen.add_widget(screen.bertec_acc_slider)
+    screen.add_widget(screen.bertec_acc_slider.label)
+    screen.add_widget(screen.torqueslider)
+    screen.add_widget(screen.torqueslider.label)
+    screen.add_widget(screen.viconfilenameinput)
+    screen.add_widget(screen.start_linked_btn)
     screen.add_widget(screen.stop_linked_btn)
 
     return screen
