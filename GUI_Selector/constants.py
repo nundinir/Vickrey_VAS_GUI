@@ -108,6 +108,10 @@ BERTEC_SPEED_STEP = 0.1
 
 TORQUE_STEP = 0.5
 
+DURATION_ORDERS = {"s": ["ones", "tens"], "min": ["ones", "tens"], "hr": ["ones"]}
+MAG_TO_SEC = {"ones": 1, "tens": 10}
+ORDS_TO_SEC = {"s": 1, "min": 60, "hr": 3600}
+
 """SPEEDFINDER SPECIFIC"""
 F_TARGET = 105.0 # spm
 V_INITIAL = 1.0 # m/s
