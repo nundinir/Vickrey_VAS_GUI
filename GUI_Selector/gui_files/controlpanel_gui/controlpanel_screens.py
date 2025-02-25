@@ -12,7 +12,6 @@ from math import atan2
 import random
 from functools import partial
 
-from kivy.utils import get_color_from_hex
 from kivy.clock import Clock
 from kivy.uix.label import Label
 from kivy.uix.image import Image
@@ -174,6 +173,22 @@ def trigger_stop(screen, dt):
 def display_cdt(screen, dt):
     pass
 
+def hide_duration_input(screen, opacity, *vargs):
+    screen.duration_label.opacity = opacity
+    screen.duration_status.opacity = opacity
+    screen.clear_duration.opacity = opacity
+
+    for ord_sep in screen.ord_separators:
+        ord_sep.opacity = opacity
+
+    for ord, mags in DURATION_ORDERS.items():
+        for mag in mags:
+            mag_label = screen.duration_inputs_dict[ord][mag]
+
+            mag_label.opacity = opacity
+            mag_label.inc_btn.opacity = opacity
+            mag_label.dec_btn.opacity = opacity
+
 def bind_start_linked(instance):
     screen = instance.parent
     sm = screen.parent
@@ -188,9 +203,12 @@ def bind_start_linked(instance):
                 for mag, label in mags.items():
                     duration_in_sec += ORDS_TO_SEC[ord] * MAG_TO_SEC[mag] * label.value
 
-            if duration_in_sec > 0:
-                screen.scheduled_events.append(Clock.schedule_once(partial(display_cdt, screen), 0))
-                screen.scheduled_events.append(Clock.schedule_once(partial(trigger_stop, screen), duration_in_sec))
+            screen.scheduled_events.append(Clock.schedule_once(partial(display_cdt, screen), 0))
+            screen.scheduled_events.append(Clock.schedule_once(partial(trigger_stop, screen), duration_in_sec))
+
+            screen.countdowntimer.opacity = 1
+            hide_duration_input(screen, opacity=0)
+            screen.countdowntimer.start(duration_in_sec)
             
     else:
         # Prevent toggle, force STOP linked usage
@@ -210,6 +228,9 @@ def bind_stop_linked(instance):
             Clock.unschedule(event)
     except:
         pass
+
+    screen.countdowntimer.opacity = 0
+    hide_duration_input(screen, opacity=1)
 
     instance.parent.start_linked_btn.state = "normal"
 
@@ -255,25 +276,23 @@ def bind_clear_duration(instance):
 
 
 def build_duration_input(screen, size_hint, pos_hint):
-    duration_label = Label(text="Duration:", color=(1,1,1), font_size="60", size_hint=(size_hint[0]*3/10, size_hint[1]/3), pos_hint={"x":pos_hint['x']+size_hint[0]/10, "y": pos_hint['y']+size_hint[1]/3})
+    screen.duration_label = Label(text="Duration:", color=(1,1,1), font_size="60", size_hint=(size_hint[0]*3/10, size_hint[1]/3), pos_hint={"x":pos_hint['x']+size_hint[0]/10, "y": pos_hint['y']+size_hint[1]/3})
 
     screen.duration_status = ToggleButton(text="DISABLED", color=(1,1,1), background_color=(1,0,0,1), font_size="50", size_hint=(size_hint[0]*3/10, size_hint[1]/6), pos_hint={'x':pos_hint['x']+size_hint[0]/10, 'y': pos_hint['y']+size_hint[1]*2/3})
     screen.duration_status.bind(on_press=bind_duration_status)
 
-    clear_duration = Button(text="CLEAR", color=(1,1,1), font_size="70", size_hint=(size_hint[0]*3/10, size_hint[1]/6), pos_hint={"x":pos_hint['x']+size_hint[0]/10, "y": pos_hint['y']+size_hint[1]/6})
-    clear_duration.bind(on_press=bind_clear_duration)
+    screen.clear_duration = Button(text="CLEAR", color=(1,1,1), font_size="70", size_hint=(size_hint[0]*3/10, size_hint[1]/6), pos_hint={"x":pos_hint['x']+size_hint[0]/10, "y": pos_hint['y']+size_hint[1]/6})
+    screen.clear_duration.bind(on_press=bind_clear_duration)
 
-    screen.add_widget(duration_label)
+    screen.add_widget(screen.duration_label)
     screen.add_widget(screen.duration_status)
-    screen.add_widget(clear_duration)
+    screen.add_widget(screen.clear_duration)
 
-    duration_orders = DURATION_ORDERS
-
-    num_ords = len([place for mag in duration_orders.values() for place in mag])
+    num_ords = len([place for mag in DURATION_ORDERS.values() for place in mag])
 
     ind=0
     inc_dec_size_x = 5/10
-    for ord, mags in duration_orders.items():
+    for ord, mags in DURATION_ORDERS.items():
         screen.duration_inputs_dict[ord] = {}
         for mag in mags:
             mag_label = build_increment_decline_buttons(screen, (size_hint[0]*inc_dec_size_x/num_ords, size_hint[1]), {'x':size_hint[0]+pos_hint['x']-size_hint[0]*inc_dec_size_x*(ind + 1)/num_ords, 'y':pos_hint['y']})
@@ -282,6 +301,7 @@ def build_duration_input(screen, size_hint, pos_hint):
         if not ind % 2:
             ord_separator = Label(text=":", color=(1,1,1), font_size="60", size_hint=(size_hint[0]*inc_dec_size_x/num_ords, size_hint[1]), pos_hint={'x':size_hint[0]+pos_hint['x']-size_hint[0]*inc_dec_size_x*(ind + 0.5)/num_ords, 'y':pos_hint['y']})
             screen.add_widget(ord_separator)
+            screen.ord_separators.append(ord_separator)
 
 
 def buildcontrolpanel(sm):
@@ -290,6 +310,7 @@ def buildcontrolpanel(sm):
     screen.scheduled_events = []
 
     sm.control_sectors = []
+    screen.ord_separators = []
 
     screen.bertecslider = Slider(min=BERTEC_SPEED_MIN, max=BERTEC_SPEED_MAX, value=BERTEC_SPEED_MIN, step=BERTEC_SPEED_STEP, value_track=True, size_hint=(1/2-1/8, 1/3), pos_hint={"x":1/8, "y": 2/3})
     screen.bertecslider.bind(value=bertecslider_onmotion)
