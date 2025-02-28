@@ -1,7 +1,7 @@
 """IP ADDRESSES"""
 SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
 LOCALHOST = "localhost:50051"    # IP address of local machine
-PI_IP = f"{'35.3.192.197'}:" f"{'50055'}"
+PI_IP = f"{'35.3.122.33'}:" f"{'50055'}"
 
 
 """BERTEC SETTINGS"""

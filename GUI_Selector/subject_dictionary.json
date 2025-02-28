@@ -5,7 +5,7 @@
             "pref_torque": 31.415,
             "EPO_MV": 9001,
             "NPO_MV": -404,
-            "squeeze": 15,
+            "squeeze": 4,
             "vas_seed": 1
         },
         "TESTER": {
@@ -53,10 +53,37 @@
         "S105": {
             "bertec_speed": 0.984,
             "pref_torque": 27.43,
-            "EPO_MV": 10,
-            "NPO_MV": -10,
+            "EPO_MV": -23.84,
+            "NPO_MV": -149.22,
             "squeeze": 1,
             "vas_seed": 105
+        },
+
+        "S106": {
+            "bertec_speed": 0.984,
+            "pref_torque": 27.43,
+            "EPO_MV": -100,
+            "NPO_MV": 100,
+            "squeeze": 1,
+            "vas_seed": 106
+        },
+
+        "S107": {
+            "bertec_speed": 0.5,
+            "pref_torque": 20,
+            "EPO_MV": -100,
+            "NPO_MV": 100,
+            "squeeze": 1,
+            "vas_seed": 107
+        },
+
+        "S108": {
+            "bertec_speed": 1.04,
+            "pref_torque": -10,
+            "EPO_MV": -100,
+            "NPO_MV": 100,
+            "squeeze": 1,
+            "vas_seed": 108
         }
     }
 }
