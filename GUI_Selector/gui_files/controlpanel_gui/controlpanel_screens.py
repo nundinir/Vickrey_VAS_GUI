@@ -28,25 +28,6 @@ from shared_files.kivy_utils import CountDownTimer
 from gui_files.pref_gui.pref_schedules import waitingscreenprefschedule, walksreenprefschedule, prefscreenschedule, reset_sliderscreen, finishscreenprefschedule
 
 
-def beginbtn_CB(instance):
-    sm = instance.parent.parent
-    # Set bertec speed
-    sm.bertec.write_command(sm.bertec_speed, sm.bertec_speed, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-    # Unpause exoboots
-    sm.exoboot_remote.set_pause(mybool=False)
-    # Next screen
-    sm.statemachine.next_screen()
-
-def buildpushtostartscreencontrolpanel(sm):
-    screen = Screen(name="pushtostartscreencontrolpanel")
-    screen.sm = sm
-    startbttn = Button(text="STOMP then Touch to begin", font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
-    startbttn.bind(on_press=beginbtn_CB)
-    screen.add_widget(startbttn)
-    
-    return screen
-
-
 def bertecspeed_start(instance):
     screen = instance.parent
     sm = instance.parent.parent

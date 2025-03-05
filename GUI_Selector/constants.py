@@ -1,7 +1,7 @@
 """IP ADDRESSES"""
 SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
 LOCALHOST = "localhost:50051"    # IP address of local machine
-PI_IP = f"{'35.3.192.197'}:" f"{'50055'}"
+PI_IP = f"{'35.3.200.5'}:" f"{'50055'}"
 
 
 """BERTEC SETTINGS"""
@@ -104,9 +104,9 @@ BERTEC_ACC_MAX = 1.0
 BERTEC_ACC_STEP = 0.05
 BERTEC_SPEED_MIN = 0.0
 BERTEC_SPEED_MAX = 2.0
-BERTEC_SPEED_STEP = 0.1
+BERTEC_SPEED_STEP = 0.01
 
-TORQUE_STEP = 0.5
+TORQUE_STEP = 0.05
 
 DURATION_ORDERS = {"s": ["ones", "tens"], "min": ["ones", "tens"], "hr": ["ones"]}
 MAG_TO_SEC = {"ones": 1, "tens": 10}

@@ -479,15 +479,13 @@ class ControlPanelGUI(BaseGui):
 
         # Create screens
         dummyscreen = Screen(name="dummy")
-        pushtostartscreencontrolpanel = buildpushtostartscreencontrolpanel(self.sm)
         self.sm.controlpanel = buildcontrolpanel(self.sm)
 
         # Add screens to ScreenManager
         self.sm.add_widget(dummyscreen)
-        self.sm.add_widget(pushtostartscreencontrolpanel)
         self.sm.add_widget(self.sm.controlpanel)
 
-        self.sm.current = "pushtostartscreencontrolpanel"
+        self.sm.current = "controlpanel"
 
         return self.sm
 
