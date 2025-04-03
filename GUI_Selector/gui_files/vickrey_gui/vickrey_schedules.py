@@ -50,7 +50,7 @@ def survey_schedule(sm):
             resultscreen.label.text = "You have won! Step on treadmill to begin walking.\nPayout: {:.2f}".format(sm.statemachine.payout)
             resultscreen.label.color =(0, 1, 0, 1)
         elif not state and prev_state:
-            resultscreen.label.text = "You have lost. Step off treadmill to sit out the round.\nPayout: {:.2f}".format(sm.statemachine.payout)
+            resultscreen.label.text = "You have lost. REMAIN on the treadmill. The round will end shortly.\nPayout: {:.2f}".format(sm.statemachine.payout)
             resultscreen.label.color =(1, 0, 0, 1)
         elif not state and not prev_state:
             resultscreen.label.text = "You have lost. Continue Sitting.\nPayout: {:.2f}".format(sm.statemachine.payout)

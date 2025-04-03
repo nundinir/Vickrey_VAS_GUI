@@ -36,21 +36,16 @@ def pause_exo_bertec(sm, dt):
     # Stop Vicon
     sm.vicon.stop_recording()
 
-def update_wait_text(sm, dt):
-    # Minimum wait depending on current_btn
-    current_btn = sm.statemachine.current_btn_option
-    min_wait = MIN_WAIT_VAS[current_btn]
-
-    if min_wait/sm.squeeze < 60:
-        waittext = "Take a break!\nTrial resumes in {} seconds".format(int(min_wait/sm.squeeze))
+def update_wait_text(sm, duration, dt):
+    if duration/sm.squeeze < 60:
+        waittext = "Take a break!\nTrial resumes in {} seconds".format(int(duration))
     else:
-        waittext = "Take a break!\nTrial resumes in {:0.1f} minutes".format(min_wait/sm.squeeze/60)
+        waittext = "Take a break!\nTrial resumes in {:0.1f} minutes".format(duration/60)
 
     sm.waitingscreen.waitlabel.text = waittext
 
-def next_presentation(sm, dt):
+def next_presentation(sm, b, t, p, dt):
     # Start Vicon
-    b, t, p = sm.statemachine.peak_btp()
     recording_name = "{}_B{}_T{}_P{}".format(sm.file_prefix, b, t, p)
     sm.vicon.start_recording(recording_name)
 
@@ -66,8 +61,15 @@ def waitingscreevasschedule(sm):
     Pause exos, update minimum wait time text, and change screens after minimum wait time has passed
     """
     Clock.schedule_once(partial(pause_exo_bertec, sm), 0)
-    Clock.schedule_once(partial(update_wait_text, sm), 0)
-    Clock.schedule_once(partial(next_presentation, sm), MIN_WAIT_VAS[sm.statemachine.current_btn_option]/sm.squeeze)
+
+    next_b, next_t, next_p = sm.statemachine.peak_btp()
+    if next_b == sm.statemachine.current_btn_option:
+        next_pres_wait = MIN_WAIT_VAS[sm.statemachine.current_btn_option]/sm.squeeze
+    else:
+        next_pres_wait = WAIT_BETWEEN_BTNS/sm.squeeze
+
+    Clock.schedule_once(partial(update_wait_text, sm, next_pres_wait), 0)
+    Clock.schedule_once(partial(next_presentation, sm, next_b, next_t, next_p), next_pres_wait)
 
 
 def vasscreenschedule(sm):

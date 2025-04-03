@@ -1,7 +1,7 @@
 """IP ADDRESSES"""
 SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
 LOCALHOST = "localhost:50051"    # IP address of local machine
-PI_IP = f"{'35.3.200.5'}:" f"{'50055'}"
+PI_IP = f"{'35.3.230.177'}:" f"{'50055'}"
 
 
 """BERTEC SETTINGS"""
@@ -42,6 +42,7 @@ SLIDER_JUSTIFICATION = 0.15
 
 # VAS timing in seconds
 MIN_WAIT_VAS = {1: 10, 4: 60, 10: 120}
+WAIT_BETWEEN_BTNS = 90
 VAS_10BTN_BREAK = 60
 
 # VAS Trial/Presentation Dicts
@@ -54,7 +55,7 @@ MAX_PRESENTATIONS_DICT = {1:20, 4:5, 10:1} # without replacement
 SUBTRIAL_MAX = 120
 MIN_WAIT_JND = 60
 
-TORQUE_MIN = 7
+TORQUE_MIN = 0
 TORQUE_MAX = 40
 
 # specific uniform sampler comparitor settings

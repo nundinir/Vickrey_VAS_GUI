@@ -45,7 +45,7 @@ def buildpushtostartscreen(sm):
 
     sm.statemachine.backupflag = False
 
-    startbttn = Button(text=text, font_size='50', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
+    startbttn = Button(text=text, font_size='70', color=(1, 1, 1, 1), size_hint=(3/4,3/4), pos_hint={'x':1/8,'y':1/8})
     startbttn.bind(on_press=startbttn_CB)
     screen.add_widget(startbttn)
 
@@ -94,7 +94,7 @@ def buildNumPadScreen(sm):
 
     sm.cdt = CountDownTimer(text='', font_size = '70', size_hint=(1/gn_x, 3/gn_y), pos_hint={'x':3/gn_x, 'y':4/gn_y})
     
-    timerlabel = Label(text='Close in: ', font_size = '50',size_hint=(1/gn_x, 3/gn_y), pos_hint={'x':2/gn_x, 'y':4/gn_y})
+    timerlabel = Label(text='Close in: ', font_size = '60',size_hint=(1/gn_x, 3/gn_y), pos_hint={'x':2/gn_x, 'y':4/gn_y})
 
     screen.add_widget(bid_input)
     screen.add_widget(btn0)
@@ -132,7 +132,7 @@ def buildsurveyscreen(sm):
     screen = Screen(name="survey")
     screen.sm = sm
 
-    enjoyment_label = Label(text="Rate your enjoyment", font_size='70', size_hint=(1/3, 1/6), pos_hint={'x':1/3, 'y':8.5/10}, halign='center')
+    enjoyment_label = Label(text="Rate your enjoyment", font_size='80', size_hint=(1/3, 1/6), pos_hint={'x':1/3, 'y':8.5/10}, halign='center')
     screen.add_widget(enjoyment_label)
 
     # Add enjoyment buttons
@@ -143,7 +143,7 @@ def buildsurveyscreen(sm):
         btn_.bind(on_press=enjoyment_cb)
         screen.add_widget(btn_)
 
-    rpe_label = Label(text="Rate your exertion (RPE)", font_size='70', size_hint=(1/3, 1/6), pos_hint={'x':1/3, 'y':1/3}, halign='center')
+    rpe_label = Label(text="Rate your exertion (RPE)", font_size='80', size_hint=(1/3, 1/6), pos_hint={'x':1/3, 'y':1/3}, halign='center')
     screen.add_widget(rpe_label)
 
     # Add rpe buttons
@@ -165,7 +165,7 @@ def buildresultscreen(sm):
     Displays Vickrey auction results to user after bidding completion
     """
     screen = Screen(name="resultscreen")
-    screen.label = Label(text='', font_size='50')
+    screen.label = Label(text='', font_size='70')
     screen.add_widget(screen.label)
     screen.on_enter = partial(result_screens_schedule, sm)
     return screen

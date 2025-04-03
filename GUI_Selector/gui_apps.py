@@ -21,7 +21,7 @@ from gui_files.vas_gui.vas_screens import buildpushtostartscreenvas, buildwaitin
 from gui_files.jnd_gui.jnd_screens import buildpushtostartscreenjnd, buildwaitingscreenjnd, buildsplitlegscreen, buildsamelegscreen, buildfinishscreenjnd
 from gui_files.pref_gui.pref_screens import buildpushtostartscreenpref, buildwaitingscreenpref, buildwalkscreenpref, buildsliderscreenpref, buildbtnscreenpref, buildfinishscreenpref, builddialscreenpref
 from gui_files.acclimation_gui.acclimation_screens import buildpushtostartscreenaccl, buildsliderscreenaccl, buildfinishscreenaccl
-from gui_files.controlpanel_gui.controlpanel_screens import buildpushtostartscreencontrolpanel, buildcontrolpanel
+from gui_files.controlpanel_gui.controlpanel_screens import buildcontrolpanel
 from gui_files.speedfinder_gui.speedfinder_screens import buildpushtostartscreensf, buildspeedfinderscreen, buildfinishscreensf
 
 from statemachine import VickreyStateMachine, VASStateMachine, JNDStateMachine, PrefStateMachine, AcclimationStateMachine, ControlPanelStateMachine, SpeedFinderStateMachine

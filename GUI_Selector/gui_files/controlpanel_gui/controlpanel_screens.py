@@ -60,6 +60,7 @@ def torqueslider_start(instance):
     if instance.state == "down":
         sm.exoboot_remote.set_torques(peak_torque_left=peaktorque, peak_torque_right=peaktorque)
         sm.exoboot_remote.set_pause(mybool=False)
+        sm.exoboot_remote.set_log(mybool=False)
     else:
         # Remove ability to toggle, force use of STOP button
         instance.state = "down"
@@ -68,6 +69,7 @@ def torqueslider_stop(instance):
     sm = instance.parent.parent
     sm.exoboot_remote.set_torques(peak_torque_left=0, peak_torque_right=0)
     sm.exoboot_remote.set_pause(mybool=True)
+    sm.exoboot_remote.set_log(mybool=True)
     instance.source.startbtn.state = "normal"
 
 def vicon_start(instance):
