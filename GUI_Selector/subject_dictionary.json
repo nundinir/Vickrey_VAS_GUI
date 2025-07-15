@@ -3,8 +3,8 @@
         "DUMMY": {
             "bertec_speed": 0.765,
             "pref_torque": 31.415,
-            "EPO_MV": 9001,
-            "NPO_MV": -404,
+            "EPO_MV": 10,
+            "NPO_MV": -10,
             "squeeze": 15,
             "vas_seed": 1
         },
