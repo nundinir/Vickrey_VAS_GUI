@@ -331,31 +331,30 @@ class JNDStateMachine:
         self.which_comparitor = which_comparitor.upper()
 
         # JND Comparitor
-        match self.which_comparitor:
-            case "UNIFORM":
-                self.comparitor = UniformSampler(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_list=REF_LIST, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
-            case "STAIR":
-                # instantiate a pickler object
-                self.pickler = Pickler()
-                
-                # Create the list of tuples with reference torques and modes
-                self.create_staircase_combos()  
-                
-                if os.path.exists(PICKLE_FILE_PATH):
-                    try:
-                        print("pickle file exists so loading it up")
-                        self.staircases = self.pickler.load_staircases(PICKLE_FILE_PATH)  # Load the staircases from the Pickle file
-                        self.converged_staircases = len(self.staircase_combinations) - len(self.staircases)
-                        self.pres = 0
-                    except:
-                        print("pickle file exists BUT FAILED to load")
-                        self.create_fresh_staircases()
-                else:   
-                    print("pickle file DNE so instantiating new staircases")
-                    self.create_fresh_staircases()      # Initialize new staircases: Kaernbach Algorithm
-                    self.pickler.save_staircases(self.staircases , PICKLE_FILE_PATH)    # save the initialized staircases to a pickle file
-            case _:
-                Exception("Invalid comparitor type")
+        if self.which_comparitor == "UNIFORM":
+            self.comparitor = UniformSampler(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_list=REF_LIST, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
+        elif self.which_comparitor ==  "STAIR":
+            # instantiate a pickler object
+            self.pickler = Pickler()
+            
+            # Create the list of tuples with reference torques and modes
+            self.create_staircase_combos()  
+            
+            if os.path.exists(PICKLE_FILE_PATH):
+                try:
+                    print("pickle file exists so loading it up")
+                    self.staircases = self.pickler.load_staircases(PICKLE_FILE_PATH)  # Load the staircases from the Pickle file
+                    self.converged_staircases = len(self.staircase_combinations) - len(self.staircases)
+                    self.pres = 0
+                except:
+                    print("pickle file exists BUT FAILED to load")
+                    self.create_fresh_staircases()
+            else:   
+                print("pickle file DNE so instantiating new staircases")
+                self.create_fresh_staircases()      # Initialize new staircases: Kaernbach Algorithm
+                self.pickler.save_staircases(self.staircases , PICKLE_FILE_PATH)    # save the initialized staircases to a pickle file
+        else:
+            Exception("Invalid comparitor type")
 
         # State tracking
         self.walknum = 0
@@ -377,30 +376,32 @@ class JNDStateMachine:
                                  "waitingscreenjnd": "pushtostartscreenjnd"}
 
         # Next screen based on jnd type
-        match jnd_type:
-            case 'SPLITLEG':
-                # Set Split Leg Funcs
-                self.next_comparison = self.next_comparison_split
-                self.report_higher = self.report_higher_split
+        if jnd_type == "SPLITLEG":
+            # Set Split Leg Funcs
+            self.next_comparison = self.next_comparison_split
+            self.report_higher = self.report_higher_split
 
-                self.peak_torque_left = 0
-                self.peak_torque_right = 0
+            self.peak_torque_left = 0
+            self.peak_torque_right = 0
 
-                self.next_screen_dict["pushtostartscreenjnd"] = "splitlegscreen"
-                self.next_screen_dict["splitlegscreen"] = "waitingscreenjnd"
-            case 'SAMELEG':
-                if self.which_comparitor == "UNIFORM":
-                    self.next_comparison = self.next_comparison_same
-                    self.report_higher = self.report_higher_same
-                elif self.which_comparitor == "STAIR":
-                    self.next_comparison = self.next_comparison_same_stair
-                    self.report_higher = self.report_higher_same_stair
+            self.next_screen_dict["pushtostartscreenjnd"] = "splitlegscreen"
+            self.next_screen_dict["splitlegscreen"] = "waitingscreenjnd"
+        elif jnd_type == "SAMELEG":
+            if self.which_comparitor == "UNIFORM":
+                self.next_comparison = self.next_comparison_same
+                self.report_higher = self.report_higher_same
+            elif self.which_comparitor == "STAIR":
+                self.next_comparison = self.next_comparison_same_stair
+                self.report_higher = self.report_higher_same_stair
 
-                self.peak_torques = []
-                self.peak_torque_ind = 0
+            self.peak_torques = []
+            self.peak_torque_ind = 0
 
-                self.next_screen_dict["pushtostartscreenjnd"] = "samelegscreen"
-                self.next_screen_dict["samelegscreen"] = "waitingscreenjnd"
+            self.next_screen_dict["pushtostartscreenjnd"] = "samelegscreen"
+            self.next_screen_dict["samelegscreen"] = "waitingscreenjnd"
+        else:
+            print("Invalid jnd_type")
+            exit()
         
 
     def loadstate(self, pres):
@@ -654,17 +655,18 @@ class PrefStateMachine:
                                  "waitingscreenpref": "pushtostartscreenpref"}
 
         # Next screen based on pref type
-        match self.pref_type:
-            case 'SLIDER':
-                self.next_screen_dict["pushtostartscreenpref"] = "sliderscreen"
-                self.next_screen_dict["sliderscreen"] = "walkscreenpref"
-            case 'BUTTON':
-                self.next_screen_dict["pushtostartscreenpref"] = "btnscreen"
-                self.next_screen_dict["btnscreen"] = "walkscreenpref"
-            case 'DIAL':
-                self.next_screen_dict["pushtostartscreenpref"] = "dialscreen"
-                self.next_screen_dict["dialscreen"] = "walkscreenpref"
-                
+        if self.pref_type == "SLIDER":
+            self.next_screen_dict["pushtostartscreenpref"] = "sliderscreen"
+            self.next_screen_dict["sliderscreen"] = "walkscreenpref"
+        elif self.pref_type == "BUTTON":
+            self.next_screen_dict["pushtostartscreenpref"] = "btnscreen"
+            self.next_screen_dict["btnscreen"] = "walkscreenpref"
+        elif self.pref_type ==  "DIAL":
+            self.next_screen_dict["pushtostartscreenpref"] = "dialscreen"
+            self.next_screen_dict["dialscreen"] = "walkscreenpref"
+        else:
+            print("Invalid pref_type")
+            exit()
 
     def report_pref(self, torque):
         """

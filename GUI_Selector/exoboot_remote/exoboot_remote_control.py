@@ -1,10 +1,12 @@
-import os, csv, time, grpc, threading
+import os, csv, time, grpc, threading, datetime
 from typing import Type
 from concurrent import futures
 
 import exoboot_remote.exoboot_remote_pb2 as pb2
 import exoboot_remote.exoboot_remote_pb2_grpc as pb2_grpc
 from shared_files.BaseExoThread import BaseThread
+
+from constants import DETROIT_TIMEZONE, DATETIME_FORMATTER_LESS_SEC
 
 
 class ExobootRemoteClient:
@@ -168,7 +170,8 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         if not loadstatus:
             match self.mainwrapper.trial_type.upper():
                 case 'VICKREY':
-                    auctionname = "{}_{}".format(self.file_prefix, "auction")
+                    current_date = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMATTER_LESS_SEC)
+                    auctionname = "{}_{}_{}".format(self.file_prefix, current_date, "auction")
                     auctionpath = self.filingcabinet.newfile(auctionname, "csv", dictkey="auction")
                     
                     surveyname = "{}_{}".format(self.file_prefix, "survey")
@@ -181,6 +184,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
 
                 case 'VAS':
                     overtimepath = ""
+                    current_date = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMATTER_LESS_SEC)
                     vasresultsname = "{}_{}".format(self.file_prefix, "vasresults")
                     vasresultspath = self.filingcabinet.newfile(vasresultsname, "csv", dictkey="vasresults")
 

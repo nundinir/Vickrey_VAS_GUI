@@ -236,6 +236,28 @@ if __name__ == "__main__":
     """
     Run test server
     """
+
+
+    # TODO use in FilingCabinet
+    import datetime, pytz, re
+    tz = pytz.timezone("America/Detroit")
+    formatter = "%Z_%Y_%m_%d_%H:%M:%S"
+
+    start = time.perf_counter()
+    now = datetime.datetime.now(tz).strftime(formatter)
+    end = time.perf_counter()
+
+    filename = "SUBJECT_{}_exothread_new.csv".format(now)
+    filename = filename.replace("_new", "")
+    print("FILENAME: ", filename)
+
+    pattern =  re.compile(r"\d{4}(.*)_")
+    result = pattern.search(filename)
+    print(filename[result.span()[0]:result.span()[1]-1])
+
+
+    exit()
+
     try:
         assert len(sys.argv) - 1 == 5
         _, subjectID, trial_type, trial_cond, description, usebackup = sys.argv
