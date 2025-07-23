@@ -54,14 +54,15 @@ VAS_10BTN_BREAK = 60
 # VAS Trial/Presentation Dicts
 BTN_NUMS = [1, 4, 10]
 MAX_TRIALS_DICT = {1:1, 4:1, 10:1}
-MAX_PRESENTATIONS_DICT = {1:20, 4:5, 10:1} # without replacement
+MAX_PRESENTATIONS_DICT = {1:10, 4:5, 10:1} # without replacement
 
 """JND SPECIFIC"""
 # JND timing in seconds
 SUBTRIAL_MAX = 120
 MIN_WAIT_JND = 60
 
-TORQUE_MIN = 0
+ZERO_TORQUE = 0
+TORQUE_MIN = 7
 TORQUE_MAX = 40
 
 # specific uniform sampler comparitor settings

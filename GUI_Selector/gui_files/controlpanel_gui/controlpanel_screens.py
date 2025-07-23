@@ -304,10 +304,10 @@ def buildcontrolpanel(sm):
     screen.bertec_acc_slider.bind(value=bertec_acc_slider_onmotion)
     screen.bertec_acc_slider.label = Label(text="ACC: {:.2f}".format(round(0, 2)), color=(1, 1, 0, 1), font_size="40", size_hint=(1/8, 1/20), pos_hint={'x': 0, 'y': 1-1/20})
 
-    screen.torqueslider = Slider(min=TORQUE_MIN, max=TORQUE_MAX, value=TORQUE_MIN, step=TORQUE_STEP, value_track=True, size_hint=(1/2, 1/3), pos_hint={"x":0, "y": 1/3})
+    screen.torqueslider = Slider(min=ZERO_TORQUE, max=TORQUE_MAX, value=ZERO_TORQUE, step=TORQUE_STEP, value_track=True, size_hint=(1/2, 1/3), pos_hint={"x":0, "y": 1/3})
     screen.torqueslider.bind(value=torqueslider_onmotion)
     build_sls_buttons(screen, screen.torqueslider, (1/8, 1/3), {"x":1/2, "y":1/3}, torqueslider_start, torqueslider_stop)
-    screen.torqueslider.label = Label(text="EXO Peak Torque : {:.2f}".format(round(TORQUE_MIN, 2)), font_size="60", size_hint=(0.1,0.1), pos_hint={'x': 1/4-1/20, 'y': 1/3+1/5})
+    screen.torqueslider.label = Label(text="EXO Peak Torque : {:.2f}".format(round(ZERO_TORQUE, 2)), font_size="60", size_hint=(0.1,0.1), pos_hint={'x': 1/4-1/20, 'y': 1/3+1/5})
     
     screen.viconfilenameinput = TextInput(text="Vicon file name here", font_size="40", size_hint=(1/3, 1/8), pos_hint={"x":1/3*1/4, "y": 1/6-1/16})
     build_sls_buttons(screen, screen.viconfilenameinput, (1/8, 1/3), {"x":1/2, "y":0}, vicon_start, vicon_stop)
