@@ -11,10 +11,19 @@ from shared_files.SoftRTloop import FlexibleSleeper
 from shared_files.utils import Pickler
 
 from constants import (
-    BTN_NUMS, MAX_TRIALS_DICT, MAX_PRESENTATIONS_DICT, REF_LIST, TORQUE_MIN, 
-    TORQUE_MAX, RIGHT_LIM, RATIO, STEP_SIZE_RIGHT_DICT, 
-    RUN_LIMIT, MODES
+    BTN_NUMS,
+    MAX_TRIALS_DICT,
+    MAX_PRESENTATIONS_DICT,
+    REF_LIST,
+    TORQUE_MIN,
+    TORQUE_MAX,
+    RIGHT_LIM,
+    RATIO,
+    STEP_SIZE_RIGHT_DICT,
+    RUN_LIMIT,
+    MODES,
 )
+
 
 # Statemachine class
 class VickreyStateMachine:
@@ -27,7 +36,7 @@ class VickreyStateMachine:
         # Init RoboBidders
         self.num_robobidders = num_robobidders
         self.robomodel = roboModel(k_RB, b_RB, self.num_robobidders)
-        self.auction_tally = 0 # Starts from 0th auction
+        self.auction_tally = 0  # Starts from 0th auction
 
         # Auction state
         self.state = False
@@ -40,19 +49,20 @@ class VickreyStateMachine:
 
         # Screen states
         self.queued_screen = None
-        self.next_screen_dict = {"dummy": "pushtostartscreen", 
-                                 "pushtostartscreen": "numpad", 
-                                 "numpad": "survey",
-                                 "survey": "resultscreen"
-                                 }
+        self.next_screen_dict = {
+            "dummy": "pushtostartscreen",
+            "pushtostartscreen": "numpad",
+            "numpad": "survey",
+            "survey": "resultscreen",
+        }
 
     def loadstate(self, states_dict: dict):
-        self.auction_tally = int((states_dict["t"])/ 2) + 1
+        self.auction_tally = int((states_dict["t"]) / 2) + 1
         self.state = states_dict["state"]
         self.prev_state = states_dict["prev_state"]
         self.total_winnings = states_dict["total_winnings"]
         self.robomodel.loadstate(states_dict["robostates"])
-        
+
         self.backupflag = True
 
     def determine_auction(self):
@@ -84,7 +94,7 @@ class VickreyStateMachine:
 
         # Get payout (Second price)
         second_prices = sorted([i for i in all_bids if i != self.winning_bid])
-        
+
         # Determine payout
         if second_prices:
             self.payout = second_prices[0]
@@ -97,7 +107,7 @@ class VickreyStateMachine:
             self.total_winnings += self.payout
         else:
             state = False
-        
+
         # Robowalks
         robo_walk_time = ROBOWALK_DUR * (self.auction_tally + 1)
         for ind, robo_win_state in enumerate(winners[1:]):
@@ -112,19 +122,27 @@ class VickreyStateMachine:
         t = self.auction_tally * ROBOWALK_DUR
 
         # Send auction results to auctionhouse
-        self.sm.exoboot_remote.call(t, subject_bid, self.state, self.payout, self.total_winnings)
+        self.sm.exoboot_remote.call(
+            t, subject_bid, self.state, self.payout, self.total_winnings
+        )
 
         # Save to backup
         auctionpath = self.sm.filingcabinet.getpath("auction")
-        with open(auctionpath, 'a', newline='') as f:
-            auction_backup = [t, subject_bid, self.state, self.payout, self.total_winnings]
+        with open(auctionpath, "a", newline="") as f:
+            auction_backup = [
+                t,
+                subject_bid,
+                self.state,
+                self.payout,
+                self.total_winnings,
+            ]
             auction_backup.extend(self.robomodel.getstate())
             csv.writer(f).writerow(auction_backup)
 
         # Increment auction tally
         self.auction_tally += 1
 
-    def close_survey(self,  *vargs):
+    def close_survey(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
         t = self.auction_tally * ROBOWALK_DUR
         self.sm.exoboot_remote.question(t, self.sm.enjoyment, self.sm.rpe)
@@ -139,7 +157,7 @@ class VickreyStateMachine:
         """
         Move to next screen according to queued_screen, then next_screen_dict
         Ignore vargs. exists so next can be called by Clock.schedule_once
-        """ 
+        """
         if self.queued_screen:
             self.sm.current = self.queued_screen
             self.queued_screen = None
@@ -152,16 +170,20 @@ class VASStateMachine:
     def __init__(self, screenmanager, subject_dict):
         self.sm = screenmanager
         self.subject_dict = subject_dict
-        
+
         # Trial/Presentation States
         self.current_btn_option = 0
         self.current_trial = 0
         self.current_presentation = 0
 
         # Set effective seed and shuffle btn_nums
-        effective_seed = 4513*self.sm.vas_seed + 599*self.sm.desc_num
+        effective_seed = 4513 * self.sm.vas_seed + 599 * self.sm.desc_num
         random.seed(effective_seed)
-        print("SUBJECT SEED: {}\nDESC_MUTATOR: {}\nEFFECTIVE_SEED: {}\n".format(self.sm.vas_seed, self.sm.desc_num, effective_seed))
+        print(
+            "SUBJECT SEED: {}\nDESC_MUTATOR: {}\nEFFECTIVE_SEED: {}\n".format(
+                self.sm.vas_seed, self.sm.desc_num, effective_seed
+            )
+        )
 
         # Shuffle btn_nums
         self.btn_nums = BTN_NUMS[:]
@@ -175,12 +197,13 @@ class VASStateMachine:
 
         # Screen states
         self.queued_screen = None
-        self.next_screen_dict = {"dummy": "pushtostartscreen", 
-                                 "pushtostartscreen": "vasscreen",
-                                 "vasscreen": "waitingscreenvas",
-                                 "waitingscreenvas": "pushtostartscreen",
-                                 "breakscreenvas": "pushtostartscreen"
-                                 }
+        self.next_screen_dict = {
+            "dummy": "pushtostartscreen",
+            "pushtostartscreen": "vasscreen",
+            "vasscreen": "waitingscreenvas",
+            "waitingscreenvas": "pushtostartscreen",
+            "breakscreenvas": "pushtostartscreen",
+        }
 
         # Quit flag
         self.quit_flag = False
@@ -192,7 +215,7 @@ class VASStateMachine:
         First 10 torques are every other torque (even indices)
         Second 10 torques are the rest (odd indices)
         """
-        base_ordered = base_list[::2] + base_list[1::2]
+        base_ordered = base_list[1::2] + base_list[::2]
         return base_ordered
 
     def generate_btn_trial_pres_list(self):
@@ -209,10 +232,14 @@ class VASStateMachine:
         Generate presentations (groups of buttons) for each trial
         Seeded mapping generation using vas_seed
         """
-        num_torques = {btn_num: btn_num * MAX_PRESENTATIONS_DICT[btn_num] for btn_num in BTN_NUMS}
+        num_torques = {
+            btn_num: btn_num * MAX_PRESENTATIONS_DICT[btn_num] for btn_num in BTN_NUMS
+        }
         max_num = max(num_torques.values())
 
-        torque_list = list(np.linspace(TORQUE_MIN, TORQUE_MAX, max_num).round(decimals=3))
+        torque_list = list(
+            np.linspace(TORQUE_MIN, TORQUE_MAX, max_num).round(decimals=3)
+        )
         ordered_torques = self.evensampler(torque_list)
 
         # Set current_btn to first btn in shuffled btn list
@@ -227,7 +254,7 @@ class VASStateMachine:
             print("{}: {}".format(btn_num, torques))
 
             trial_mappings = {}
-        
+
             for trial in range(1, MAX_TRIALS_DICT[btn_num] + 1):
                 available_torques = torques[:]
                 random.shuffle(available_torques)
@@ -264,22 +291,30 @@ class VASStateMachine:
         """
         Return torque (Nm) for a given btp
         """
-        return self.button_mappings[self.current_btn_option][self.current_trial][self.current_presentation][ind]
+        return self.button_mappings[self.current_btn_option][self.current_trial][
+            self.current_presentation
+        ][ind]
 
     def next_trial_pres(self):
         """
         Returns next btp to query
         """
-        [self.current_btn_option, self.current_trial, self.current_presentation] = self.vas_btn_trial_pres.pop(0)
-        self.overtime_dict = {self.get_torque(i):0 for i in range(self.current_btn_option)}
+        [self.current_btn_option, self.current_trial, self.current_presentation] = (
+            self.vas_btn_trial_pres.pop(0)
+        )
+        self.overtime_dict = {
+            self.get_torque(i): 0 for i in range(self.current_btn_option)
+        }
 
         # Send overtime info
-        self.sm.exoboot_remote.update_vas_info(self.current_btn_option, self.current_trial, self.current_presentation)
+        self.sm.exoboot_remote.update_vas_info(
+            self.current_btn_option, self.current_trial, self.current_presentation
+        )
 
         # Quit after next screen if no more trial/pres left
         if len(self.vas_btn_trial_pres) < 1:
-            self.quit_flag  = True
-        
+            self.quit_flag = True
+
     def log_overtime(self, torque, mv):
         """
         Log slider movements when moving
@@ -293,16 +328,26 @@ class VASStateMachine:
         Send presentation results to pi
         Save backup
         """
-        self.sm.exoboot_remote.presentation_result(self.current_btn_option, self.current_trial, self.current_presentation, torques, values)
+        self.sm.exoboot_remote.presentation_result(
+            self.current_btn_option,
+            self.current_trial,
+            self.current_presentation,
+            torques,
+            values,
+        )
 
         # Save backup
-        datalist = [self.current_btn_option, self.current_trial, self.current_presentation]
+        datalist = [
+            self.current_btn_option,
+            self.current_trial,
+            self.current_presentation,
+        ]
         for t, mv in zip(torques, values):
             datalist.append(t)
             datalist.append(mv)
 
         vasresultspath = self.sm.filingcabinet.getpath("vasresults")
-        with open(vasresultspath, 'a', newline='') as f:
+        with open(vasresultspath, "a", newline="") as f:
             csv.writer(f).writerow(datalist)
 
     def queue_screen(self, screen):
@@ -316,7 +361,7 @@ class VASStateMachine:
         Move to next screen depending on conditions
         """
         if self.quit_flag:
-            self.sm.current = 'finishscreenvas'
+            self.sm.current = "finishscreenvas"
         elif self.queued_screen:
             self.sm.current = self.queued_screen
             self.queued_screen = None
@@ -325,34 +370,47 @@ class VASStateMachine:
 
 
 class JNDStateMachine:
-    def __init__(self, screenmanager, jnd_type='SPLITLEG', which_comparitor="UNIFORM"):
+    def __init__(self, screenmanager, jnd_type="SPLITLEG", which_comparitor="UNIFORM"):
         self.sm = screenmanager
         self.jnd_type = jnd_type.upper()
         self.which_comparitor = which_comparitor.upper()
 
         # JND Comparitor
         if self.which_comparitor == "UNIFORM":
-            self.comparitor = UniformSampler(num_bins=NUM_BINS, prop_low=PROP_LOW, prop_high=PROP_HIGH, ref_list=REF_LIST, torque_min=TORQUE_MIN, torque_max=TORQUE_MAX)
-        elif self.which_comparitor ==  "STAIR":
+            self.comparitor = UniformSampler(
+                num_bins=NUM_BINS,
+                prop_low=PROP_LOW,
+                prop_high=PROP_HIGH,
+                ref_list=REF_LIST,
+                torque_min=TORQUE_MIN,
+                torque_max=TORQUE_MAX,
+            )
+        elif self.which_comparitor == "STAIR":
             # instantiate a pickler object
             self.pickler = Pickler()
-            
+
             # Create the list of tuples with reference torques and modes
-            self.create_staircase_combos()  
-            
+            self.create_staircase_combos()
+
             if os.path.exists(PICKLE_FILE_PATH):
                 try:
                     print("pickle file exists so loading it up")
-                    self.staircases = self.pickler.load_staircases(PICKLE_FILE_PATH)  # Load the staircases from the Pickle file
-                    self.converged_staircases = len(self.staircase_combinations) - len(self.staircases)
+                    self.staircases = self.pickler.load_staircases(
+                        PICKLE_FILE_PATH
+                    )  # Load the staircases from the Pickle file
+                    self.converged_staircases = len(self.staircase_combinations) - len(
+                        self.staircases
+                    )
                     self.pres = 0
                 except:
                     print("pickle file exists BUT FAILED to load")
                     self.create_fresh_staircases()
-            else:   
+            else:
                 print("pickle file DNE so instantiating new staircases")
-                self.create_fresh_staircases()      # Initialize new staircases: Kaernbach Algorithm
-                self.pickler.save_staircases(self.staircases , PICKLE_FILE_PATH)    # save the initialized staircases to a pickle file
+                self.create_fresh_staircases()  # Initialize new staircases: Kaernbach Algorithm
+                self.pickler.save_staircases(
+                    self.staircases, PICKLE_FILE_PATH
+                )  # save the initialized staircases to a pickle file
         else:
             Exception("Invalid comparitor type")
 
@@ -372,8 +430,10 @@ class JNDStateMachine:
 
         # Screen states dictionary
         self.queued_screen = None
-        self.next_screen_dict = {"dummy": "pushtostartscreenjnd",
-                                 "waitingscreenjnd": "pushtostartscreenjnd"}
+        self.next_screen_dict = {
+            "dummy": "pushtostartscreenjnd",
+            "waitingscreenjnd": "pushtostartscreenjnd",
+        }
 
         # Next screen based on jnd type
         if jnd_type == "SPLITLEG":
@@ -402,7 +462,6 @@ class JNDStateMachine:
         else:
             print("Invalid jnd_type")
             exit()
-        
 
     def loadstate(self, pres):
         """
@@ -418,7 +477,9 @@ class JNDStateMachine:
             self.quit_flag = True
             self.next_screen()
         else:
-            self.prop, self.T_ref, self.T_comp, truth = self.comparitor.generate_next_comparison()
+            self.prop, self.T_ref, self.T_comp, truth = (
+                self.comparitor.generate_next_comparison()
+            )
             self.pres += 1
 
             if random.getrandbits(1):
@@ -431,7 +492,10 @@ class JNDStateMachine:
                 self.peak_torque_right = self.T_ref
                 self.truth = int(not truth)
 
-            self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torque_left, peak_torque_right=self.peak_torque_right)
+            self.sm.exoboot_remote.set_torques(
+                peak_torque_left=self.peak_torque_left,
+                peak_torque_right=self.peak_torque_right,
+            )
 
     def next_comparison_same(self):
         """
@@ -441,10 +505,12 @@ class JNDStateMachine:
             self.quit_flag = True
             self.next_screen()
         else:
-            self.prop, self.T_ref, self.T_comp, truth = self.comparitor.generate_next_comparison()
+            self.prop, self.T_ref, self.T_comp, truth = (
+                self.comparitor.generate_next_comparison()
+            )
             self.pres += 1
 
-            self.peak_torque_ind = 0 
+            self.peak_torque_ind = 0
             if random.getrandbits(1):
                 self.peak_torques = [self.T_ref, self.T_comp]
                 self.truth = int(truth)
@@ -452,15 +518,19 @@ class JNDStateMachine:
                 self.peak_torques = [self.T_comp, self.T_ref]
                 self.truth = int(not truth)
 
-            self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torques[self.peak_torque_ind], peak_torque_right=self.peak_torques[self.peak_torque_ind])
-        
+            self.sm.exoboot_remote.set_torques(
+                peak_torque_left=self.peak_torques[self.peak_torque_ind],
+                peak_torque_right=self.peak_torques[self.peak_torque_ind],
+            )
+
     def create_staircase_combos(self):
-        """Creates list of tuples with combos of reference torque, mode, and repetition. 
-        Contained within staircase_combinations attribute. Sets seed for reproducibility and shuffles."""
-        
-        self.staircase_combinations = [(ref_torque, mode) 
-                        for ref_torque in REF_LIST 
-                        for mode in MODES]
+        """Creates list of tuples with combos of reference torque, mode, and repetition.
+        Contained within staircase_combinations attribute. Sets seed for reproducibility and shuffles.
+        """
+
+        self.staircase_combinations = [
+            (ref_torque, mode) for ref_torque in REF_LIST for mode in MODES
+        ]
 
         # Setting seed for reproducibility & shuffling
         seed = 2
@@ -469,26 +539,29 @@ class JNDStateMachine:
         print(f"Staircase combos created: {self.staircase_combinations}")
 
     def create_fresh_staircases(self):
-        """ Instantiates the randomly interleaved staircase objects and 
-        saves FOR THE FIRST TIME to a Pickle file. Sets converged_staircases and presentation to 0."""
+        """Instantiates the randomly interleaved staircase objects and
+        saves FOR THE FIRST TIME to a Pickle file. Sets converged_staircases and presentation to 0.
+        """
         self.staircases = []
         for ref_torque, mode in self.staircase_combinations:
             step_size_right = STEP_SIZE_RIGHT_DICT[ref_torque]
-            self.comparitor = KaernbachAlgorithm(reference_torque=ref_torque,
-                                                step_size_right=step_size_right, 
-                                                step_ratio=RATIO,
-                                                run_limit=RUN_LIMIT, 
-                                                mode=mode, 
-                                                init_step_out_size=INIT_STEP_OUT_SIZE,
-                                                consec_correct_lim=RIGHT_LIM, 
-                                                torque_max_lim=TORQUE_MAX, 
-                                                torque_min_lim=TORQUE_MIN)
+            self.comparitor = KaernbachAlgorithm(
+                reference_torque=ref_torque,
+                step_size_right=step_size_right,
+                step_ratio=RATIO,
+                run_limit=RUN_LIMIT,
+                mode=mode,
+                init_step_out_size=INIT_STEP_OUT_SIZE,
+                consec_correct_lim=RIGHT_LIM,
+                torque_max_lim=TORQUE_MAX,
+                torque_min_lim=TORQUE_MIN,
+            )
             self.staircases.append((self.comparitor, ref_torque, mode))
             self.converged_staircases = 0
             self.pres = 0
-            
+
         print(f"Staircases instantiated: {self.staircases}")
-        
+
     def next_comparison_same_stair(self):
         """
         Assigns torque pair to randomly selected swap button state according to kaernbach algorithm
@@ -499,28 +572,32 @@ class JNDStateMachine:
             self.pickler.remove_pickle_file(PICKLE_FILE_PATH)
             self.next_screen()
         else:
-            
+
             # Calculate the starting index of circular roll
-            self.pres += 1          # increment presentation number
+            self.pres += 1  # increment presentation number
             start_index = self.pres % len(self.staircases)
-            
+
             # Circularly roll through the list of tuples containing staircase objects, refs, and modes
-            rolling_staircase_list = self.staircases[start_index:] + self.staircases[:start_index]
-            
+            rolling_staircase_list = (
+                self.staircases[start_index:] + self.staircases[:start_index]
+            )
+
             # Extract the staircase object, ref_torque, and mode from the first tuple
             self.selected_staircase, ref_torque, self.mode = rolling_staircase_list[0]
 
             # print out components for debugging
             print(f"Selected Stair Reference Torque: {ref_torque}")
             print(f"Selected Stair Mode: {self.mode}")
-            
+
             # if the selected_staircase hasn't converged, generate the next comparison torque
             if not self.selected_staircase.converged_flag:
-                
+
                 self.T_ref = ref_torque
                 self.T_comp = self.selected_staircase.current_comparison_torque
-                truth = min(math.floor(self.T_comp/self.T_ref), 1)  # indicator for which torque is higher (0: T_comp, 1: T_ref) 
-                  
+                truth = min(
+                    math.floor(self.T_comp / self.T_ref), 1
+                )  # indicator for which torque is higher (0: T_comp, 1: T_ref)
+
                 # shuffle the peak torques for ref and comparison presentation
                 self.peak_torque_ind = 0
                 if random.getrandbits(1):
@@ -529,23 +606,30 @@ class JNDStateMachine:
                 else:
                     self.peak_torques = [self.T_comp, self.T_ref]
                     self.truth = int(not truth)
-                    
+
                 print(f"Currently Presented Comparison Torque: {self.T_comp}")
                 print(f"Diff is: {abs(self.T_comp - self.T_ref)}")
-                
+
                 # present current comparison vs ref
-                self.sm.exoboot_remote.set_torques(peak_torque_left=self.peak_torques[self.peak_torque_ind], peak_torque_right=self.peak_torques[self.peak_torque_ind])
-                
+                self.sm.exoboot_remote.set_torques(
+                    peak_torque_left=self.peak_torques[self.peak_torque_ind],
+                    peak_torque_right=self.peak_torques[self.peak_torque_ind],
+                )
+
     def report_higher_split(self, signature):
         """
         Reports result of comparison
         """
-        self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature)
+        self.sm.exoboot_remote.comparison_result(
+            self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature
+        )
 
         # Log backup
         comparisonpath = self.sm.filingcabinet.getpath("comparison")
-        with open(comparisonpath, 'a', newline='') as f:
-            csv.writer(f).writerow([self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature])
+        with open(comparisonpath, "a", newline="") as f:
+            csv.writer(f).writerow(
+                [self.pres, self.prop, self.T_ref, self.T_comp, self.truth, signature]
+            )
 
         if not self.subtrial_limit:
             self.next_comparison()
@@ -557,42 +641,66 @@ class JNDStateMachine:
         """
         Reports result of comparison
         """
-        self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind)
+        self.sm.exoboot_remote.comparison_result(
+            self.pres,
+            self.prop,
+            self.T_ref,
+            self.T_comp,
+            self.truth,
+            self.peak_torque_ind,
+        )
 
         # Log backup
         comparisonpath = self.sm.filingcabinet.getpath("comparison")
-        with open(comparisonpath, 'a', newline='') as f:
-            csv.writer(f).writerow([self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind])
+        with open(comparisonpath, "a", newline="") as f:
+            csv.writer(f).writerow(
+                [
+                    self.pres,
+                    self.prop,
+                    self.T_ref,
+                    self.T_comp,
+                    self.truth,
+                    self.peak_torque_ind,
+                ]
+            )
 
         if not self.subtrial_limit:
             self.next_comparison()
         else:
             self.next_screen()
-            
 
     def report_higher_same_stair(self):
         """
         Reports result of comparison
         """
-        self.prop = self.T_comp/self.T_ref
-        self.sm.exoboot_remote.comparison_result(self.pres, self.prop, self.T_ref, self.T_comp, self.truth, self.peak_torque_ind)
+        self.prop = self.T_comp / self.T_ref
+        self.sm.exoboot_remote.comparison_result(
+            self.pres,
+            self.prop,
+            self.T_ref,
+            self.T_comp,
+            self.truth,
+            self.peak_torque_ind,
+        )
         user_decided_torque = self.peak_torques[self.peak_torque_ind]
-        
-        # if the user_decision is the same as the truth, 
+
+        # if the user_decision is the same as the truth,
         if self.peak_torque_ind == self.truth:
             user_decision = True
         else:
             user_decision = False
-            
+
         # print(f"User Decision: {user_decision}")
-        
+
         # generate next comparison torque based on observer response for current comparison torque
-        next_comparison_torque = self.selected_staircase.generate_next_comparison(user_decision)
+        next_comparison_torque = self.selected_staircase.generate_next_comparison(
+            user_decision
+        )
         # print(f"Next Comparison Torque: {next_comparison_torque}")
-        
+
         # set the current comparison torque to the next comparison torque for the selected_staircase evaluation
         self.selected_staircase.current_comparison_torque = next_comparison_torque
-        
+
         # if the selected_staircase has converged, remove the particular staircase from the list
         if self.selected_staircase.converged_flag:
             print("A staircase has converged!")
@@ -602,21 +710,25 @@ class JNDStateMachine:
 
         # Log backup variables
         comparisonpath = self.sm.filingcabinet.getpath("comparison")
-        with open(comparisonpath, 'a', newline='') as f:
-            csv.writer(f).writerow([self.pres, 
-                                    self.mode, 
-                                    self.T_ref, 
-                                    self.T_comp, 
-                                    self.truth, 
-                                    self.peak_torque_ind, 
-                                    self.selected_staircase.converged_flag, 
-                                    self.selected_staircase.consec_correct_counter,
-                                    self.selected_staircase.step_size,
-                                    self.selected_staircase.convergence_attempts,])
-            
+        with open(comparisonpath, "a", newline="") as f:
+            csv.writer(f).writerow(
+                [
+                    self.pres,
+                    self.mode,
+                    self.T_ref,
+                    self.T_comp,
+                    self.truth,
+                    self.peak_torque_ind,
+                    self.selected_staircase.converged_flag,
+                    self.selected_staircase.consec_correct_counter,
+                    self.selected_staircase.step_size,
+                    self.selected_staircase.convergence_attempts,
+                ]
+            )
+
         # Update the saved pickle file
         self.pickler.save_staircases(self.staircases, PICKLE_FILE_PATH)
-        
+
         if not self.subtrial_limit:
             self.next_comparison()
         else:
@@ -631,7 +743,7 @@ class JNDStateMachine:
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
         if self.quit_flag:
-            self.sm.current = 'finishscreenjnd'
+            self.sm.current = "finishscreenjnd"
         elif self.queued_screen:
             self.sm.current = self.queued_screen
             self.queued_screen = None
@@ -640,7 +752,7 @@ class JNDStateMachine:
 
 
 class PrefStateMachine:
-    def __init__(self, screenmanager, pref_type='SLIDER'):
+    def __init__(self, screenmanager, pref_type="SLIDER"):
         self.sm = screenmanager
         self.pref_type = pref_type.upper()
 
@@ -650,9 +762,11 @@ class PrefStateMachine:
         self.quit_flag = False
 
         # Screen states dictionary
-        self.next_screen_dict = {"dummy": "pushtostartscreenpref",
-                                 "walkscreenpref": "waitingscreenpref",
-                                 "waitingscreenpref": "pushtostartscreenpref"}
+        self.next_screen_dict = {
+            "dummy": "pushtostartscreenpref",
+            "walkscreenpref": "waitingscreenpref",
+            "waitingscreenpref": "pushtostartscreenpref",
+        }
 
         # Next screen based on pref type
         if self.pref_type == "SLIDER":
@@ -661,7 +775,7 @@ class PrefStateMachine:
         elif self.pref_type == "BUTTON":
             self.next_screen_dict["pushtostartscreenpref"] = "btnscreen"
             self.next_screen_dict["btnscreen"] = "walkscreenpref"
-        elif self.pref_type ==  "DIAL":
+        elif self.pref_type == "DIAL":
             self.next_screen_dict["pushtostartscreenpref"] = "dialscreen"
             self.next_screen_dict["dialscreen"] = "walkscreenpref"
         else:
@@ -693,9 +807,11 @@ class AcclimationStateMachine:
         self.sm = screenmanager
 
         # Screen states dictionary
-        self.next_screen_dict = {"dummy": "pushtostartscreenaccl",
-                                 "pushtostartscreenaccl": "sliderscreen",
-                                 "sliderscreen": "finishscreenaccl"}
+        self.next_screen_dict = {
+            "dummy": "pushtostartscreenaccl",
+            "pushtostartscreenaccl": "sliderscreen",
+            "sliderscreen": "finishscreenaccl",
+        }
 
     def next_screen(self, *vargs):
         # Ignore vargs. exists so next can be called by Clock.schedule_once
@@ -720,9 +836,11 @@ class SpeedFinderStateMachine:
         self.sm = screenmanager
 
         # Screen states dictionary
-        self.next_screen_dict = {"dummy": "pushtostartscreensf",
-                                 "pushtostartscreensf": "speedfinderscreen",
-                                 "speedfinderscreen": "finishscreensf"}
+        self.next_screen_dict = {
+            "dummy": "pushtostartscreensf",
+            "pushtostartscreensf": "speedfinderscreen",
+            "speedfinderscreen": "finishscreensf",
+        }
 
         self.IsOptimized = False
 
@@ -734,7 +852,7 @@ class SpeedFinderStateMachine:
         """
         Walk Ratio invariance formula
         """
-        v2 = f2**2/f1**2 * v1
+        v2 = f2**2 / f1**2 * v1
         return self.clamp_v(v2)
 
     def runoptimizer(self, f_target=F_TARGET, v_init=V_INITIAL, sleeptime=SLEEPTIME):
@@ -769,11 +887,11 @@ if __name__ == "__main__":
     """
     Display VAS Trial/Presentation Torques
     """
+
     class blank_sm:
         def __init__(self):
-            self.vas_seed = 1
-            self.cond_num = 2
-            self.desc_num = 1
+            self.vas_seed = 1  # subject seed
+            self.desc_num = 1  # group number
 
     sm = blank_sm()
     testvas = VASStateMachine(sm, None)

@@ -16,6 +16,30 @@
             "squeeze": 15,
             "vas_seed": 1
         },
+        "AB01": {
+            "bertec_speed": 0.8,
+            "pref_torque": 0,
+            "EPO_MV": 9999,
+            "NPO_MV": -9999,
+            "squeeze": 1,
+            "vas_seed": 1
+        },
+        "AB02": {
+            "bertec_speed": 0.8,
+            "pref_torque": 0,
+            "EPO_MV": 9999,
+            "NPO_MV": -9999,
+            "squeeze": 1,
+            "vas_seed": 2
+        },
+        "AB03": {
+            "bertec_speed": 0.8,
+            "pref_torque": 0,
+            "EPO_MV": 9999,
+            "NPO_MV": -9999,
+            "squeeze": 1,
+            "vas_seed": 3
+        },
         "S101": {
             "bertec_speed": 1.08,
             "pref_torque": 33.20,
@@ -40,7 +64,6 @@
             "squeeze": 1,
             "vas_seed": 103
         },
-
         "S104": {
             "bertec_speed": 0.9,
             "pref_torque": 10,
@@ -49,7 +72,6 @@
             "squeeze": 1,
             "vas_seed": 104
         },
-
         "S105": {
             "bertec_speed": 0.984,
             "pref_torque": 27.43,
@@ -58,7 +80,6 @@
             "squeeze": 1,
             "vas_seed": 105
         },
-
         "S106": {
             "bertec_speed": 0.984,
             "pref_torque": 27.43,
