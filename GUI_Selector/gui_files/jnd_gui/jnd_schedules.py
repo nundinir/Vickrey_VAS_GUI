@@ -1,10 +1,12 @@
+import datetime
 from functools import partial
 
 from kivy.clock import Clock
 
-from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBTRIAL_MAX, MIN_WAIT_JND
+from constants import BERTEC_SPEED_STOP, BERTEC_ACC_LEFT, BERTEC_ACC_RIGHT, SUBTRIAL_MAX, MIN_WAIT_JND, FILENAME_FORMAT_LESS_EXT, DETROIT_TIMEZONE, DATETIME_FORMAT_LESS_SEC
 
 from gui_files.shared_screens import check_batteries
+from shared_files.filing_cabinet_regex import build_filename
 
 
 def initialize_comparison(sm, dt):
@@ -24,7 +26,7 @@ def splitsameschedule(sm):
 def pause_exo_bertec(sm, dt):
     # Stop bertec
     sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-    
+
     # Pause exoboots
     sm.exoboot_remote.set_pause(mybool=True)
 
@@ -36,8 +38,17 @@ def pause_exo_bertec(sm, dt):
 
 def trial_ready(sm, dt):
     # Start Vicon
-    recording_name = "{}_walk{}".format(sm.file_prefix, sm.statemachine.walknum)
-    sm.vicon.start_recording(recording_name)
+    suffix = "walk{}".format(sm.statemachine.walknum)
+    recording_name = build_filename(
+            FORMAT=FILENAME_FORMAT_LESS_EXT,
+            PREFIX=sm.file_prefix,
+            DATE=sm.current_date,
+            SUFFIX=suffix,
+        )
+
+    start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+    file_description = f"Current date:{sm.current_date}. Start recording date:{start_recording_stamp}"
+    sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
 
     # Start exo logging
     sm.exoboot_remote.set_log(mybool=False)

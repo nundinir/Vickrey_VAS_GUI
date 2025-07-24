@@ -4,12 +4,13 @@ from kivy.clock import Clock
 
 from constants import *
 from gui_files.shared_screens import check_batteries
+from shared_files.filing_cabinet_regex import build_filename
 
 
 def pause_exo_bertec_no_vicon(sm, dt):
     # Stop bertec
     sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-    
+
     # Zero and pause exoboots
     sm.exoboot_remote.set_torques(peak_torque_left=0, peak_torque_right=0)
     sm.exoboot_remote.set_pause(mybool=True)
@@ -25,7 +26,7 @@ def start_exo_bertec_only(sm, dt):
 def pause_exo_bertec(sm, dt):
     # Stop bertec
     sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-    
+
     # Zero and pause exoboots
     sm.exoboot_remote.set_torques(peak_torque_left=0, peak_torque_right=0)
     sm.exoboot_remote.set_pause(mybool=True)
@@ -46,8 +47,17 @@ def update_wait_text(sm, duration, dt):
 
 def next_presentation(sm, b, t, p, dt):
     # Start Vicon
-    recording_name = "{}_B{}_T{}_P{}".format(sm.file_prefix, b, t, p)
-    sm.vicon.start_recording(recording_name)
+    suffix = "B{}_T{}_P{}".format(b, t, p)
+    recording_name = build_filename(
+            FORMAT=FILENAME_FORMAT_LESS_EXT,
+            PREFIX=sm.file_prefix,
+            DATE=sm.current_date,
+            SUFFIX=suffix,
+        )
+
+    start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+    file_description = f"Current date:{sm.current_date}. Start recording date:{start_recording_stamp}"
+    sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
 
     # Start exo logging
     sm.exoboot_remote.set_log(mybool=False)

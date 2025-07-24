@@ -13,7 +13,7 @@
             "pref_torque": 35,
             "EPO_MV": 9001,
             "NPO_MV": -9001,
-            "squeeze": 15,
+            "squeeze": 2,
             "vas_seed": 1
         },
         "AB01": {

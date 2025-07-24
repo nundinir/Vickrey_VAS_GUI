@@ -5,11 +5,12 @@ from kivy.clock import Clock
 import random
 
 from constants import *
+from shared_files.filing_cabinet_regex import build_filename
 
 
 def pause_exo_bertec(sm, dt):
     sm.bertec.write_command(BERTEC_SPEED_STOP, BERTEC_SPEED_STOP, incline=None, accR=BERTEC_ACC_RIGHT, accL=BERTEC_ACC_LEFT)
-    
+
     # 0 Torque/Pause exoboots
     sm.exoboot_remote.set_torques(peak_torque_left=0, peak_torque_right=0)
     sm.exoboot_remote.set_pause(mybool=True)
@@ -20,8 +21,17 @@ def pause_exo_bertec(sm, dt):
 
 def trial_ready(sm, dt):
     # Start Vicon
-    recording_name = "{}_walk{}".format(sm.file_prefix, sm.statemachine.pres)
-    sm.vicon.start_recording(recording_name)
+    suffix = "walk{}".format(sm.statemachine.pres)
+    recording_name = build_filename(
+            FORMAT=FILENAME_FORMAT_LESS_EXT,
+            PREFIX=sm.file_prefix,
+            DATE=sm.current_date,
+            SUFFIX=suffix,
+        )
+
+    start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+    file_description = f"Current date:{sm.current_date}. Start recording date:{start_recording_stamp}"
+    sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
 
     # Start logging
     sm.exoboot_remote.set_log(mybool=False)

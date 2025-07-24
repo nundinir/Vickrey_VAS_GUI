@@ -220,7 +220,10 @@ class VickreyGUI(BaseGui):
                         self.file_prefix,
                         int(self.sm.statemachine.auction_tally * ROBOWALK_DUR),
                     )
-                    self.sm.vicon.start_recording(recording_name)
+                    # get timestamp of vicon recording
+                    start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+                    file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
+                    self.sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
 
                     # Start exo logging
                     self.sm.exoboot_remote.set_log(mybool=False)
@@ -364,8 +367,17 @@ class VASGUI(BaseGui):
 
         # Start Vicon Recording
         b, t, p = self.sm.statemachine.peak_btp()
-        recording_name = "{}_B{}_T{}_P{}".format(self.sm.file_prefix, b, t, p)
-        self.sm.vicon.start_recording(recording_name)
+        suffix = "B{}_T{}_P{}".format(b, t, p)
+        recording_name = build_filename(
+                FORMAT=FILENAME_FORMAT_LESS_EXT,
+                PREFIX=self.sm.file_prefix,
+                DATE=self.sm.current_date,
+                SUFFIX=suffix,
+            )
+
+        start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+        file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
+        self.sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
 
         self.sm.exoboot_remote.set_log(mybool=False)
 
@@ -531,10 +543,17 @@ class JNDGUI(BaseGui):
                     )
 
         # Start Vicon
-        recording_name = "{}_walk{}".format(
-            self.sm.file_prefix, self.sm.statemachine.walknum
-        )
-        self.sm.vicon.start_recording(recording_name)
+        suffix = "walk{}".format(self.sm.statemachine.walknum)
+        recording_name = build_filename(
+                FORMAT=FILENAME_FORMAT_LESS_EXT,
+                PREFIX=self.sm.file_prefix,
+                DATE=self.sm.current_date,
+                SUFFIX=suffix,
+            )
+
+        start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+        file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
+        self.sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
 
         # Start exo logging
         self.sm.exoboot_remote.set_log(mybool=False)
@@ -601,10 +620,17 @@ class PREFGUI(BaseGui):
         self.sm.statemachine = PrefStateMachine(self.sm, pref_type=self.pref_type)
 
         # Start Vicon
-        recording_name = "{}_walk{}".format(
-            self.sm.file_prefix, self.sm.statemachine.pres
-        )
-        self.sm.vicon.start_recording(recording_name)
+        suffix = "walk{}".format(self.sm.statemachine.pres)
+        recording_name = build_filename(
+                FORMAT=FILENAME_FORMAT_LESS_EXT,
+                PREFIX=self.sm.file_prefix,
+                DATE=self.sm.current_date,
+                SUFFIX=suffix,
+            )
+
+        start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+        file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
+        self.sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
 
         # Start logging
         self.sm.exoboot_remote.set_log(mybool=False)

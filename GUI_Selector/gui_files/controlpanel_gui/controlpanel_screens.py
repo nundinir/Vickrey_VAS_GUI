@@ -192,7 +192,7 @@ def bind_start_linked(instance):
             screen.countdowntimer.opacity = 1
             hide_duration_input(screen, opacity=0)
             screen.countdowntimer.start(duration_in_sec)
-            
+
     else:
         # Prevent toggle, force STOP linked usage
         instance.state = "down"
@@ -234,7 +234,7 @@ def build_increment_decline_buttons(screen, size_hint, pos_hint):
     screen.value_label.dec_btn.linked_value = screen.value_label
     screen.value_label.dec_btn.operation = -1
     screen.value_label.dec_btn.bind(on_press=bind_increment_decrement)
-    
+
     screen.add_widget(screen.value_label)
     screen.add_widget(screen.value_label.inc_btn)
     screen.add_widget(screen.value_label.dec_btn)
@@ -308,15 +308,15 @@ def buildcontrolpanel(sm):
     screen.torqueslider.bind(value=torqueslider_onmotion)
     build_sls_buttons(screen, screen.torqueslider, (1/8, 1/3), {"x":1/2, "y":1/3}, torqueslider_start, torqueslider_stop)
     screen.torqueslider.label = Label(text="EXO Peak Torque : {:.2f}".format(round(ZERO_TORQUE, 2)), font_size="60", size_hint=(0.1,0.1), pos_hint={'x': 1/4-1/20, 'y': 1/3+1/5})
-    
+
     screen.viconfilenameinput = TextInput(text="Vicon file name here", font_size="40", size_hint=(1/3, 1/8), pos_hint={"x":1/3*1/4, "y": 1/6-1/16})
     build_sls_buttons(screen, screen.viconfilenameinput, (1/8, 1/3), {"x":1/2, "y":0}, vicon_start, vicon_stop)
-    
+
     screen.start_linked_btn = ToggleButton(text="Start Linked", font_size="80", color=(1,1,1), background_normal='', background_color=[0,1,0,1], size_hint=(3/8, 1/4), pos_hint={"x":5/8, "y": 3/4})
     screen.start_linked_btn.background_normal = 'atlas://data/images/defaulttheme/button_pressed'
     screen.start_linked_btn.background_down = ''
     screen.start_linked_btn.bind(on_press=bind_start_linked)
-    
+
     screen.stop_linked_btn = Button(text="STOP Linked", font_size="80", color=(1,1,1), background_normal='', background_color=[1,0,0,1], size_hint=(3/8, 1/4), pos_hint={"x":5/8, "y": 0})
     screen.stop_linked_btn.bind(on_press=bind_stop_linked)
 
@@ -324,7 +324,7 @@ def buildcontrolpanel(sm):
     build_duration_input(screen, (3/8, 1/2), {'x': 5/8,'y': 1/4})
     screen.countdowntimer = CountDownTimer(text='asdf', font_size = '70', size_hint=(3/8, 1/2), pos_hint={'x': 5/8,'y': 1/4})
     screen.countdowntimer.opacity = 0
-    
+
     # Add widgets
     screen.add_widget(screen.bertecslider)
     screen.add_widget(screen.bertecslider.label)
