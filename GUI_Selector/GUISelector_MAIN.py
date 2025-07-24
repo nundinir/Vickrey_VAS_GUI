@@ -96,21 +96,20 @@ if __name__ == "__main__":
     }
 
     # Run GUI
-    match trial_type:
-        case "VICKREY":
-            VickreyGUI(**gui_kwargs).run()
-        case "VAS":
-            VASGUI(**gui_kwargs).run()
-        case "JND":
-            JNDGUI(**gui_kwargs).run()
-        case "PREF":
-            PREFGUI(**gui_kwargs).run()
-        case "ACCLIMATION":
-            AcclimationGUI(**gui_kwargs).run()
+    if trial_type == "VICKREY":
+        VickreyGUI(**gui_kwargs).run()
+    elif trial_type == "VAS":
+        VASGUI(**gui_kwargs).run()
+    elif trial_type == "JND":
+        JNDGUI(**gui_kwargs).run()
+    elif trial_type == "PREF":
+        PREFGUI(**gui_kwargs).run()
+    elif trial_type == "ACCLIMATION":
+        AcclimationGUI(**gui_kwargs).run()
         # case "SPEEDFINDER":
         #     SpeedFinderGUI(**gui_kwargs).run()
-        case "CONTROLPANEL":
-            ControlPanelGUI(**gui_kwargs).run()
-        case _:
-            print("INVALID GUI TYPE")
-            quit()
+    elif trial_type == "CONTROLPANEL":
+        ControlPanelGUI(**gui_kwargs).run()
+    else:
+        print("INVALID GUI TYPE")
+        quit()

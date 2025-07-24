@@ -585,13 +585,15 @@ class JNDGUI(BaseGui):
         self.sm.add_widget(self.sm.batteryscreen)
 
         # Split or same trial cond
-        match self.jnd_type:
-            case "SPLITLEG":
-                splitlegscreen = buildsplitlegscreen(self.sm)
-                self.sm.add_widget(splitlegscreen)
-            case "SAMELEG":
-                samelegscreen = buildsamelegscreen(self.sm)
-                self.sm.add_widget(samelegscreen)
+        if self.jnd_type == "SPLITLEG":
+            splitlegscreen = buildsplitlegscreen(self.sm)
+            self.sm.add_widget(splitlegscreen)
+        elif self.jnd_type == "SAMELEG":
+            samelegscreen = buildsamelegscreen(self.sm)
+            self.sm.add_widget(samelegscreen)
+        else:
+            print("invalid JND trial type selected")
+            quit()
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenjnd"
@@ -666,21 +668,23 @@ class PREFGUI(BaseGui):
         self.sm.add_widget(finishscreenpref)
 
         # Split or same trial cond
-        match self.pref_type:
-            case "SLIDER":
-                sliderscreenpref = buildsliderscreenpref(self.sm)
-                self.sm.add_widget(sliderscreenpref)
-                self.sm.prefscreen = sliderscreenpref
-            case "BUTTON":
-                btnscreenpref = Screen(name="btnscreen")
-                btnscreenpref.sm = self.sm
-                buildbtnscreenpref(self.sm, btnscreenpref)
-                self.sm.add_widget(btnscreenpref)
-                self.sm.prefscreen = btnscreenpref
-            case "DIAL":
-                dialscreenpref = builddialscreenpref(self.sm)
-                self.sm.add_widget(dialscreenpref)
-                self.sm.dialscreenpref = dialscreenpref
+        if self.pref_type == "SLIDER":
+            sliderscreenpref = buildsliderscreenpref(self.sm)
+            self.sm.add_widget(sliderscreenpref)
+            self.sm.prefscreen = sliderscreenpref
+        elif self.pref_type == "BUTTON":
+            btnscreenpref = Screen(name="btnscreen")
+            btnscreenpref.sm = self.sm
+            buildbtnscreenpref(self.sm, btnscreenpref)
+            self.sm.add_widget(btnscreenpref)
+            self.sm.prefscreen = btnscreenpref
+        elif self.pref_type == "DIAL":
+            dialscreenpref = builddialscreenpref(self.sm)
+            self.sm.add_widget(dialscreenpref)
+            self.sm.dialscreenpref = dialscreenpref
+        else:
+            print("invalid pref trial type selected")
+            quit()
 
         # Switch from dummy to startscreen to run on_enter
         self.sm.current = "pushtostartscreenpref"
