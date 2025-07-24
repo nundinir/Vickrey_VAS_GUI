@@ -49,7 +49,7 @@ def next_presentation(sm, b, t, p, dt):
     # Start Vicon
     suffix = "B{}_T{}_P{}".format(b, t, p)
     recording_name = build_filename(
-            FORMAT=FILENAME_FORMAT_LESS_EXT,
+            format=FILENAME_FORMAT_LESS_EXT,
             PREFIX=sm.file_prefix,
             DATE=sm.current_date,
             SUFFIX=suffix,

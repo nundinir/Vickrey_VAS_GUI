@@ -120,7 +120,7 @@ def result_screens_schedule(sm):
                 # Start Vicon
                 suffix = "t{}".format(int(sm.statemachine.auction_tally * ROBOWALK_DUR))
                 recording_name = build_filename(
-                    FORMAT=FILENAME_FORMAT_LESS_EXT,
+                    format=FILENAME_FORMAT_LESS_EXT,
                     PREFIX=sm.file_prefix,
                     DATE=sm.current_date,
                     SUFFIX=suffix,

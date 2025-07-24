@@ -221,9 +221,13 @@ class VickreyGUI(BaseGui):
                         int(self.sm.statemachine.auction_tally * ROBOWALK_DUR),
                     )
                     # get timestamp of vicon recording
-                    start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+                    start_recording_stamp = datetime.datetime.now(
+                        tz=DETROIT_TIMEZONE
+                    ).strftime(DATETIME_FORMAT_LESS_SEC)
                     file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
-                    self.sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
+                    self.sm.vicon.start_recording(
+                        fileNameIn=recording_name, fileDescription=file_description
+                    )
 
                     # Start exo logging
                     self.sm.exoboot_remote.set_log(mybool=False)
@@ -233,7 +237,7 @@ class VickreyGUI(BaseGui):
         if not usebackup:
             # Create new file
             auctionname = auctionname = build_filename(
-                FORMAT=FILENAME_FORMAT,
+                format=FILENAME_FORMAT,
                 PREFIX=self.sm.file_prefix,
                 DATE=self.sm.current_date,
                 SUFFIX="auction",
@@ -348,7 +352,7 @@ class VASGUI(BaseGui):
         if not usebackup:
             # Create new file
             vasresultsname = build_filename(
-                FORMAT=FILENAME_FORMAT,
+                format=FILENAME_FORMAT,
                 PREFIX=self.sm.file_prefix,
                 DATE=self.sm.current_date,
                 SUFFIX="vasresults",
@@ -369,15 +373,19 @@ class VASGUI(BaseGui):
         b, t, p = self.sm.statemachine.peak_btp()
         suffix = "B{}_T{}_P{}".format(b, t, p)
         recording_name = build_filename(
-                FORMAT=FILENAME_FORMAT_LESS_EXT,
-                PREFIX=self.sm.file_prefix,
-                DATE=self.sm.current_date,
-                SUFFIX=suffix,
-            )
+            format=FILENAME_FORMAT_LESS_EXT,
+            PREFIX=self.sm.file_prefix,
+            DATE=self.sm.current_date,
+            SUFFIX=suffix,
+        )
 
-        start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+        start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(
+            DATETIME_FORMAT_LESS_SEC
+        )
         file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
-        self.sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
+        self.sm.vicon.start_recording(
+            fileNameIn=recording_name, fileDescription=file_description
+        )
 
         self.sm.exoboot_remote.set_log(mybool=False)
 
@@ -479,7 +487,7 @@ class JNDGUI(BaseGui):
                 elif self.which_comparitor == "STAIR":
                     # Create new file for JND back-up logging with full details (DO THIS NO MATTER WHAT)
                     comparisonname = build_filename(
-                        FORMAT=FILENAME_FORMAT,
+                        format=FILENAME_FORMAT,
                         PREFIX=self.sm.file_prefix,
                         DATE=self.sm.current_date,
                         SUFFIX="comparison",
@@ -509,7 +517,7 @@ class JNDGUI(BaseGui):
         if not usebackup:
             # Create new file
             comparisonname = build_filename(
-                FORMAT=FILENAME_FORMAT,
+                format=FILENAME_FORMAT,
                 PREFIX=self.sm.file_prefix,
                 DATE=self.sm.current_date,
                 SUFFIX="comparison",
@@ -545,15 +553,19 @@ class JNDGUI(BaseGui):
         # Start Vicon
         suffix = "walk{}".format(self.sm.statemachine.walknum)
         recording_name = build_filename(
-                FORMAT=FILENAME_FORMAT_LESS_EXT,
-                PREFIX=self.sm.file_prefix,
-                DATE=self.sm.current_date,
-                SUFFIX=suffix,
-            )
+            format=FILENAME_FORMAT_LESS_EXT,
+            PREFIX=self.sm.file_prefix,
+            DATE=self.sm.current_date,
+            SUFFIX=suffix,
+        )
 
-        start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+        start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(
+            DATETIME_FORMAT_LESS_SEC
+        )
         file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
-        self.sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
+        self.sm.vicon.start_recording(
+            fileNameIn=recording_name, fileDescription=file_description
+        )
 
         # Start exo logging
         self.sm.exoboot_remote.set_log(mybool=False)
@@ -622,15 +634,19 @@ class PREFGUI(BaseGui):
         # Start Vicon
         suffix = "walk{}".format(self.sm.statemachine.pres)
         recording_name = build_filename(
-                FORMAT=FILENAME_FORMAT_LESS_EXT,
-                PREFIX=self.sm.file_prefix,
-                DATE=self.sm.current_date,
-                SUFFIX=suffix,
-            )
+            format=FILENAME_FORMAT_LESS_EXT,
+            PREFIX=self.sm.file_prefix,
+            DATE=self.sm.current_date,
+            SUFFIX=suffix,
+        )
 
-        start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
+        start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(
+            DATETIME_FORMAT_LESS_SEC
+        )
         file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
-        self.sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
+        self.sm.vicon.start_recording(
+            fileNameIn=recording_name, fileDescription=file_description
+        )
 
         # Start logging
         self.sm.exoboot_remote.set_log(mybool=False)

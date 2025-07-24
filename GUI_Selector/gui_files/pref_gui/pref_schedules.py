@@ -23,7 +23,7 @@ def trial_ready(sm, dt):
     # Start Vicon
     suffix = "walk{}".format(sm.statemachine.pres)
     recording_name = build_filename(
-            FORMAT=FILENAME_FORMAT_LESS_EXT,
+            format=FILENAME_FORMAT_LESS_EXT,
             PREFIX=sm.file_prefix,
             DATE=sm.current_date,
             SUFFIX=suffix,

@@ -204,7 +204,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         if not loadstatus:
             if trial_type == "VICKREY":
                 auctionname = build_filename(
-                    FORMAT=FILENAME_FORMAT,
+                    format=FILENAME_FORMAT,
                     PREFIX=self.file_prefix,
                     DATE=self.current_date,
                     SUFFIX="auction",
@@ -213,7 +213,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
                 auctionpath = self.filingcabinet.newfile(auctionname, uid="auction")
 
                 surveyname = build_filename(
-                    FORMAT=FILENAME_FORMAT,
+                    format=FILENAME_FORMAT,
                     PREFIX=self.file_prefix,
                     DATE=self.current_date,
                     SUFFIX="survey",
@@ -237,7 +237,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
             elif trial_type == "VAS":
                 overtimepath = ""
                 vasresultsname = build_filename(
-                    FORMAT=FILENAME_FORMAT,
+                    format=FILENAME_FORMAT,
                     PREFIX=self.file_prefix,
                     DATE=self.current_date,
                     SUFFIX="vasresults",
@@ -256,7 +256,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
 
             elif trial_type == "JND":
                 comparisonname = build_filename(
-                    FORMAT=FILENAME_FORMAT,
+                    format=FILENAME_FORMAT,
                     PREFIX=self.file_prefix,
                     DATE=self.current_date,
                     SUFFIX="comparison",
@@ -274,7 +274,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
 
             elif trial_type == "PREF":
                 prefname = build_filename(
-                    FORMAT=FILENAME_FORMAT,
+                    format=FILENAME_FORMAT,
                     PREFIX=self.file_prefix,
                     DATE=self.current_date,
                     SUFFIX="pref",
@@ -429,7 +429,7 @@ class ExobootCommServicer(pb2_grpc.exoboot_over_networkServicer):
         print("Received updated vas info: ", btn_num, trial, pres)
         overtimesuffix = "overtime_B{}_T{}_P{}".format(btn_num, trial, pres)
         overtimename = build_filename(
-            FORMAT=FILENAME_FORMAT,
+            format=FILENAME_FORMAT,
             PREFIX=self.file_prefix,
             DATE=self.current_date,
             SUFFIX=overtimesuffix,
