@@ -8,7 +8,7 @@ if __name__ == "__main__":
     print("Stuff")
 
     # Client to LoggingServer
-    logging_client = LoggingClient(guiname='GUISelector')
+    logging_client = LoggingClient(guiname="GUISelector")
     subjectID, trial_type, description = logging_client.get_subject_info()
 
     # Connect to Exoboot
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     bertec = Bertec()
 
     match trial_type:
-        case 'Vickrey':
+        case "Vickrey":
             VickreyGUI(logging_client, exoboot_remote, bertec).run()
-        case 'VAS':
+        case "VAS":
             VASGUI(logging_client, exoboot_remote, bertec).run()
