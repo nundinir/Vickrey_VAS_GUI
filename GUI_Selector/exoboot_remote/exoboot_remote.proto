@@ -48,6 +48,7 @@ message subject_info {
     string trial_cond = 4;
     string description = 5;
     bool usebackup = 6;
+    string date = 7;
 }
 
 // Vickrey Auction Messages
@@ -83,7 +84,7 @@ message presentation {
     float trial = 2;
     float pres = 3;
     repeated float torques = 4;
-    repeated float values = 5; 
+    repeated float values = 5;
 }
 
 // JND Messages
@@ -102,7 +103,7 @@ message preference {
     float torque = 2;
 }
 
-// Logging Messages 
+// Logging Messages
 // TODO IMPLEMENT GENERAL DICT LOGGING
 message header {
     repeated string names = 1;

@@ -1,14 +1,34 @@
 import datetime, pytz
 
 """IP ADDRESSES"""
-SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"    # IP address of local machine
-LOCALHOST = "localhost:50051"    # IP address of local machine
+SERVER_IP = f"{'35.3.150.116'}:" f"{'50051'}"  # IP address of local machine
+LOCALHOST = "localhost:50051"  # IP address of local machine
 PI_IP = f"{'35.3.75.183'}:" f"{'50055'}"
 
 
 """Datetime Constants"""
 DETROIT_TIMEZONE = pytz.timezone("America/Detroit")
-DATETIME_FORMATTER_LESS_SEC = "%Y_%m_%d_%H_%M"
+DATETIME_FORMAT_LESS_SEC = "%Y_%m_%d_%H_%M"
+
+"""FILE PATHS"""
+SUBJECT_DATA_PATH = "subject_data"
+TABLET_DATA_PATH = "tablet_side_data"
+
+"""FORMAT STRINGS"""
+PREFIX_FORMAT_GENERIC = r"%SUBJECT_%TRIALTYPE_%CONDITION1_%CONDITION2"
+FILENAME_FORMAT = "%PREFIX_%DATE_%SUFFIX.%EXT"
+
+
+"""FILING CABINET REGEX"""
+VALID_FILE_EXTENSIONS = ["csv", "txt"]
+FORMATCODE_TO_REGEX = {
+    "%Y": r"\d{4}",
+    "%m": r"(0[1-9]|1[0-2])",
+    "%d": r"(0[1-9]|[1-2][0-9]|3[01])",
+    "%H": r"([01][0-9]|[2][0-3])",
+    "%M": r"([0-5][0-9])",
+    "%S": r"([0-5][0-9])",
+}
 
 """BERTEC SETTINGS"""
 BERTEC_SPEED_STOP = 0.0
@@ -19,7 +39,7 @@ DEFAULT_BERTEC_ACC = 0.25
 
 
 """BATTERY SETTINGS"""
-BATTV_LOWER_LIM = 22000 # mV
+BATTV_LOWER_LIM = 22000  # mV
 
 
 """VICKREY SPECIFIC"""
@@ -35,15 +55,15 @@ RESULT_SHOW = 100
 MAX_BID = 100
 
 # Robobidder constants
-ROBOWALK_DUR = 2 # min
+ROBOWALK_DUR = 2  # min
 NUM_ROBOBIDDERS = 2
 k_RB = 0.4395073979128712
-b_RB = 0.05735650555767768 # regular 'b' from Leo's trials
+b_RB = 0.05735650555767768  # regular 'b' from Leo's trials
 
 
 """VAS SPECIFIC"""
 # MV text offsets
-MV_TEXT_OFFSETS = {1:0.42, 4:0.1, 10: 0.03}
+MV_TEXT_OFFSETS = {1: 0.42, 4: 0.1, 10: 0.03}
 SLIDER_JUSTIFICATION = 0.15
 
 # VAS timing in seconds
@@ -53,8 +73,8 @@ VAS_10BTN_BREAK = 60
 
 # VAS Trial/Presentation Dicts
 BTN_NUMS = [1, 4, 10]
-MAX_TRIALS_DICT = {1:1, 4:1, 10:1}
-MAX_PRESENTATIONS_DICT = {1:10, 4:5, 10:1} # without replacement
+MAX_TRIALS_DICT = {1: 1, 4: 1, 10: 1}
+MAX_PRESENTATIONS_DICT = {1: 10, 4: 5, 10: 1}  # without replacement
 
 """JND SPECIFIC"""
 # JND timing in seconds
@@ -73,13 +93,23 @@ MAX_QUERIES = 150
 
 # specific staircase comparitor settings
 REF_LIST = [18, 29]
-RIGHT_LIM = 2   # num of consecutive right(s) after which distance from ref will decrease
-RATIO = 0.947   # ratio of step_down(correct)/step_up(incorrect)
-STEP_SIZE_RIGHT_DICT = {18: 1, 29: 1}  # step size when correct response given for each reference torque
-RUN_LIMIT = 6                 # Number of reversals before the algorithm converges
-INIT_STEP_OUT_SIZE = 11       # Initial multiplier away from reference torque for the comparison torque   
-REPETITIONS = 1               # Number of ascending and descending repetitions for each reference torque value
-MODES = ['ascending', 'descending'] # Staircase modes, either 'ascending' or 'descending' towards reference
+RIGHT_LIM = 2  # num of consecutive right(s) after which distance from ref will decrease
+RATIO = 0.947  # ratio of step_down(correct)/step_up(incorrect)
+STEP_SIZE_RIGHT_DICT = {
+    18: 1,
+    29: 1,
+}  # step size when correct response given for each reference torque
+RUN_LIMIT = 6  # Number of reversals before the algorithm converges
+INIT_STEP_OUT_SIZE = (
+    11  # Initial multiplier away from reference torque for the comparison torque
+)
+REPETITIONS = (
+    1  # Number of ascending and descending repetitions for each reference torque value
+)
+MODES = [
+    "ascending",
+    "descending",
+]  # Staircase modes, either 'ascending' or 'descending' towards reference
 
 PICKLE_FILE_PATH = "jnd_staircase.pkl"  # To Load/Save the staircase objects
 
@@ -121,10 +151,13 @@ MAG_TO_SEC = {"ones": 1, "tens": 10}
 ORDS_TO_SEC = {"s": 1, "min": 60, "hr": 3600}
 
 """SPEEDFINDER SPECIFIC"""
-F_TARGET = 105.0 # spm
-V_INITIAL = 1.0 # m/s
+F_TARGET = 105.0  # spm
+V_INITIAL = 1.0  # m/s
 ERROR_THRESHOLD = 0.005
 
-VMIN = 0 # m/s
-VMAX = 1.75 # m/s
-SLEEPTIME = 2.0 # s
+VMIN = 0  # m/s
+VMAX = 1.75  # m/s
+SLEEPTIME = 2.0  # s
+
+"""GSE MODE"""
+GSE_MODE = "BERTEC"

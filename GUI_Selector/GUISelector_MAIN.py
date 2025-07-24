@@ -4,11 +4,25 @@ from test_server import DumbBertec, DumbVicon
 from external_devices.BertecMan import Bertec
 from external_devices.ViconMan import Vicon
 
-from shared_files.LoggingClass import FilingCabinet
+from shared_files.filing_cabinet import FilingCabinet
+from shared_files.filing_cabinet_regex import (
+    build_prefix,
+    group_files_by_uid,
+    datetime_formatcode_to_regex,
+    file_extension_regex,
+)
 from exoboot_remote.exoboot_remote_control import ExobootRemoteClient
 
-from gui_apps import VickreyGUI, VASGUI, JNDGUI, PREFGUI, AcclimationGUI, SpeedFinderGUI, ControlPanelGUI
-from constants import PI_IP, LOCALHOST
+from gui_apps import (
+    VickreyGUI,
+    VASGUI,
+    JNDGUI,
+    PREFGUI,
+    AcclimationGUI,
+    SpeedFinderGUI,
+    ControlPanelGUI,
+)
+from constants import TABLET_DATA_PATH, PI_IP, LOCALHOST
 
 
 if __name__ == "__main__":
@@ -16,9 +30,25 @@ if __name__ == "__main__":
     exoboot_remote = ExobootRemoteClient(LOCALHOST)
 
     # Get subject info
-    _, subjectID, trial_type, trial_cond, description, usebackup = exoboot_remote.get_subject_info()
-    file_prefix = "{}_{}_{}_{}".format(subjectID, trial_type, trial_cond, description)
-    print("DETAILS: ", subjectID, trial_type, trial_cond, description)
+    _, subjectID, trial_type, condition1, condition2, usebackup, current_date = (
+        exoboot_remote.get_subject_info()
+    )
+    print(
+        "GET_SUBJECT_INFO: ",
+        subjectID,
+        trial_type,
+        condition1,
+        condition2,
+        usebackup,
+        current_date,
+    )
+    file_prefix = build_prefix(
+        SUBJECT=subjectID,
+        TRIALTYPE=trial_type,
+        CONDITION1=condition1,
+        CONDITION2=condition2,
+    )
+    print("DEBUG_fileprefix: ", file_prefix)
 
     # Load subject dictionary
     subj_dict_file = open("subject_dictionary.json", mode="r")
@@ -30,17 +60,20 @@ if __name__ == "__main__":
         subject_specific_info = subject_dict["subjects"][subjectID]
 
     # FilingCabinet for backups
-    filingcabinet = FilingCabinet("trial_backups", subjectID)
+    use_for_dir = [subjectID, trial_type]
+    filingcabinet = FilingCabinet(TABLET_DATA_PATH, *use_for_dir)
     if usebackup:
         loadstatus = filingcabinet.loadbackup(file_prefix, rule="newest")
         print("Backup load status: {}".format("SUCCESS" if loadstatus else "FAILURE"))
 
     # Battery Check
-    allow_check_batteries = trial_type in ["VAS", "JND"] or (trial_type == "VICKREY" and trial_cond == "EPO")
+    allow_check_batteries = trial_type in ["VAS", "JND"] or (
+        trial_type == "VICKREY" and condition1 == "EPO"
+    )
     print("BATTCHECK: ", allow_check_batteries)
 
     # DUMMY Check
-    if subjectID == 'DUMMY':
+    if subjectID == "DUMMY":
         bertec = DumbBertec()
         vicon = DumbVicon()
     else:
@@ -48,18 +81,20 @@ if __name__ == "__main__":
         vicon = Vicon()
 
     # GUI kwargs
-    gui_kwargs = {"exoboot_remote": exoboot_remote,
-                  "filingcabinet": filingcabinet,
-                  "bertec": bertec,
-                  "vicon": vicon,
-                  "trial_cond": trial_cond,
-                  "description": description,
-                  "file_prefix": file_prefix,
-                  "usebackup": usebackup,
-                  "allow_check_batteries": allow_check_batteries,
-                  "subject_dict": subject_specific_info
-                  }
-    
+    gui_kwargs = {
+        "exoboot_remote": exoboot_remote,
+        "filingcabinet": filingcabinet,
+        "bertec": bertec,
+        "vicon": vicon,
+        "condition1": condition1,
+        "condition2": condition2,
+        "file_prefix": file_prefix,
+        "usebackup": usebackup,
+        "current_date": current_date,
+        "allow_check_batteries": allow_check_batteries,
+        "subject_dict": subject_specific_info,
+    }
+
     # Run GUI
     match trial_type:
         case "VICKREY":
