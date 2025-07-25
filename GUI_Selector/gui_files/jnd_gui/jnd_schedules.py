@@ -47,8 +47,8 @@ def trial_ready(sm, dt):
         )
 
     start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(DATETIME_FORMAT_LESS_SEC)
-    file_description = f"Current date:{sm.current_date}. Start recording date:{start_recording_stamp}"
-    sm.vicon.start_recording(fileNameIn=recording_name, fileDescription=file_description)
+    notes = f"Current date: {sm.current_date}. Start recording date: {start_recording_stamp}"
+    sm.vicon.start_recording(fileNameIn=recording_name, notes=notes)
 
     # Start exo logging
     sm.exoboot_remote.set_log(mybool=False)

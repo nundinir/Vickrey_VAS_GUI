@@ -224,9 +224,9 @@ class VickreyGUI(BaseGui):
                     start_recording_stamp = datetime.datetime.now(
                         tz=DETROIT_TIMEZONE
                     ).strftime(DATETIME_FORMAT_LESS_SEC)
-                    file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
+                    notes = f"Current date: {self.sm.current_date}. Start recording date: {start_recording_stamp}"
                     self.sm.vicon.start_recording(
-                        fileNameIn=recording_name, fileDescription=file_description
+                        fileNameIn=recording_name, notes=notes
                     )
 
                     # Start exo logging
@@ -382,9 +382,9 @@ class VASGUI(BaseGui):
         start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(
             DATETIME_FORMAT_LESS_SEC
         )
-        file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
+        notes = f"Current date: {self.sm.current_date}. Start recording date: {start_recording_stamp}"
         self.sm.vicon.start_recording(
-            fileNameIn=recording_name, fileDescription=file_description
+            fileNameIn=recording_name, notes=notes
         )
 
         self.sm.exoboot_remote.set_log(mybool=False)
@@ -562,9 +562,9 @@ class JNDGUI(BaseGui):
         start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(
             DATETIME_FORMAT_LESS_SEC
         )
-        file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
+        notes = f"Current date: {self.sm.current_date}. Start recording date: {start_recording_stamp}"
         self.sm.vicon.start_recording(
-            fileNameIn=recording_name, fileDescription=file_description
+            fileNameIn=recording_name, notes=notes
         )
 
         # Start exo logging
@@ -645,9 +645,9 @@ class PREFGUI(BaseGui):
         start_recording_stamp = datetime.datetime.now(tz=DETROIT_TIMEZONE).strftime(
             DATETIME_FORMAT_LESS_SEC
         )
-        file_description = f"Current date:{self.sm.current_date}. Start recording date:{start_recording_stamp}"
+        notes = f"Current date: {self.sm.current_date}. Start recording date: {start_recording_stamp}"
         self.sm.vicon.start_recording(
-            fileNameIn=recording_name, fileDescription=file_description
+            fileNameIn=recording_name, notes=notes
         )
 
         # Start logging

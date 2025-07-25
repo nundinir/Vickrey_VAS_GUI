@@ -94,7 +94,10 @@ class DumbVicon:
         pass
 
     def start_recording(
-        self, fileNameIn: str, fileDescription: str = "A vicon recording"
+        self,
+        fileNameIn: str,
+        fileDescription: str = "A vicon recording",
+        notes: str = "Vicon triggered from python over UDP",
     ):
         """
         Send command to vicon to start file recording.
@@ -113,7 +116,7 @@ class DumbVicon:
         # self.sock.sendto(msg, (self.destinationIP, self.destinationPort))
         pass
 
-    def _assemble_payload_start(self, fileNameIn, fileDescription):
+    def _assemble_payload_start(self, fileNameIn, fileDescription, notes):
         """
         Creates the proper XML string to trigger vicon.
         More documentation available here:
@@ -125,12 +128,12 @@ class DumbVicon:
         self.fileDescription = fileDescription
 
         # Construct the string
-        notes = "Vicon triggered from python over UDP"
+        self.notes = notes
         cmdHeader = (
             '\n<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<CaptureStart>\n'
         )
         nameLine = '<Name VALUE="{}"/>\n'.format(self.fileName)
-        notesLine = '<Notes VALUE="{}"/>\n'.format(notes)
+        notesLine = '<Notes VALUE="{}"/>\n'.format(self.notes)
         descriptionLine = '<Description VALUE="{}"/>\n'.format(self.fileDescription)
         databasePathLine = '<DatabasePath VALUE="{}"/>\n'.format(self.viconPath)
         delayLine = '<Delay VALUE="{}"/>\n'.format(self.delayPriorToRecord_ms)

@@ -5,7 +5,7 @@ from time import sleep
 class Vicon:
     """
     A class for managing starting and stopping Vicon recordings
-    over the network. 
+    over the network.
     To use this class, make sure you've armed vicon and enabled network triggers.
     See this page for more info: https://docs.vicon.com/display/Nexus213/Automatically+start+and+stop+capture
     Kevin Best 10/22
@@ -23,26 +23,26 @@ class Vicon:
         self.fileDescription = ''
 
         # Setup UDP
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    def start_recording(self, fileNameIn: str, fileDescription: str = 'A vicon recording'):
+    def start_recording(self, fileNameIn: str, fileDescription: str = 'A vicon recording', notes: str = "Vicon triggered from python over UDP"):
         """
         Send command to vicon to start file recording.
         Requires 2 inputs:
             fileNameIn: File name to be used on the vicon PC
-            fileDescription: Any notes you want to add to your file. Fills the description field on vicon 
+            fileDescription: Any notes you want to add to your file. Fills the description field on vicon
         """
-        msg = self._assemble_payload_start(fileNameIn, fileDescription)
+        msg = self._assemble_payload_start(fileNameIn, fileDescription, notes)
         self.sock.sendto(msg, (self.destinationIP, self.destinationPort))
 
     def stop_recording(self):
         msg = self._assemble_payload_stop()
         self.sock.sendto(msg, (self.destinationIP, self.destinationPort))
 
-    def _assemble_payload_start(self, fileNameIn, fileDescription):
+    def _assemble_payload_start(self, fileNameIn, fileDescription, notes):
         """
-        Creates the proper XML string to trigger vicon. 
-        More documentation available here: 
+        Creates the proper XML string to trigger vicon.
+        More documentation available here:
            https://docs.vicon.com/pages/viewpage.action?pageId=152010925
         """
 
@@ -51,10 +51,10 @@ class Vicon:
         self.fileDescription = fileDescription
 
         # Construct the string
-        notes = 'Vicon triggered from python over UDP'
+        self.notes = notes
         cmdHeader = '\n<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<CaptureStart>\n'
         nameLine = '<Name VALUE="{}"/>\n'.format(self.fileName)
-        notesLine = '<Notes VALUE="{}"/>\n'.format(notes)
+        notesLine = '<Notes VALUE="{}"/>\n'.format(self.notes)
         descriptionLine = '<Description VALUE="{}"/>\n'.format(self.fileDescription)
         databasePathLine = '<DatabasePath VALUE="{}"/>\n'.format(self.viconPath)
         delayLine = '<Delay VALUE="{}"/>\n'.format(self.delayPriorToRecord_ms)
@@ -63,13 +63,13 @@ class Vicon:
         fullPayloadString = cmdHeader + nameLine + notesLine + descriptionLine + databasePathLine + delayLine + packetIDline + suffixLine
         # print(fullPayloadString)
 
-        # Convert string to utf-8 bytes string to send over network. 
+        # Convert string to utf-8 bytes string to send over network.
         return bytes(fullPayloadString, "utf-8")
 
     def _assemble_payload_stop(self):
         """
-        Creates the proper XML string to stop vicon. 
-        More documentation available here: 
+        Creates the proper XML string to stop vicon.
+        More documentation available here:
            https://docs.vicon.com/pages/viewpage.action?pageId=152010925
         """
 
@@ -82,7 +82,7 @@ class Vicon:
         fullPayloadString = cmdHeader + nameLine + databasePathLine + delayLine + packetIDline + suffixLine
         # print(fullPayloadString)
 
-        # Convert string to utf-8 bytes string to send over network. 
+        # Convert string to utf-8 bytes string to send over network.
         return bytes(fullPayloadString, "utf-8")
 
 

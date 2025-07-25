@@ -129,9 +129,9 @@ def result_screens_schedule(sm):
                 start_recording_stamp = datetime.datetime.now(
                     tz=DETROIT_TIMEZONE
                 ).strftime(DATETIME_FORMAT_LESS_SEC)
-                file_description = f"Current date:{sm.current_date}. Start recording date:{start_recording_stamp}"
+                notes = f"Current date: {sm.current_date}. Start recording date: {start_recording_stamp}"
                 sm.vicon.start_recording(
-                    fileNameIn=recording_name, fileDescription=file_description
+                    fileNameIn=recording_name, notes=notes
                 )
 
                 # Start exo logging
