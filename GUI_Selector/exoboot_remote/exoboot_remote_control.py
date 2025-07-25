@@ -21,6 +21,12 @@ class ExobootRemoteClient:
 
     def __init__(self, server_IP):
         self.channel = grpc.insecure_channel(server_IP)
+        # self.channel = grpc.insecure_channel(server_IP,
+        #                                      options=[
+        #                                         ('grpc.keepalive_time_ms', 4200000),           # send keepalive ping every 120 seconds
+        #                                         ('grpc.keepalive_timeout_ms', 4200000),        # wait 120 seconds for ping ack before considering the connection dead
+        #                                         ('grpc.keepalive_permit_without_calls', 1),   # allow keepalive pings when there are no calls
+        #                                      ])
         self.stub = pb2_grpc.exoboot_over_networkStub(self.channel)
         self.startstamp = 0
 
@@ -592,9 +598,15 @@ class ExobootRemoteServerThread(BaseThread):
 
     def start_server(self):
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        pb2_grpc.add_exoboot_over_networkServicer_to_server(
-            self.exoboot_remote_servicer, server
-        )
+#         server = grpc.server(
+#             futures.ThreadPoolExecutor(max_workers=10),
+#             options=[
+#                 ('grpc.keepalive_time_ms', 4200000),          # send keepalive ping every 120 seconds
+#                 ('grpc.keepalive_timeout_ms', 4200000),       # wait 120 seconds for ping ack before considering the connection dead
+#                 ('grpc.keepalive_permit_without_calls', 1),  # allow keepalive pings when there are no calls
+#             ]
+# )
+        pb2_grpc.add_exoboot_over_networkServicer_to_server(self.exoboot_remote_servicer, server)
         server.add_insecure_port(self.target_IP)
         server.start()
         server.wait_for_termination()
